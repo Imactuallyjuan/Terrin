@@ -30,13 +30,22 @@ export default function CostEstimator() {
 
   useEffect(() => {
     const handleEstimateGenerated = (event: CustomEvent) => {
+      console.log('Estimate generated:', event.detail);
       setEstimate(event.detail);
       setIsLoading(false);
     };
 
+    const handleEstimateStarted = () => {
+      setIsLoading(true);
+      setEstimate(null);
+    };
+
     window.addEventListener('estimateGenerated', handleEstimateGenerated as EventListener);
+    window.addEventListener('estimateStarted', handleEstimateStarted as EventListener);
+    
     return () => {
       window.removeEventListener('estimateGenerated', handleEstimateGenerated as EventListener);
+      window.removeEventListener('estimateStarted', handleEstimateStarted as EventListener);
     };
   }, []);
 

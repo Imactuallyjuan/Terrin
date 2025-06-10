@@ -63,6 +63,9 @@ export default function PostProject() {
 
   const getEstimateMutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
+      // Trigger loading state
+      window.dispatchEvent(new CustomEvent('estimateStarted'));
+      
       const response = await apiRequest("POST", "/api/estimate", { projectData: data });
       return response.json();
     },
@@ -71,15 +74,22 @@ export default function PostProject() {
         title: "Estimate Generated!",
         description: "Your AI-powered cost estimate is ready.",
       });
+      
       // Scroll to cost estimator section
-      const element = document.getElementById('cost-estimator');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
+      setTimeout(() => {
+        const element = document.getElementById('cost-estimator');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+      
       // Store estimate data for display
       window.dispatchEvent(new CustomEvent('estimateGenerated', { detail: estimate }));
     },
     onError: (error) => {
+      // Stop loading state on error
+      window.dispatchEvent(new CustomEvent('estimateGenerated', { detail: null }));
+      
       toast({
         title: "Error",
         description: "Failed to generate estimate. Please try again.",
