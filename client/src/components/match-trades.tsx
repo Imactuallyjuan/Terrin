@@ -4,6 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, DollarSign, Check, Users } from "lucide-react";
 
+const getContractorImage = (contractorId: number) => {
+  const images = [
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150', // Professional man
+    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150', // Professional woman
+    'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150', // Construction worker
+    'https://images.unsplash.com/photo-1582750433449-648ed127bb54?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150', // Professional contractor
+    'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150', // Mature professional
+    'https://images.unsplash.com/photo-1566492031773-4f4e44671d66?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150', // Diverse professional
+  ];
+  return images[(contractorId - 1) % images.length];
+};
+
 export default function MatchTrades() {
   const { data: contractors = [], isLoading } = useQuery({
     queryKey: ["/api/contractors"],
@@ -75,9 +87,7 @@ export default function MatchTrades() {
                   <div className="flex items-center mb-4">
                     <img
                       className="h-12 w-12 rounded-full object-cover"
-                      src={`https://images.unsplash.com/photo-${
-                        contractor.id % 2 === 0 ? '1507003211169-0a1dd7228f2d' : '1472099645785-5658abf4ff4e'
-                      }?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150`}
+                      src={getContractorImage(contractor.id)}
                       alt={contractor.businessName}
                     />
                     <div className="ml-3 flex-1">
