@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
+import AuthPage from "@/pages/auth";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
 function Router() {
@@ -13,7 +14,8 @@ function Router() {
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
+      <Route path="/auth" component={AuthPage} />
+      {loading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
         <>
