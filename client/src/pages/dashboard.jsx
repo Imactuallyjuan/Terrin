@@ -3,7 +3,7 @@ import { useFirebaseAuth } from "../hooks/useFirebaseAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, DollarSign, Clock, Plus, User, Building } from "lucide-react";
+import { Calendar, MapPin, DollarSign, Clock, Plus, User, Building, Settings } from "lucide-react";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { Link } from "wouter";
