@@ -9,6 +9,7 @@ import Home from "@/pages/home";
 import AuthPage from "@/pages/auth";
 import Dashboard from "@/pages/dashboard";
 import ContractorPortal from "@/pages/contractor-portal";
+import Contractors from "@/pages/contractors";
 import SettingsPage from "@/pages/settings";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
@@ -38,6 +39,13 @@ function Router() {
       <Route path="/settings">
         <ProtectedRoute requireAuth={true}>
           <SettingsPage />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Contractors Browsing - Requires Authentication */}
+      <Route path="/contractors">
+        <ProtectedRoute requireAuth={true}>
+          <Contractors />
         </ProtectedRoute>
       </Route>
       
