@@ -6,7 +6,7 @@ import { useFirebaseAuth } from "../hooks/useFirebaseAuth";
 import { useToast } from "../hooks/use-toast";
 
 export default function Header() {
-  const { isAuthenticated, user } = useFirebaseAuth();
+  const { isAuthenticated, user, userRole } = useFirebaseAuth();
   const { toast } = useToast();
 
   const handleSignOut = async () => {
@@ -40,21 +40,40 @@ export default function Header() {
           
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              <Link href="#how-it-works">
-                <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
-                  How it Works
-                </span>
-              </Link>
-              <Link href="#contractors">
-                <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
-                  Find Contractors
-                </span>
-              </Link>
-              <Link href="#professionals">
-                <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
-                  For Professionals
-                </span>
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link href="/dashboard">
+                    <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
+                      Dashboard
+                    </span>
+                  </Link>
+                  {(userRole === 'contractor' || userRole === 'both') && (
+                    <Link href="/contractor-portal">
+                      <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
+                        Contractor Portal
+                      </span>
+                    </Link>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Link href="#how-it-works">
+                    <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
+                      How it Works
+                    </span>
+                  </Link>
+                  <Link href="#contractors">
+                    <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
+                      Find Contractors
+                    </span>
+                  </Link>
+                  <Link href="#professionals">
+                    <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
+                      For Professionals
+                    </span>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
           

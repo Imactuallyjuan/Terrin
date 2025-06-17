@@ -7,6 +7,9 @@ import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import AuthPage from "@/pages/auth";
+import Dashboard from "@/pages/dashboard";
+import ContractorPortal from "@/pages/contractor-portal";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
 function Router() {
@@ -15,14 +18,28 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
+      
+      {/* Protected Dashboard - Requires Authentication */}
+      <Route path="/dashboard">
+        <ProtectedRoute requireAuth={true}>
+          <Dashboard />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Protected Contractor Portal - Contractors and Both only */}
+      <Route path="/contractor-portal">
+        <ProtectedRoute requireAuth={true} allowedRoles={['contractor', 'both']}>
+          <ContractorPortal />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Home/Landing Page */}
       {loading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/dashboard" component={Home} />
-        </>
+        <Route path="/" component={Home} />
       )}
+      
       <Route component={NotFound} />
     </Switch>
   );
