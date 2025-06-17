@@ -102,6 +102,7 @@ export default function PostProject() {
     console.log('Form submitted with data:', data);
     console.log('Estimate mode:', estimateMode);
     console.log('Is authenticated:', isAuthenticated);
+    console.log('Form errors:', form.formState.errors);
     
     if (!isAuthenticated) {
       toast({
@@ -121,6 +122,25 @@ export default function PostProject() {
     } else {
       console.log('Triggering project creation...');
       createProjectMutation.mutate(data);
+    }
+  };
+
+  const handleEstimateClick = (e: React.MouseEvent) => {
+    console.log('Get Estimate button clicked');
+    setEstimateMode(true);
+    
+    // Check if form is valid first
+    const isValid = form.trigger();
+    console.log('Form validation result:', isValid);
+    
+    if (!form.formState.isValid) {
+      console.log('Form validation errors:', form.formState.errors);
+      toast({
+        title: "Please complete all required fields",
+        description: "Make sure to fill in all the project details before getting an estimate.",
+        variant: "destructive",
+      });
+      return;
     }
   };
 
@@ -273,10 +293,7 @@ export default function PostProject() {
                     type="submit"
                     variant="outline"
                     className="border-green-600 text-green-600 hover:bg-green-50 flex items-center"
-                    onClick={(e) => {
-                      console.log('Get Estimate button clicked');
-                      setEstimateMode(true);
-                    }}
+                    onClick={handleEstimateClick}
                     disabled={getEstimateMutation.isPending}
                   >
                     {getEstimateMutation.isPending ? (
