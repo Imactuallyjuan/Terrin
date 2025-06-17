@@ -1,7 +1,7 @@
 import Header from "@/components/header";
 import Hero from "@/components/hero";
 import Features from "@/components/features";
-import PostProject from "@/components/post-project";
+import PostProjectFirebase from "@/components/PostProjectFirebase";
 import CostEstimator from "@/components/cost-estimator";
 import MatchTrades from "@/components/match-trades";
 import Stats from "@/components/stats";
@@ -13,7 +13,7 @@ export default function Landing() {
       <Header />
       <Hero />
       <Features />
-      <PostProject />
+      <PostProjectFirebase />
       <CostEstimator />
       <MatchTrades />
       <Stats />

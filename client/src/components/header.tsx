@@ -1,9 +1,30 @@
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
+import { signOut } from "firebase/auth";
+import { auth } from "../lib/firebase";
+import { useFirebaseAuth } from "../hooks/useFirebaseAuth";
+import { useToast } from "../hooks/use-toast";
 
 export default function Header() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user } = useFirebaseAuth();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      toast({
+        title: "Signed out successfully",
+        description: "You've been signed out of your account.",
+      });
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error signing out",
+        description: "There was a problem signing you out.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
@@ -41,12 +62,12 @@ export default function Header() {
             {isAuthenticated ? (
               <>
                 <span className="text-sm text-slate-600">
-                  Welcome, {user?.firstName || 'User'}
+                  Welcome, {user?.email?.split('@')[0] || 'User'}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.location.href = '/api/logout'}
+                  onClick={handleSignOut}
                   className="border-blue-600 text-blue-600 hover:bg-blue-50"
                 >
                   Sign Out
@@ -54,21 +75,23 @@ export default function Header() {
               </>
             ) : (
               <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.location.href = '/api/login'}
-                  className="border-blue-600 text-blue-600 hover:bg-blue-50"
-                >
-                  Sign In
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => window.location.href = '/api/login'}
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                >
-                  Get Started
-                </Button>
+                <Link href="/auth">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/auth">
+                  <Button
+                    size="sm"
+                    className="bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    Get Started
+                  </Button>
+                </Link>
               </>
             )}
           </div>
