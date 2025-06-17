@@ -193,19 +193,41 @@ export default function UserRoleSettings() {
           onClick={async () => {
             try {
               console.log('Testing Firebase write...');
-              await updateDoc(doc(db, 'users', user.uid), {
-                testField: new Date().toISOString()
+              console.log('User UID:', user.uid);
+              console.log('Firebase config:', {
+                projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+                authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+                hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY
               });
+              
+              const userDocRef = doc(db, 'users', user.uid);
+              console.log('Document reference created:', userDocRef.path);
+              
+              await updateDoc(userDocRef, {
+                testField: new Date().toISOString(),
+                lastTestUpdate: new Date()
+              });
+              
               console.log('Firebase test write successful');
               toast({
                 title: "Firebase Test Success",
                 description: "Firebase write operation works!",
               });
             } catch (error) {
-              console.error('Firebase test failed:', error);
+              console.error('Firebase test failed - Full error:', error);
+              console.error('Error code:', error.code);
+              console.error('Error message:', error.message);
+              
+              let errorMsg = error.message;
+              if (error.code === 'permission-denied') {
+                errorMsg = 'Permission denied - Firestore security rules may need updating';
+              } else if (error.code === 'not-found') {
+                errorMsg = 'Document not found - User document may not exist';
+              }
+              
               toast({
                 title: "Firebase Test Failed",
-                description: error.message,
+                description: `${error.code}: ${errorMsg}`,
                 variant: "destructive",
               });
             }
