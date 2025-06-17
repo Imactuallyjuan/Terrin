@@ -63,13 +63,24 @@ export default function PostProject() {
 
   const getEstimateMutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
+      console.log('Starting estimate mutation with data:', data);
+      
       // Trigger loading state
       window.dispatchEvent(new CustomEvent('estimateStarted'));
       
-      const response = await apiRequest("POST", "/api/estimate", { projectData: data });
-      return response.json();
+      try {
+        const response = await apiRequest("POST", "/api/estimate", { projectData: data });
+        const result = await response.json();
+        console.log('Estimate response:', result);
+        return result;
+      } catch (error) {
+        console.error('Estimate API error:', error);
+        throw error;
+      }
     },
     onSuccess: (estimate) => {
+      console.log('Estimate generated successfully:', estimate);
+      
       toast({
         title: "Estimate Generated!",
         description: "Your AI-powered cost estimate is ready.",
@@ -86,9 +97,24 @@ export default function PostProject() {
       // Store estimate data for display
       window.dispatchEvent(new CustomEvent('estimateGenerated', { detail: estimate }));
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('Estimate mutation error:', error);
+      
       // Stop loading state on error
       window.dispatchEvent(new CustomEvent('estimateGenerated', { detail: null }));
+      
+      // Check if it's an authentication error
+      if (error.message && error.message.includes('401')) {
+        toast({
+          title: "Please sign in",
+          description: "You need to be signed in to get an estimate. Redirecting...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 1500);
+        return;
+      }
       
       toast({
         title: "Error",
@@ -104,18 +130,9 @@ export default function PostProject() {
     console.log('Is authenticated:', isAuthenticated);
     console.log('Form errors:', form.formState.errors);
     
-    if (!isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to post a project.",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 1000);
-      return;
-    }
-
+    // Skip auth check here - let the API handle authentication
+    // If not authenticated, the API will return 401 and we'll handle it in the mutation
+    
     if (estimateMode) {
       console.log('Triggering estimate mutation...');
       getEstimateMutation.mutate(data);
