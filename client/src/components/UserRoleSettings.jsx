@@ -189,6 +189,10 @@ export default function UserRoleSettings() {
           <div>Current Role: {userRole}</div>
           <div>Selected Role: {newRole}</div>
           <div>Can Update: {(!newRole || newRole === userRole) ? 'No' : 'Yes'}</div>
+          <div><strong>Firebase Config:</strong></div>
+          <div>Project ID: {import.meta.env.VITE_FIREBASE_PROJECT_ID || 'NOT SET'}</div>
+          <div>Auth Domain: {import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'NOT SET'}</div>
+          <div>API Key: {import.meta.env.VITE_FIREBASE_API_KEY ? 'SET' : 'NOT SET'}</div>
         </div>
 
         {/* Test Firebase Button */}
