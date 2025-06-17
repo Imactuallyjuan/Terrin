@@ -99,6 +99,10 @@ export default function PostProject() {
   });
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
+    console.log('Form submitted with data:', data);
+    console.log('Estimate mode:', estimateMode);
+    console.log('Is authenticated:', isAuthenticated);
+    
     if (!isAuthenticated) {
       toast({
         title: "Authentication Required",
@@ -112,8 +116,10 @@ export default function PostProject() {
     }
 
     if (estimateMode) {
+      console.log('Triggering estimate mutation...');
       getEstimateMutation.mutate(data);
     } else {
+      console.log('Triggering project creation...');
       createProjectMutation.mutate(data);
     }
   };
@@ -267,7 +273,10 @@ export default function PostProject() {
                     type="submit"
                     variant="outline"
                     className="border-green-600 text-green-600 hover:bg-green-50 flex items-center"
-                    onClick={() => setEstimateMode(true)}
+                    onClick={(e) => {
+                      console.log('Get Estimate button clicked');
+                      setEstimateMode(true);
+                    }}
                     disabled={getEstimateMutation.isPending}
                   >
                     {getEstimateMutation.isPending ? (

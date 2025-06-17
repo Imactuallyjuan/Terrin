@@ -1,0 +1,117 @@
+# Terrin - Construction Project Management Platform
+
+## Overview
+
+Terrin is a modern full-stack web application built to connect homeowners with trusted construction professionals. The platform allows users to post construction projects, get AI-powered cost estimates, and match with verified contractors. Built with React, Express, PostgreSQL, and integrated with OpenAI for intelligent cost estimation.
+
+## System Architecture
+
+### Frontend Architecture
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite for fast development and optimized builds
+- **Routing**: Wouter for lightweight client-side routing
+- **State Management**: TanStack Query (React Query) for server state management
+- **UI Components**: Shadcn/ui components built on Radix UI primitives
+- **Styling**: Tailwind CSS with custom design tokens and brand colors
+- **Form Handling**: React Hook Form with Zod validation
+
+### Backend Architecture
+- **Runtime**: Node.js with Express.js framework
+- **Language**: TypeScript with ES modules
+- **Database ORM**: Drizzle ORM for type-safe database operations
+- **Authentication**: Replit Auth with OpenID Connect integration
+- **Session Management**: Express sessions with PostgreSQL store
+- **API Integration**: OpenAI API for cost estimation
+
+### Database Design
+- **Database**: PostgreSQL with Neon serverless connection
+- **Schema Management**: Drizzle migrations
+- **Key Tables**:
+  - `users` - User profiles and authentication data
+  - `projects` - Construction project details
+  - `estimates` - AI-generated cost estimates
+  - `contractors` - Verified contractor profiles
+  - `sessions` - User session storage
+
+## Key Components
+
+### Authentication System
+- **Provider**: Replit Auth with OpenID Connect
+- **Session Storage**: PostgreSQL-backed sessions with 7-day TTL
+- **User Management**: Automatic user creation and profile management
+- **Security**: HTTP-only cookies with secure flag for production
+
+### AI-Powered Cost Estimation
+- **Engine**: OpenAI GPT-4o for intelligent cost analysis
+- **Input Processing**: Structured project data with validation
+- **Output Format**: Detailed cost breakdown including materials, labor, permits, and contingency
+- **Error Handling**: Fallback mechanisms and validation
+
+### Project Management
+- **CRUD Operations**: Full project lifecycle management
+- **Validation**: Zod schemas for type-safe data handling
+- **Status Tracking**: Project status management and updates
+- **User Association**: Projects linked to authenticated users
+
+### Contractor Matching
+- **Discovery**: Contractor search by specialty and location
+- **Profiles**: Detailed contractor information with ratings
+- **Contact System**: Secure contractor-client communication
+
+## Data Flow
+
+1. **User Authentication**: Users authenticate via Replit Auth, sessions stored in PostgreSQL
+2. **Project Creation**: Users submit project details through validated forms
+3. **AI Estimation**: Project data sent to OpenAI API for cost analysis
+4. **Contractor Matching**: System matches projects with suitable contractors
+5. **Real-time Updates**: TanStack Query provides real-time data synchronization
+
+## External Dependencies
+
+### Core Dependencies
+- **@neondatabase/serverless** - Serverless PostgreSQL connection
+- **@tanstack/react-query** - Server state management
+- **drizzle-orm** - Type-safe database operations
+- **openai** - AI-powered cost estimation
+- **express-session** - Session management
+- **passport** - Authentication middleware
+
+### UI Dependencies
+- **@radix-ui/react-*** - Accessible UI primitives
+- **tailwindcss** - Utility-first CSS framework
+- **react-hook-form** - Form handling and validation
+- **zod** - Runtime type validation
+
+## Deployment Strategy
+
+### Development Environment
+- **Platform**: Replit with auto-reload and hot module replacement
+- **Database**: Neon PostgreSQL with connection pooling
+- **Build Process**: Vite dev server with Express backend
+- **Port Configuration**: Frontend (5000) with backend API routes
+
+### Production Build
+- **Frontend**: Vite build with optimized bundles
+- **Backend**: esbuild for Node.js bundle optimization
+- **Deployment**: Replit autoscale deployment
+- **Environment**: NODE_ENV=production with optimized settings
+
+### Environment Variables
+- `DATABASE_URL` - PostgreSQL connection string
+- `OPENAI_API_KEY` - OpenAI API authentication
+- `SESSION_SECRET` - Session encryption key
+- `REPLIT_DOMAINS` - Allowed domains for OIDC
+- `ISSUER_URL` - OpenID Connect issuer URL
+
+## Changelog
+
+```
+Changelog:
+- June 17, 2025. Initial setup
+```
+
+## User Preferences
+
+```
+Preferred communication style: Simple, everyday language.
+```
