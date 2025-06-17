@@ -8,12 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { User, Building, Users, Globe } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 export default function UserRoleSettings() {
   const { user, userRole, refreshUserData } = useFirebaseAuth();
   const [newRole, setNewRole] = useState(userRole || '');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const roleOptions = [
     {
@@ -74,6 +76,11 @@ export default function UserRoleSettings() {
 
       // Reset the form
       setNewRole(userRole);
+
+      // Redirect to dashboard to see changes
+      setTimeout(() => {
+        setLocation('/dashboard');
+      }, 1500);
     } catch (error) {
       console.error('Error updating user role:', error);
       toast({
