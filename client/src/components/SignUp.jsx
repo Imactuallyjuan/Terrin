@@ -101,6 +101,10 @@ export default function SignUp({ onSwitchToLogin }) {
         title: "Account created successfully!",
         description: "Welcome to Terrin.",
       });
+      // Redirect to dashboard after successful signup
+      setTimeout(() => {
+        setLocation('/dashboard');
+      }, 1000);
     } catch (error) {
       console.error('Error signing up with Google:', error);
       toast({
