@@ -3,7 +3,7 @@ import Hero from "@/components/hero";
 import Features from "@/components/features";
 import PostProjectFirebase from "@/components/PostProjectFirebase";
 import CostEstimator from "@/components/cost-estimator";
-import MatchTrades from "@/components/match-trades";
+import MatchTradesFirebase from "@/components/MatchTradesFirebase";
 import Stats from "@/components/stats";
 import Footer from "@/components/footer";
 
@@ -15,7 +15,7 @@ export default function Landing() {
       <Features />
       <PostProjectFirebase />
       <CostEstimator />
-      <MatchTrades />
+      <MatchTradesFirebase />
       <Stats />
       <Footer />
     </div>

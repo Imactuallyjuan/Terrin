@@ -24,22 +24,20 @@ Terrin is a modern full-stack web application built to connect homeowners with t
 - **API Integration**: OpenAI API for cost estimation
 
 ### Database Design
-- **Database**: PostgreSQL with Neon serverless connection
-- **Schema Management**: Drizzle migrations
-- **Key Tables**:
-  - `users` - User profiles and authentication data
-  - `projects` - Construction project details
-  - `estimates` - AI-generated cost estimates
-  - `contractors` - Verified contractor profiles
-  - `sessions` - User session storage
+- **Database**: Firebase Firestore (NoSQL document database)
+- **Collections**:
+  - `users` - User profiles with role assignments (homeowner/contractor/both/visitor)
+  - `projects` - Construction project details posted by homeowners
+  - `contractors` - Verified contractor profiles with photos and business info
+- **Storage**: Firebase Storage for contractor profile photos and project images
 
 ## Key Components
 
 ### Authentication System
-- **Provider**: Replit Auth with OpenID Connect
-- **Session Storage**: PostgreSQL-backed sessions with 7-day TTL
-- **User Management**: Automatic user creation and profile management
-- **Security**: HTTP-only cookies with secure flag for production
+- **Provider**: Firebase Authentication with email/password and Google OAuth
+- **User Management**: Firestore-based user profiles with role-based access
+- **Role System**: Homeowner, Contractor, Both, or Visitor roles stored in Firestore
+- **Profile Photos**: Firebase Storage for contractor profile image uploads
 
 ### AI-Powered Cost Estimation
 - **Engine**: OpenAI GPT-4o for intelligent cost analysis
