@@ -106,6 +106,11 @@ Terrin is a modern full-stack web application built to connect homeowners with t
 ```
 Changelog:
 - June 17, 2025. Initial setup
+- June 17, 2025. Firebase role switching implemented and working
+  * Fixed Firebase Firestore connection issues
+  * Implemented user role management with setDoc instead of updateDoc
+  * Users can now successfully change roles between visitor, homeowner, contractor, and both
+  * Enhanced error handling for Firebase operations
 ```
 
 ## User Preferences
