@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Lock } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 export default function SignUp({ onSwitchToLogin }) {
   const [email, setEmail] = useState('');
@@ -17,6 +18,7 @@ export default function SignUp({ onSwitchToLogin }) {
   const [role, setRole] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const handleEmailSignUp = async (e) => {
     e.preventDefault();
@@ -56,6 +58,10 @@ export default function SignUp({ onSwitchToLogin }) {
         title: "Account created successfully!",
         description: "Welcome to Terrin.",
       });
+      // Redirect to dashboard after successful signup
+      setTimeout(() => {
+        setLocation('/dashboard');
+      }, 1000);
     } catch (error) {
       console.error('Error signing up:', error);
       toast({

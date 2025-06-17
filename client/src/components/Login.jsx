@@ -8,12 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Lock } from 'lucide-react';
+import { useLocation } from 'wouter';
 
 export default function Login({ onSwitchToSignUp }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
@@ -25,6 +27,10 @@ export default function Login({ onSwitchToSignUp }) {
         title: "Welcome back!",
         description: "You've successfully signed in.",
       });
+      // Redirect to dashboard after successful login
+      setTimeout(() => {
+        setLocation('/dashboard');
+      }, 1000);
     } catch (error) {
       console.error('Error signing in:', error);
       toast({
@@ -58,6 +64,10 @@ export default function Login({ onSwitchToSignUp }) {
         title: "Welcome back!",
         description: "You've successfully signed in with Google.",
       });
+      // Redirect to dashboard after successful login
+      setTimeout(() => {
+        setLocation('/dashboard');
+      }, 1000);
     } catch (error) {
       console.error('Error signing in with Google:', error);
       toast({
