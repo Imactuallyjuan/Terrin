@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useFirebaseAuth } from '../hooks/useFirebaseAuth';
 import { Button } from '@/components/ui/button';
@@ -67,13 +67,16 @@ export default function UserRoleSettings() {
     const selectedRoleInfo = getNewRoleInfo();
     
     try {
-      // Update the role in Firestore
-      console.log('Updating Firestore document...');
-      await updateDoc(doc(db, 'users', user.uid), {
+      // Update the role in Firestore using setDoc with merge
+      console.log('Updating Firestore document with setDoc...');
+      await setDoc(doc(db, 'users', user.uid), {
         role: newRole,
-        updatedAt: new Date()
-      });
-      console.log('Firestore update successful');
+        email: user.email,
+        uid: user.uid,
+        updatedAt: new Date(),
+        createdAt: new Date() // Only sets if document doesn't exist
+      }, { merge: true });
+      console.log('Firestore update successful with setDoc');
 
       // Clear the cached role and refresh user data
       sessionStorage.removeItem(`userRole_${user.uid}`);
@@ -192,7 +195,7 @@ export default function UserRoleSettings() {
         <Button 
           onClick={async () => {
             try {
-              console.log('Testing Firebase write...');
+              console.log('Testing Firebase write with setDoc...');
               console.log('User UID:', user.uid);
               console.log('Firebase config:', {
                 projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -203,12 +206,15 @@ export default function UserRoleSettings() {
               const userDocRef = doc(db, 'users', user.uid);
               console.log('Document reference created:', userDocRef.path);
               
-              await updateDoc(userDocRef, {
+              // Use setDoc with merge instead of updateDoc
+              await setDoc(userDocRef, {
                 testField: new Date().toISOString(),
-                lastTestUpdate: new Date()
-              });
+                lastTestUpdate: new Date(),
+                email: user.email,
+                uid: user.uid
+              }, { merge: true });
               
-              console.log('Firebase test write successful');
+              console.log('Firebase test write successful with setDoc');
               toast({
                 title: "Firebase Test Success",
                 description: "Firebase write operation works!",
@@ -220,9 +226,11 @@ export default function UserRoleSettings() {
               
               let errorMsg = error.message;
               if (error.code === 'permission-denied') {
-                errorMsg = 'Permission denied - Firestore security rules may need updating';
+                errorMsg = 'Permission denied - Check Firebase security rules';
               } else if (error.code === 'not-found') {
-                errorMsg = 'Document not found - User document may not exist';
+                errorMsg = 'Document not found - Creating new document';
+              } else if (error.code === 'unavailable') {
+                errorMsg = 'Firebase service unavailable - Network or project issue';
               }
               
               toast({
