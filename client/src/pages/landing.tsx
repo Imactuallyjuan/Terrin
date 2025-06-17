@@ -2,7 +2,7 @@ import Header from "@/components/header";
 import Hero from "@/components/hero";
 import Features from "@/components/features";
 import PostProjectFirebase from "@/components/PostProjectFirebase";
-import CostEstimator from "@/components/cost-estimator";
+import EstimateForm from "@/components/EstimateForm";
 import MatchTradesFirebase from "@/components/MatchTradesFirebase";
 import Stats from "@/components/stats";
 import Footer from "@/components/footer";
@@ -14,7 +14,9 @@ export default function Landing() {
       <Hero />
       <Features />
       <PostProjectFirebase />
-      <CostEstimator />
+      <EstimateForm onEstimateComplete={(estimate) => {
+        console.log('Estimate completed:', estimate);
+      }} />
       <MatchTradesFirebase />
       <Stats />
       <Footer />

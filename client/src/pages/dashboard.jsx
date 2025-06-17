@@ -3,14 +3,16 @@ import { useFirebaseAuth } from "../hooks/useFirebaseAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, DollarSign, Clock, Plus, User, Building, Settings } from "lucide-react";
+import { Calendar, MapPin, DollarSign, Clock, Plus, User, Building, Settings, Calculator } from "lucide-react";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { Link } from "wouter";
+import EstimateResults from "@/components/EstimateResults";
 
 export default function Dashboard() {
   const { user, userRole, loading, isAuthenticated } = useFirebaseAuth();
   const [projects, setProjects] = useState([]);
+  const [estimates, setEstimates] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
@@ -28,17 +30,16 @@ export default function Dashboard() {
     if (!user) return;
 
     try {
+      // Fetch projects from Firestore
       let projectsQuery;
       
       if (userRole === 'homeowner' || userRole === 'both') {
-        // Homeowners see their posted projects
         projectsQuery = query(
           collection(db, 'projects'),
           where('userId', '==', user.uid),
           orderBy('createdAt', 'desc')
         );
       } else if (userRole === 'contractor') {
-        // Contractors see all open projects they can bid on
         projectsQuery = query(
           collection(db, 'projects'),
           where('status', '==', 'open'),
@@ -54,6 +55,18 @@ export default function Dashboard() {
         }));
         setProjects(projectData);
       }
+
+      // Fetch estimates from API
+      try {
+        const response = await fetch('/api/estimates');
+        if (response.ok) {
+          const estimatesData = await response.json();
+          setEstimates(estimatesData.slice(0, 3)); // Show only recent 3 estimates
+        }
+      } catch (estimateError) {
+        console.error('Error fetching estimates:', estimateError);
+      }
+
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -152,6 +165,31 @@ export default function Dashboard() {
             </Button>
           )}
         </div>
+
+        {/* Recent Estimates Section */}
+        {estimates.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-gray-900 flex items-center">
+                <Calculator className="h-5 w-5 mr-2" />
+                Recent Cost Estimates
+              </h3>
+              <Link href="/#estimate">
+                <Button variant="outline" size="sm">
+                  Get New Estimate
+                </Button>
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {estimates.map((estimate) => (
+                <div key={estimate.id} className="transform scale-90">
+                  <EstimateResults estimate={estimate} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Projects Section */}
         <div>
