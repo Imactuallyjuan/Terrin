@@ -179,6 +179,43 @@ export default function UserRoleSettings() {
           </div>
         )}
 
+        {/* Debug Info */}
+        <div className="bg-gray-100 p-3 rounded text-sm">
+          <div><strong>Debug Info:</strong></div>
+          <div>User ID: {user?.uid}</div>
+          <div>Current Role: {userRole}</div>
+          <div>Selected Role: {newRole}</div>
+          <div>Can Update: {(!newRole || newRole === userRole) ? 'No' : 'Yes'}</div>
+        </div>
+
+        {/* Test Firebase Button */}
+        <Button 
+          onClick={async () => {
+            try {
+              console.log('Testing Firebase write...');
+              await updateDoc(doc(db, 'users', user.uid), {
+                testField: new Date().toISOString()
+              });
+              console.log('Firebase test write successful');
+              toast({
+                title: "Firebase Test Success",
+                description: "Firebase write operation works!",
+              });
+            } catch (error) {
+              console.error('Firebase test failed:', error);
+              toast({
+                title: "Firebase Test Failed",
+                description: error.message,
+                variant: "destructive",
+              });
+            }
+          }}
+          variant="outline"
+          className="w-full mb-2"
+        >
+          Test Firebase Connection
+        </Button>
+
         {/* Action Button */}
         <Button 
           onClick={handleRoleChange} 
