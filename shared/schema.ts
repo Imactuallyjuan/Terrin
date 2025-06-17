@@ -67,6 +67,7 @@ export const estimates = pgTable("estimates", {
   contingencyCostMin: decimal("contingency_cost_min").notNull(),
   contingencyCostMax: decimal("contingency_cost_max").notNull(),
   aiAnalysis: jsonb("ai_analysis"),
+  inputData: text("input_data"), // Store the form input as JSON string
   createdAt: timestamp("created_at").defaultNow(),
 });
 

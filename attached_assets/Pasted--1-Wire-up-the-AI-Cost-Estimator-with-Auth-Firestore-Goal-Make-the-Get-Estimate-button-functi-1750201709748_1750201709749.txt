@@ -1,0 +1,89 @@
+ 1️⃣ Wire up the AI Cost Estimator (with Auth & Firestore)
+Goal: Make the Get Estimate button functional and tied to signed-in users.
+
+📋 How it should work:
+When the user clicks Get Estimate:
+
+Open a form with:
+
+Project description
+
+Location
+
+Square footage
+
+Optional budget or project type (if helpful)
+
+When submitted:
+
+Send a POST request to /api/estimate
+
+Call OpenAI GPT-4o with the following sample prompt:
+
+diff
+Copy
+Edit
+"You are a professional construction estimator. 
+Please estimate the total cost for a project with the following details:
+- Description: {description}
+- Location: {location}
+- Square Footage: {sqft}
+Provide a detailed breakdown including:
+- Labor costs
+- Materials costs
+- Permits or fees if applicable
+- Contingency amount
+Also, include an estimated timeline in weeks."
+Parse GPT’s response and display it nicely in the UI.
+
+Save the estimate in Firestore under an estimates collection:
+
+json
+Copy
+Edit
+{
+  userId: "...",
+  inputData: {...},
+  result: {...},
+  createdAt: timestamp
+}
+Show Recent Estimates on the dashboard for each signed-in user.
+
+✅ 2️⃣ Contractor Matching (Dynamic)
+Goal: Make the Browse Contractors button functional with real, dynamic data.
+
+📋 How it should work:
+Open a Contractors page.
+
+Query Firestore for all users with:
+
+role === "contractor" or role === "both"
+
+verified === true (optional, if we use a verified flag)
+
+For each contractor:
+
+Show:
+
+Name
+
+Specialty
+
+Location
+
+Rating (placeholder OK for now)
+
+Profile photo loaded from Firebase Storage (use the profilePhotoUrl field if we save it)
+
+Include a Contact or Request Quote button (can be placeholder for now).
+
+✅ 3️⃣ General
+Make sure only signed-in users can access these features.
+
+Tie all saved data to the userId from Firebase Auth.
+
+Keep the code modular for adding more features later.
+
+✅ All Firebase, Firestore, Storage, and OpenAI secrets are ready in Replit Secrets.
+
+Let me know if you need the actual GPT prompt or want example JSON for Firestore documents — thanks so much!

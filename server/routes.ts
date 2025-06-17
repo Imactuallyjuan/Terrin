@@ -80,28 +80,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/estimate', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { projectData } = req.body;
+      const { description, location, squareFootage, projectType, budget } = req.body;
 
-      if (!projectData) {
-        return res.status(400).json({ message: "Project data is required" });
-      }
-
-      // Generate AI-powered cost estimate
-      const aiEstimate = await generateCostEstimate(projectData);
-
-      // Create project if projectId is not provided
-      let projectId = req.body.projectId;
-      if (!projectId) {
-        const project = await storage.createProject({
-          ...projectData,
-          userId,
+      // Validate required fields
+      if (!description || !location || !squareFootage) {
+        return res.status(400).json({ 
+          message: "Missing required fields: description, location, and squareFootage are required" 
         });
-        projectId = project.id;
       }
+
+      console.log('Generating estimate for user:', userId);
+      
+      // Generate AI-powered cost estimate
+      const aiEstimate = await generateCostEstimate({
+        title: projectType || 'Construction Project',
+        description,
+        projectType: projectType || 'General Construction',
+        budgetRange: budget || 'Not specified',
+        timeline: 'To be determined',
+        location
+      });
 
       // Save estimate to database
       const estimate = await storage.createEstimate({
-        projectId,
+        projectId: 0, // Standalone estimate, not tied to a project
         userId,
         totalCostMin: aiEstimate.totalCostMin,
         totalCostMax: aiEstimate.totalCostMax,
@@ -115,11 +117,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         contingencyCostMin: aiEstimate.contingencyCostMin,
         contingencyCostMax: aiEstimate.contingencyCostMax,
         aiAnalysis: aiEstimate.analysis,
+        inputData: JSON.stringify({
+          description,
+          location,
+          squareFootage: parseInt(squareFootage),
+          projectType,
+          budget
+        })
       });
 
+      console.log('Estimate saved successfully:', estimate.id);
+
       res.json({
-        ...estimate,
-        projectId,
+        id: estimate.id,
+        ...aiEstimate,
+        inputData: {
+          description,
+          location,
+          squareFootage: parseInt(squareFootage),
+          projectType,
+          budget
+        },
+        createdAt: estimate.createdAt
       });
     } catch (error) {
       console.error("Error generating estimate:", error);
