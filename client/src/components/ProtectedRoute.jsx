@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useFirebaseAuth } from "../hooks/useFirebaseAuth";
 import { useToast } from "../hooks/use-toast";
+import { useLocation } from "wouter";
 
 export default function ProtectedRoute({ 
   children, 
@@ -10,6 +11,7 @@ export default function ProtectedRoute({
 }) {
   const { user, userRole, loading, isAuthenticated } = useFirebaseAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     if (loading) return; // Wait for auth state to load
@@ -21,9 +23,7 @@ export default function ProtectedRoute({
         description: "Please sign in to access this page.",
         variant: "destructive",
       });
-      setTimeout(() => {
-        window.location.href = redirectTo;
-      }, 1000);
+      setLocation(redirectTo);
       return;
     }
 
@@ -34,21 +34,16 @@ export default function ProtectedRoute({
         description: `This page is only available for ${allowedRoles.join(' and ')} accounts.`,
         variant: "destructive",
       });
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1500);
+      setLocation("/");
       return;
     }
-  }, [loading, isAuthenticated, userRole, allowedRoles, requireAuth, redirectTo, toast]);
+  }, [loading, isAuthenticated, userRole, allowedRoles, requireAuth, redirectTo, toast, setLocation]);
 
-  // Show loading while checking authentication
+  // Show minimal loading for very brief auth check
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Checking access...</p>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
   }
