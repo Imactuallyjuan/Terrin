@@ -109,6 +109,12 @@ export default function Dashboard() {
               <Badge variant="secondary">
                 {userRole === 'both' ? 'Homeowner & Contractor' : userRole}
               </Badge>
+              <Link href="/settings">
+                <Button variant="outline" size="sm" className="flex items-center space-x-2">
+                  <Settings className="h-4 w-4" />
+                  <span>Settings</span>
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
