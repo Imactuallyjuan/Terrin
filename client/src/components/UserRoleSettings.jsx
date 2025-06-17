@@ -57,35 +57,45 @@ export default function UserRoleSettings() {
   };
 
   const handleRoleChange = async () => {
-    if (!user || !newRole || newRole === userRole) return;
+    if (!user || !newRole || newRole === userRole) {
+      console.log('Role change blocked:', { user: !!user, newRole, userRole });
+      return;
+    }
 
+    console.log('Starting role update:', { from: userRole, to: newRole, userId: user.uid });
     setLoading(true);
+    const selectedRoleInfo = getNewRoleInfo();
+    
     try {
+      // Update the role in Firestore
+      console.log('Updating Firestore document...');
       await updateDoc(doc(db, 'users', user.uid), {
         role: newRole,
         updatedAt: new Date()
       });
+      console.log('Firestore update successful');
 
-      // Refresh user data to get updated role
+      // Clear the cached role and refresh user data
+      sessionStorage.removeItem(`userRole_${user.uid}`);
+      console.log('Cache cleared, refreshing user data...');
       await refreshUserData();
+      console.log('User data refreshed');
 
       toast({
         title: "Role updated successfully!",
-        description: `You are now registered as a ${getNewRoleInfo().label.toLowerCase()}.`,
+        description: `You are now registered as a ${selectedRoleInfo.label.toLowerCase()}.`,
       });
 
-      // Reset the form
-      setNewRole(userRole);
-
-      // Redirect to dashboard to see changes
+      // Small delay to ensure state updates, then redirect
       setTimeout(() => {
+        console.log('Redirecting to dashboard...');
         setLocation('/dashboard');
-      }, 1500);
+      }, 500);
     } catch (error) {
       console.error('Error updating user role:', error);
       toast({
         title: "Failed to update role",
-        description: error.message,
+        description: error.message || 'An unexpected error occurred',
         variant: "destructive",
       });
     } finally {
