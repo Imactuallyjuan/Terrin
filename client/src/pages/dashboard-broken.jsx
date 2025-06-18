@@ -32,24 +32,75 @@ export default function Dashboard() {
       return;
     }
 
-    // Auto-select first project if available
-    if (projects.length > 0 && !selectedProject) {
-      setSelectedProject(projects[0]);
+    if (user && userRole) {
+      fetchDashboardData();
     }
-  }, [loading, isAuthenticated, projects, selectedProject]);
+  }, [user, userRole, loading, isAuthenticated]);
 
-  const getProjectStatusColor = (status) => {
-    const colors = {
-      planning: 'bg-blue-100 text-blue-800',
-      active: 'bg-green-100 text-green-800',
-      in_progress: 'bg-yellow-100 text-yellow-800',
-      completed: 'bg-gray-100 text-gray-800',
-      cancelled: 'bg-red-100 text-red-800'
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+  const fetchDashboardData = async () => {
+    if (!user) return;
+
+    try {
+      // Fetch projects from Firestore
+      let projectsQuery;
+      
+      if (userRole === 'homeowner' || userRole === 'both') {
+        projectsQuery = query(
+          collection(db, 'projects'),
+          where('userId', '==', user.uid),
+          orderBy('createdAt', 'desc')
+        );
+      } else if (userRole === 'contractor') {
+        projectsQuery = query(
+          collection(db, 'projects'),
+          where('status', '==', 'open'),
+          orderBy('createdAt', 'desc')
+        );
+      }
+
+      if (projectsQuery) {
+        const querySnapshot = await getDocs(projectsQuery);
+        const projectData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setProjects(projectData);
+      }
+
+      // Fetch estimates from API
+      try {
+        const response = await fetch('/api/estimates');
+        if (response.ok) {
+          const estimatesData = await response.json();
+          setEstimates(estimatesData.slice(0, 3)); // Show only recent 3 estimates
+        }
+      } catch (estimateError) {
+        console.error('Error fetching estimates:', estimateError);
+      }
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoadingData(false);
+    }
   };
 
-  if (loading || projectsLoading) {
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'Recently';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString();
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'open': return 'bg-green-100 text-green-800';
+      case 'in-progress': return 'bg-blue-100 text-blue-800';
+      case 'completed': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -317,6 +368,162 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+      </div>
+    );
+  }
+                }} />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {estimates.map((estimate) => (
+                <div key={estimate.id} className="transform scale-90">
+                  <EstimateResults estimate={estimate} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Projects Section */}
+        <div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-6">
+            {userRole === 'homeowner' || userRole === 'both' ? 'Your Projects' : 'Available Projects'}
+          </h3>
+
+          {loadingData ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="p-6">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : projects.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <div className="mb-4">
+                  {userRole === 'contractor' ? (
+                    <Building className="h-12 w-12 text-gray-400 mx-auto" />
+                  ) : (
+                    <Plus className="h-12 w-12 text-gray-400 mx-auto" />
+                  )}
+                </div>
+                <h4 className="text-lg font-medium text-gray-900 mb-2">
+                  {userRole === 'contractor' ? 'No projects available' : 'No projects yet'}
+                </h4>
+                <p className="text-gray-600 mb-6">
+                  {userRole === 'contractor' 
+                    ? 'New projects will appear here when homeowners post them.'
+                    : 'Start by posting your first construction project.'
+                  }
+                </p>
+                {(userRole === 'homeowner' || userRole === 'both') && (
+                  <Link href="/#post-project">
+                    <Button className="bg-blue-600 text-white hover:bg-blue-700">
+                      Post Your First Project
+                    </Button>
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.map((project) => (
+                <Card key={project.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg truncate">{project.title}</CardTitle>
+                      <Badge className={getStatusColor(project.status || 'open')}>
+                        {project.status || 'open'}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                      {project.description}
+                    </p>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center text-gray-600">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        {project.location}
+                      </div>
+                      
+                      <div className="flex items-center text-gray-600">
+                        <DollarSign className="h-4 w-4 mr-2" />
+                        {project.budgetRange}
+                      </div>
+                      
+                      <div className="flex items-center text-gray-600">
+                        <Clock className="h-4 w-4 mr-2" />
+                        {project.timeline}
+                      </div>
+                      
+                      <div className="flex items-center text-gray-600">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Posted {formatDate(project.createdAt)}
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 pt-4 border-t">
+                      {userRole === 'contractor' ? (
+                        <Button variant="outline" size="sm" className="w-full">
+                          View Details & Bid
+                        </Button>
+                      ) : (
+                        <div className="flex space-x-2">
+                          <Button variant="outline" size="sm" className="flex-1">
+                            Edit
+                          </Button>
+                          <Button variant="outline" size="sm" className="flex-1">
+                            View Bids
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Quick Stats for Contractors */}
+        {userRole === 'contractor' && (
+          <div className="mt-12">
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">Your Stats</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <User className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-gray-900">0</div>
+                  <div className="text-sm text-gray-600">Active Bids</div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <Building className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-gray-900">0</div>
+                  <div className="text-sm text-gray-600">Projects Won</div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <DollarSign className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-gray-900">$0</div>
+                  <div className="text-sm text-gray-600">Total Earnings</div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
