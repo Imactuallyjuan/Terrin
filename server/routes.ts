@@ -77,7 +77,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cost estimation routes
   app.post('/api/estimate', verifyFirebaseToken, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.uid;
       const { description, location, squareFootage, projectType, budget } = req.body;
 
       // Validate required fields
@@ -146,7 +146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/estimates', verifyFirebaseToken, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.uid;
       const estimates = await storage.getUserEstimates(userId);
       res.json(estimates);
     } catch (error) {
@@ -165,7 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user owns the estimate
-      if (estimate.userId !== req.user.claims.sub) {
+      if (estimate.userId !== req.user.uid) {
         return res.status(403).json({ message: "Access denied" });
       }
 
@@ -179,7 +179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contractor routes
   app.post('/api/contractors', verifyFirebaseToken, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.uid;
       const contractorData = insertContractorSchema.parse(req.body);
       
       const contractor = await storage.createContractor({

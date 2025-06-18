@@ -28,7 +28,8 @@ export const verifyFirebaseToken: RequestHandler = async (req: any, res, next) =
       req.user = {
         uid: decodedToken.uid,
         email: decodedToken.email,
-        ...decodedToken
+        name: decodedToken.name,
+        picture: decodedToken.picture
       };
       next();
     } catch (error) {
