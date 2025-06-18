@@ -441,11 +441,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const projectId = parseInt(req.params.id);
       const userId = req.user.uid;
       
-      const cost = await storage.createProjectCost({
+      // Parse the dateIncurred to a proper Date object
+      const costData = {
         ...req.body,
         projectId,
         userId,
-      });
+      };
+      
+      // Convert dateIncurred string to Date object if it exists
+      if (costData.dateIncurred) {
+        costData.dateIncurred = new Date(costData.dateIncurred);
+      }
+      
+      const cost = await storage.createProjectCost(costData);
       
       res.json(cost);
     } catch (error) {
@@ -481,10 +489,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const projectId = parseInt(req.params.id);
       
-      const milestone = await storage.createProjectMilestone({
+      // Parse date fields to proper Date objects
+      const milestoneData = {
         ...req.body,
         projectId,
-      });
+      };
+      
+      // Convert date strings to Date objects if they exist
+      if (milestoneData.dueDate) {
+        milestoneData.dueDate = new Date(milestoneData.dueDate);
+      }
+      if (milestoneData.completedDate) {
+        milestoneData.completedDate = new Date(milestoneData.completedDate);
+      }
+      
+      const milestone = await storage.createProjectMilestone(milestoneData);
       
       res.json(milestone);
     } catch (error) {
@@ -507,7 +526,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/projects/milestones/:id', verifyFirebaseToken, async (req: any, res) => {
     try {
       const milestoneId = parseInt(req.params.id);
-      const milestone = await storage.updateProjectMilestone(milestoneId, req.body);
+      
+      // Parse date fields to proper Date objects for updates
+      const updateData = { ...req.body };
+      
+      // Convert date strings to Date objects if they exist
+      if (updateData.dueDate) {
+        updateData.dueDate = new Date(updateData.dueDate);
+      }
+      if (updateData.completedDate) {
+        updateData.completedDate = new Date(updateData.completedDate);
+      }
+      
+      const milestone = await storage.updateProjectMilestone(milestoneId, updateData);
       res.json(milestone);
     } catch (error) {
       console.error("Error updating project milestone:", error);
