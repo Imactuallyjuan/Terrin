@@ -105,7 +105,7 @@ export default function Contractors() {
     }
 
     // Filter by specialty
-    if (specialtyFilter) {
+    if (specialtyFilter && specialtyFilter !== 'all') {
       filtered = filtered.filter(contractor =>
         contractor.specialty === specialtyFilter
       );
@@ -171,7 +171,7 @@ export default function Contractors() {
                 <SelectValue placeholder="All specialties" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All specialties</SelectItem>
+                <SelectItem value="all">All specialties</SelectItem>
                 {specialties.map((specialty) => (
                   <SelectItem key={specialty} value={specialty}>
                     {specialty}
@@ -185,7 +185,7 @@ export default function Contractors() {
               onClick={() => {
                 setSearchTerm('');
                 setLocationFilter('');
-                setSpecialtyFilter('');
+                setSpecialtyFilter('all');
               }}
             >
               <Filter className="h-4 w-4 mr-2" />
