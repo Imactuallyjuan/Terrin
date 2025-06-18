@@ -197,6 +197,7 @@ export const projectMilestones = pgTable("project_milestones", {
   completedDate: timestamp("completed_date"),
   status: varchar("status").default("pending").notNull(), // pending, in_progress, completed, overdue
   order: integer("order").notNull(),
+  progressWeight: integer("progress_weight").default(10).notNull(), // Weight for progress calculation (1-50)
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -92,8 +92,28 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     title: '',
     description: '',
     dueDate: '',
-    order: 1
+    order: 1,
+    progressWeight: 10
   });
+
+  // Construction milestone presets with realistic weights
+  const constructionPresets = [
+    { title: 'Site Preparation', description: 'Clear land, excavation, utilities setup', weight: 5 },
+    { title: 'Foundation', description: 'Pour concrete foundation and basement', weight: 15 },
+    { title: 'Framing', description: 'Frame walls, roof structure, windows/doors', weight: 20 },
+    { title: 'Electrical Rough-in', description: 'Install wiring, panels, outlets', weight: 8 },
+    { title: 'Plumbing Rough-in', description: 'Install pipes, fixtures, water lines', weight: 8 },
+    { title: 'HVAC Installation', description: 'Install heating, cooling, ductwork', weight: 7 },
+    { title: 'Insulation', description: 'Install wall and attic insulation', weight: 5 },
+    { title: 'Drywall', description: 'Hang, tape, and finish drywall', weight: 10 },
+    { title: 'Flooring', description: 'Install hardwood, tile, carpet', weight: 8 },
+    { title: 'Interior Paint', description: 'Prime and paint all interior walls', weight: 6 },
+    { title: 'Kitchen Installation', description: 'Install cabinets, countertops, appliances', weight: 8 },
+    { title: 'Bathroom Finishing', description: 'Install fixtures, tile, vanities', weight: 6 },
+    { title: 'Exterior Siding', description: 'Install siding, trim, exterior paint', weight: 10 },
+    { title: 'Roofing', description: 'Install shingles, gutters, flashing', weight: 12 },
+    { title: 'Final Inspections', description: 'Final walkthrough and punch list', weight: 2 }
+  ];
 
   const [newPhoto, setNewPhoto] = useState({
     fileName: '',
@@ -536,6 +556,32 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <Label htmlFor="preset">Quick Add Construction Phase</Label>
+                    <Select onValueChange={(value) => {
+                      const preset = constructionPresets[parseInt(value)];
+                      if (preset) {
+                        setNewMilestone({
+                          title: preset.title,
+                          description: preset.description,
+                          dueDate: '',
+                          order: milestones.length + 1,
+                          progressWeight: preset.weight
+                        });
+                      }
+                    }}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a construction phase or create custom..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {constructionPresets.map((preset, index) => (
+                          <SelectItem key={index} value={index.toString()}>
+                            {preset.title} ({preset.weight}% weight)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div>
                     <Label htmlFor="title">Milestone Title</Label>
                     <Input
@@ -550,6 +596,31 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                       type="date"
                       value={newMilestone.dueDate}
                       onChange={(e) => setNewMilestone({...newMilestone, dueDate: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="progressWeight">Progress Weight (%)</Label>
+                    <Select onValueChange={(value) => setNewMilestone({...newMilestone, progressWeight: parseInt(value)})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={newMilestone.progressWeight.toString()} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="2">Minor Task (2%)</SelectItem>
+                        <SelectItem value="5">Small Phase (5%)</SelectItem>
+                        <SelectItem value="8">Medium Phase (8%)</SelectItem>
+                        <SelectItem value="10">Standard Phase (10%)</SelectItem>
+                        <SelectItem value="15">Major Phase (15%)</SelectItem>
+                        <SelectItem value="20">Critical Phase (20%)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="order">Order</Label>
+                    <Input
+                      type="number"
+                      value={newMilestone.order}
+                      onChange={(e) => setNewMilestone({...newMilestone, order: parseInt(e.target.value) || 1})}
+                      placeholder="Sequence order"
                     />
                   </div>
                   <div className="md:col-span-2">

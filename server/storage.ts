@@ -374,6 +374,10 @@ export class DatabaseStorage implements IStorage {
       .insert(projectMilestones)
       .values(milestone)
       .returning();
+    
+    // Update project completion percentage after creating milestone
+    await this.updateProjectCompletion(newMilestone.projectId);
+    
     return newMilestone;
   }
 
@@ -391,11 +395,52 @@ export class DatabaseStorage implements IStorage {
       .set(updates)
       .where(eq(projectMilestones.id, id))
       .returning();
+    
+    // Update project completion percentage after milestone change
+    if (updatedMilestone) {
+      await this.updateProjectCompletion(updatedMilestone.projectId);
+    }
+    
     return updatedMilestone;
   }
 
   async deleteProjectMilestone(id: number): Promise<void> {
+    // Get the milestone first to know which project to update
+    const milestone = await db
+      .select()
+      .from(projectMilestones)
+      .where(eq(projectMilestones.id, id))
+      .limit(1);
+      
     await db.delete(projectMilestones).where(eq(projectMilestones.id, id));
+    
+    // Update project completion percentage after deletion
+    if (milestone.length > 0) {
+      await this.updateProjectCompletion(milestone[0].projectId);
+    }
+  }
+
+  // Calculate and update project completion percentage based on milestone weights
+  async updateProjectCompletion(projectId: number): Promise<void> {
+    const milestones = await this.getProjectMilestones(projectId);
+    
+    if (milestones.length === 0) {
+      // No milestones, set completion to 0
+      await this.updateProject(projectId, { completionPercentage: 0 });
+      return;
+    }
+    
+    // Calculate total weight and completed weight
+    const totalWeight = milestones.reduce((sum, milestone) => sum + (milestone.progressWeight || 10), 0);
+    const completedWeight = milestones
+      .filter(milestone => milestone.status === 'completed')
+      .reduce((sum, milestone) => sum + (milestone.progressWeight || 10), 0);
+    
+    // Calculate completion percentage
+    const completionPercentage = Math.round((completedWeight / totalWeight) * 100);
+    
+    // Update the project with new completion percentage
+    await this.updateProject(projectId, { completionPercentage });
   }
 
   // Photo operations
