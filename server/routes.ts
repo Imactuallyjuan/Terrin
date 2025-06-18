@@ -1,21 +1,19 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { verifyFirebaseToken } from "./firebaseAuth";
 import { insertProjectSchema, insertContractorSchema } from "@shared/schema";
 import { generateCostEstimate } from "./openai";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', verifyFirebaseToken, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.uid;
       const user = await storage.getUser(userId);
-      res.json(user);
+      res.json(user || { id: userId, email: req.user.email });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -23,9 +21,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Project routes
-  app.post('/api/projects', isAuthenticated, async (req: any, res) => {
+  app.post('/api/projects', verifyFirebaseToken, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.uid;
       const projectData = insertProjectSchema.parse(req.body);
       
       const project = await storage.createProject({
@@ -44,9 +42,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/projects', isAuthenticated, async (req: any, res) => {
+  app.get('/api/projects', verifyFirebaseToken, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.uid;
       const projects = await storage.getUserProjects(userId);
       res.json(projects);
     } catch (error) {
@@ -55,7 +53,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/projects/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/projects/:id', verifyFirebaseToken, async (req: any, res) => {
     try {
       const projectId = parseInt(req.params.id);
       const project = await storage.getProject(projectId);
@@ -65,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user owns the project
-      if (project.userId !== req.user.claims.sub) {
+      if (project.userId !== req.user.uid) {
         return res.status(403).json({ message: "Access denied" });
       }
 
@@ -77,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cost estimation routes
-  app.post('/api/estimate', isAuthenticated, async (req: any, res) => {
+  app.post('/api/estimate', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { description, location, squareFootage, projectType, budget } = req.body;
@@ -146,7 +144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/estimates', isAuthenticated, async (req: any, res) => {
+  app.get('/api/estimates', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const estimates = await storage.getUserEstimates(userId);
@@ -157,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/projects/:id/estimate', isAuthenticated, async (req: any, res) => {
+  app.get('/api/projects/:id/estimate', verifyFirebaseToken, async (req: any, res) => {
     try {
       const projectId = parseInt(req.params.id);
       const estimate = await storage.getProjectEstimate(projectId);
@@ -179,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Contractor routes
-  app.post('/api/contractors', isAuthenticated, async (req: any, res) => {
+  app.post('/api/contractors', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const contractorData = insertContractorSchema.parse(req.body);
