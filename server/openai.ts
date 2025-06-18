@@ -34,7 +34,15 @@ export async function generateCostEstimate(projectData: ProjectData): Promise<Co
     console.log("Generating cost estimate for project:", projectData.title);
     
     const prompt = `
-You are a construction cost estimation expert with 20+ years of experience. Analyze the following project and provide a detailed cost breakdown in JSON format.
+You are a construction cost estimation expert with 20+ years of experience. Analyze the following project carefully and provide realistic, project-specific cost estimates.
+
+CRITICAL: Each project type has vastly different costs. Provide accurate estimates based on the actual project scope:
+- New home construction: $200,000-$500,000+
+- Large additions/major remodels: $50,000-$200,000
+- Garage additions: $15,000-$40,000
+- Kitchen remodels: $25,000-$75,000
+- Bathroom remodels: $8,000-$25,000
+- Small renovations: $3,000-$15,000
 
 Project Details:
 - Title: ${projectData.title}
@@ -44,28 +52,30 @@ Project Details:
 - Timeline: ${projectData.timeline}
 - Location: ${projectData.location}
 
-Provide accurate cost estimates in USD with this exact JSON structure:
+Based on the project type "${projectData.projectType}" and description "${projectData.description}", provide realistic cost estimates that reflect the actual scope of work.
+
+Return this exact JSON structure with realistic values for the project scope:
 {
-  "totalCostMin": "25000",
-  "totalCostMax": "45000",
-  "timeline": "8-12 weeks",
-  "materialsCostMin": "15000",
-  "materialsCostMax": "25000",
-  "laborCostMin": "8000",
-  "laborCostMax": "15000",
-  "permitsCostMin": "500",
-  "permitsCostMax": "2000",
-  "contingencyCostMin": "1500",
-  "contingencyCostMax": "3000",
+  "totalCostMin": "realistic_minimum_cost",
+  "totalCostMax": "realistic_maximum_cost", 
+  "timeline": "realistic_timeline",
+  "materialsCostMin": "materials_cost_min",
+  "materialsCostMax": "materials_cost_max",
+  "laborCostMin": "labor_cost_min",
+  "laborCostMax": "labor_cost_max",
+  "permitsCostMin": "permits_cost_min",
+  "permitsCostMax": "permits_cost_max",
+  "contingencyCostMin": "contingency_cost_min",
+  "contingencyCostMax": "contingency_cost_max",
   "analysis": {
-    "factors": ["Current market rates", "Regional pricing", "Project complexity"],
-    "assumptions": ["Standard materials quality", "Licensed contractor rates"],
-    "recommendations": ["Get multiple quotes", "Consider material timing"],
-    "riskFactors": ["Material price fluctuations", "Permit delays"]
+    "factors": ["project-specific cost factors"],
+    "assumptions": ["project-specific assumptions"],
+    "recommendations": ["project-specific recommendations"],
+    "riskFactors": ["project-specific risks"]
   }
 }
 
-Important: Return ONLY valid JSON. All cost values must be numeric strings without dollar signs or commas.
+IMPORTANT: Return ONLY valid JSON. All cost values must be numeric strings without dollar signs or commas. Make sure costs accurately reflect the specific project type and description provided.
 `;
 
     const response = await openai.chat.completions.create({
@@ -91,33 +101,29 @@ Important: Return ONLY valid JSON. All cost values must be numeric strings witho
     }
 
     console.log("OpenAI response received, parsing...");
-    const result = JSON.parse(content);
+    console.log("Raw OpenAI response:", content);
     
-    // Validate and ensure all required fields exist
-    const requiredFields = [
-      'totalCostMin', 'totalCostMax', 'timeline', 'materialsCostMin', 
-      'materialsCostMax', 'laborCostMin', 'laborCostMax', 'permitsCostMin', 
-      'permitsCostMax', 'contingencyCostMin', 'contingencyCostMax'
-    ];
+    const result = JSON.parse(content);
+    console.log("Parsed OpenAI result:", result);
+    
+    // Validate that we have actual values from AI, not just defaults
+    if (!result.totalCostMin || !result.totalCostMax) {
+      throw new Error("OpenAI did not provide valid cost estimates");
+    }
 
     const estimate: CostEstimate = {
-      totalCostMin: result.totalCostMin || "20000",
-      totalCostMax: result.totalCostMax || "40000",
-      timeline: result.timeline || "6-10 weeks",
-      materialsCostMin: result.materialsCostMin || "12000",
-      materialsCostMax: result.materialsCostMax || "22000",
-      laborCostMin: result.laborCostMin || "6000",
-      laborCostMax: result.laborCostMax || "15000",
-      permitsCostMin: result.permitsCostMin || "500",
-      permitsCostMax: result.permitsCostMax || "1500",
-      contingencyCostMin: result.contingencyCostMin || "1500",
-      contingencyCostMax: result.contingencyCostMax || "2500",
-      analysis: result.analysis || {
-        factors: ["Project scope", "Material costs", "Labor rates"],
-        assumptions: ["Standard quality materials", "Normal market conditions"],
-        recommendations: ["Get detailed quotes", "Plan for contingencies"],
-        riskFactors: ["Material availability", "Weather delays"]
-      }
+      totalCostMin: result.totalCostMin,
+      totalCostMax: result.totalCostMax,
+      timeline: result.timeline,
+      materialsCostMin: result.materialsCostMin,
+      materialsCostMax: result.materialsCostMax,
+      laborCostMin: result.laborCostMin,
+      laborCostMax: result.laborCostMax,
+      permitsCostMin: result.permitsCostMin,
+      permitsCostMax: result.permitsCostMax,
+      contingencyCostMin: result.contingencyCostMin,
+      contingencyCostMax: result.contingencyCostMax,
+      analysis: result.analysis
     };
 
     console.log("Cost estimate generated successfully");
