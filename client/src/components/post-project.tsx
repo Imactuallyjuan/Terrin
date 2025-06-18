@@ -185,6 +185,11 @@ export default function PostProject() {
     }
   };
 
+  const handleProjectClick = (e: React.MouseEvent) => {
+    console.log('Post Project button clicked');
+    setEstimateMode(false);
+  };
+
   return (
     <section className="py-16 bg-slate-50" id="post-project">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -348,7 +353,7 @@ export default function PostProject() {
                   <Button
                     type="submit"
                     className="bg-blue-600 text-white hover:bg-blue-700 flex items-center"
-                    onClick={() => setEstimateMode(false)}
+                    onClick={handleProjectClick}
                     disabled={createProjectMutation.isPending}
                   >
                     {createProjectMutation.isPending ? (
