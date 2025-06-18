@@ -24,17 +24,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/projects', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
+      console.log('Creating project for user:', userId);
+      console.log('Project data received:', req.body);
+      
       const projectData = insertProjectSchema.parse(req.body);
+      console.log('Project data validated:', projectData);
       
       const project = await storage.createProject({
         ...projectData,
         userId,
       });
 
+      console.log('Project created successfully:', project.id);
       res.json(project);
     } catch (error) {
       console.error("Error creating project:", error);
       if (error instanceof z.ZodError) {
+        console.error("Validation errors:", error.errors);
         res.status(400).json({ message: "Invalid project data", errors: error.errors });
       } else {
         res.status(500).json({ message: "Failed to create project" });

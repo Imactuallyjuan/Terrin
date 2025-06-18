@@ -11,11 +11,17 @@ async function throwIfResNotOk(res: Response) {
 async function getAuthHeaders(): Promise<Record<string, string>> {
   const user = auth.currentUser;
   if (user) {
-    const token = await user.getIdToken();
-    return {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
-    };
+    try {
+      // Force refresh token to ensure it's valid
+      const token = await user.getIdToken(true);
+      return {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      };
+    } catch (error) {
+      console.error('Failed to get auth token:', error);
+      return { "Content-Type": "application/json" };
+    }
   }
   return { "Content-Type": "application/json" };
 }
