@@ -1,17 +1,55 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, DollarSign, Clock, MapPin } from "lucide-react";
+import { ArrowLeft, Calendar, DollarSign, Clock, MapPin, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Estimates() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const { data: estimates = [], isLoading } = useQuery({
     queryKey: ["/api/estimates"],
   });
+
+  const deleteEstimateMutation = useMutation({
+    mutationFn: async (estimateId: number) => {
+      await apiRequest('DELETE', `/api/estimates/${estimateId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/estimates"] });
+      toast({
+        title: "Estimate Deleted",
+        description: "The estimate has been removed successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete estimate. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const getEstimateName = (estimate: any) => {
+    try {
+      if (estimate.inputData) {
+        const inputData = JSON.parse(estimate.inputData);
+        const type = inputData.projectType || 'Construction Project';
+        const location = inputData.location ? ` in ${inputData.location}` : '';
+        return `${type}${location}`;
+      }
+    } catch (error) {
+      // If parsing fails, fall back to generic name
+    }
+    return `Construction Estimate`;
+  };
 
   const formatCurrency = (value: string) => {
     const num = parseFloat(value);

@@ -39,8 +39,10 @@ export interface IStorage {
   
   // Estimate operations
   createEstimate(estimate: InsertEstimate): Promise<Estimate>;
+  getEstimate(id: number): Promise<Estimate | undefined>;
   getProjectEstimate(projectId: number): Promise<Estimate | undefined>;
   getUserEstimates(userId: string): Promise<Estimate[]>;
+  deleteEstimate(id: number): Promise<void>;
   
   // Contractor operations
   createContractor(contractor: InsertContractor): Promise<Contractor>;
@@ -147,6 +149,20 @@ export class DatabaseStorage implements IStorage {
       .from(estimates)
       .where(eq(estimates.userId, userId))
       .orderBy(desc(estimates.createdAt));
+  }
+
+  async getEstimate(id: number): Promise<Estimate | undefined> {
+    const [estimate] = await db
+      .select()
+      .from(estimates)
+      .where(eq(estimates.id, id));
+    return estimate;
+  }
+
+  async deleteEstimate(id: number): Promise<void> {
+    await db
+      .delete(estimates)
+      .where(eq(estimates.id, id));
   }
 
   // Contractor operations

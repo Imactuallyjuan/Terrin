@@ -155,6 +155,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete estimate
+  app.delete('/api/estimates/:id', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const userId = req.user.uid;
+      const estimateId = parseInt(req.params.id);
+      
+      // First check if estimate exists and belongs to user
+      const estimate = await storage.getEstimate(estimateId);
+      if (!estimate) {
+        return res.status(404).json({ message: "Estimate not found" });
+      }
+      
+      if (estimate.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      await storage.deleteEstimate(estimateId);
+      res.json({ message: "Estimate deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting estimate:", error);
+      res.status(500).json({ message: "Failed to delete estimate" });
+    }
+  });
+
   app.get('/api/projects/:id/estimate', verifyFirebaseToken, async (req: any, res) => {
     try {
       const projectId = parseInt(req.params.id);
