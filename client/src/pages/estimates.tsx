@@ -198,6 +198,23 @@ export default function Estimates() {
                           </div>
                         </div>
                       </div>
+                      
+                      {/* Trade Breakdowns */}
+                      {estimate.tradeBreakdowns && Object.keys(estimate.tradeBreakdowns).length > 0 && (
+                        <div className="mt-6 pt-4 border-t border-slate-200">
+                          <h4 className="text-sm font-semibold text-slate-700 mb-3">Trade-Specific Costs</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            {Object.entries(estimate.tradeBreakdowns).map(([trade, costs]: [string, any]) => (
+                              <div key={trade} className="flex justify-between">
+                                <span className="text-slate-600 capitalize">{trade}:</span>
+                                <span className="font-medium">
+                                  {formatCurrency(costs.min)} - {formatCurrency(costs.max)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Metadata */}

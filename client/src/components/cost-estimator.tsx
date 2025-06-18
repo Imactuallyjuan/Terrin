@@ -132,6 +132,23 @@ export default function CostEstimator() {
                 </div>
               </div>
 
+              {/* Trade Breakdowns */}
+              {estimate.tradeBreakdowns && Object.keys(estimate.tradeBreakdowns).length > 0 && (
+                <div className="bg-white/10 rounded-lg p-4 mb-6">
+                  <h4 className="font-semibold mb-3">Trade-Specific Costs</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    {Object.entries(estimate.tradeBreakdowns).map(([trade, costs]: [string, any]) => (
+                      <div key={trade} className="flex justify-between items-center">
+                        <span className="capitalize opacity-90">{trade}:</span>
+                        <span className="font-medium">
+                          {formatCurrency(costs.min)} - {formatCurrency(costs.max)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {estimate.analysis && (
                 <div className="bg-white/10 rounded-lg p-4 mb-6">
                   <h4 className="font-semibold mb-3">AI Analysis</h4>
