@@ -146,6 +146,13 @@ Changelog:
   * Added complete milestone management functionality (create, toggle completion, delete)
   * Fixed date conversion issues where strings weren't properly converted to Date objects
   * Application now runs reliably with full CRUD operations for costs and milestones
+- June 18, 2025. Advanced Progress Tracking & Photo Management
+  * Implemented weighted milestone progress tracking with construction-specific presets
+  * Added automatic project completion percentage calculation based on milestone weights
+  * Created 15 realistic construction phase presets (Foundation 15%, Framing 20%, etc.)
+  * Enhanced milestone interface with progress weight badges and visual feedback
+  * Added comprehensive photo deletion functionality with backend API and frontend interface
+  * Progress bar now accurately reflects real construction phase completion
 ```
 
 ## User Preferences

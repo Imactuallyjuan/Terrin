@@ -242,6 +242,19 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     }
   });
 
+  const deletePhotoMutation = useMutation({
+    mutationFn: async (photoId: number) => {
+      return await apiRequest('DELETE', `/api/projects/photos/${photoId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/photos`] });
+      toast({
+        title: "Photo Deleted",
+        description: "The photo has been removed successfully.",
+      });
+    }
+  });
+
   // Handlers
   const handleAddCost = () => {
     if (!newCost.category || !newCost.description || !newCost.amount) {
@@ -813,9 +826,20 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                         <div className="p-3">
                           <div className="flex items-center justify-between mb-2">
                             <Badge variant="outline">{photo.category}</Badge>
-                            <span className="text-sm text-muted-foreground">
-                              {new Date(photo.uploadedAt).toLocaleDateString()}
-                            </span>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm text-muted-foreground">
+                                {new Date(photo.uploadedAt).toLocaleDateString()}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => deletePhotoMutation.mutate(photo.id)}
+                                disabled={deletePhotoMutation.isPending}
+                                className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
                           </div>
                           {photo.caption && (
                             <p className="text-sm">{photo.caption}</p>
