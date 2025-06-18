@@ -59,6 +59,7 @@ interface ProjectMilestone {
   completedDate?: string;
   status: string;
   order: number;
+  progressWeight?: number;
 }
 
 interface ProjectPhoto {
@@ -163,11 +164,14 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/milestones`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       setNewMilestone({
         title: '',
         description: '',
         dueDate: '',
-        order: milestones.length + 1
+        order: milestones.length + 1,
+        progressWeight: 10
       });
       toast({
         title: "Milestone Added",
@@ -182,6 +186,8 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/milestones`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       toast({
         title: "Milestone Updated",
         description: "The milestone has been updated successfully.",
@@ -227,6 +233,8 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/milestones`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       toast({
         title: "Milestone Deleted",
         description: "The milestone has been removed successfully.",
@@ -643,6 +651,40 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
               </CardContent>
             </Card>
 
+            {/* Progress Summary */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Progress Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span>Overall Progress</span>
+                      <span>{project.completionPercentage || 0}%</span>
+                    </div>
+                    <Progress value={project.completionPercentage || 0} className="h-3" />
+                  </div>
+                  {milestones.length > 0 && (
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Completed:</span>
+                        <span className="ml-2 font-medium">
+                          {milestones.filter((m: ProjectMilestone) => m.status === 'completed').length} of {milestones.length}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Total Weight:</span>
+                        <span className="ml-2 font-medium">
+                          {milestones.reduce((sum: number, m: ProjectMilestone) => sum + (m.progressWeight || 10), 0)}%
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Milestones List */}
             <Card>
               <CardHeader>
@@ -670,6 +712,9 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                             </span>
                             <Badge variant={milestone.status === 'completed' ? 'outline' : 'default'}>
                               {milestone.status}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {milestone.progressWeight || 10}% weight
                             </Badge>
                           </div>
                           {milestone.description && (
