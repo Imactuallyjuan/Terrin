@@ -39,7 +39,10 @@ export default function Home() {
               <Plus className="h-12 w-12 text-blue-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Post New Project</h3>
               <p className="text-sm text-slate-600 mb-4">Describe your construction project and get started</p>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700">
+              <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                onClick={() => window.location.href = '/#post-project'}
+              >
                 Create Project
               </Button>
             </CardContent>
@@ -50,7 +53,11 @@ export default function Home() {
               <Calculator className="h-12 w-12 text-orange-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Get Cost Estimate</h3>
               <p className="text-sm text-slate-600 mb-4">AI-powered estimates for your projects</p>
-              <Button variant="outline" className="w-full border-orange-600 text-orange-600 hover:bg-orange-50">
+              <Button 
+                variant="outline" 
+                className="w-full border-orange-600 text-orange-600 hover:bg-orange-50"
+                onClick={() => window.location.href = '/#cost-estimator'}
+              >
                 Get Estimate
               </Button>
             </CardContent>
@@ -61,7 +68,11 @@ export default function Home() {
               <Users className="h-12 w-12 text-green-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Find Contractors</h3>
               <p className="text-sm text-slate-600 mb-4">Connect with verified professionals</p>
-              <Button variant="outline" className="w-full border-green-600 text-green-600 hover:bg-green-50">
+              <Button 
+                variant="outline" 
+                className="w-full border-green-600 text-green-600 hover:bg-green-50"
+                onClick={() => window.location.href = '/contractors'}
+              >
                 Browse Contractors
               </Button>
             </CardContent>
@@ -72,7 +83,11 @@ export default function Home() {
               <FileText className="h-12 w-12 text-slate-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">View Reports</h3>
               <p className="text-sm text-slate-600 mb-4">Track your project progress and costs</p>
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => window.location.href = '/dashboard'}
+              >
                 View Reports
               </Button>
             </CardContent>
