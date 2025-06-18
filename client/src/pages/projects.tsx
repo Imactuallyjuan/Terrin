@@ -1,17 +1,20 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, DollarSign, MapPin, Clock, Trash2, Edit } from "lucide-react";
+import { ArrowLeft, Calendar, DollarSign, MapPin, Clock, Trash2, Edit, Eye } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import EnhancedProjectView from "@/components/enhanced-project-view";
 
 export default function Projects() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedProject, setSelectedProject] = useState<any>(null);
   
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ["/api/projects"],

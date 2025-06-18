@@ -435,6 +435,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Project cost tracking routes
+  app.post('/api/projects/:id/costs', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userId = req.user.uid;
+      
+      const cost = await storage.createProjectCost({
+        ...req.body,
+        projectId,
+        userId,
+      });
+      
+      res.json(cost);
+    } catch (error) {
+      console.error("Error creating project cost:", error);
+      res.status(500).json({ message: "Failed to create project cost" });
+    }
+  });
+
+  app.get('/api/projects/:id/costs', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const costs = await storage.getProjectCosts(projectId);
+      res.json(costs);
+    } catch (error) {
+      console.error("Error fetching project costs:", error);
+      res.status(500).json({ message: "Failed to fetch project costs" });
+    }
+  });
+
+  app.delete('/api/projects/costs/:id', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const costId = parseInt(req.params.id);
+      await storage.deleteProjectCost(costId);
+      res.json({ message: "Cost deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting project cost:", error);
+      res.status(500).json({ message: "Failed to delete project cost" });
+    }
+  });
+
+  // Project milestone routes
+  app.post('/api/projects/:id/milestones', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      
+      const milestone = await storage.createProjectMilestone({
+        ...req.body,
+        projectId,
+      });
+      
+      res.json(milestone);
+    } catch (error) {
+      console.error("Error creating project milestone:", error);
+      res.status(500).json({ message: "Failed to create project milestone" });
+    }
+  });
+
+  app.get('/api/projects/:id/milestones', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const milestones = await storage.getProjectMilestones(projectId);
+      res.json(milestones);
+    } catch (error) {
+      console.error("Error fetching project milestones:", error);
+      res.status(500).json({ message: "Failed to fetch project milestones" });
+    }
+  });
+
+  app.patch('/api/projects/milestones/:id', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const milestoneId = parseInt(req.params.id);
+      const milestone = await storage.updateProjectMilestone(milestoneId, req.body);
+      res.json(milestone);
+    } catch (error) {
+      console.error("Error updating project milestone:", error);
+      res.status(500).json({ message: "Failed to update project milestone" });
+    }
+  });
+
+  // Project photo routes
+  app.post('/api/projects/:id/photos', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userId = req.user.uid;
+      
+      const photo = await storage.createProjectPhoto({
+        ...req.body,
+        projectId,
+        userId,
+      });
+      
+      res.json(photo);
+    } catch (error) {
+      console.error("Error creating project photo:", error);
+      res.status(500).json({ message: "Failed to create project photo" });
+    }
+  });
+
+  app.get('/api/projects/:id/photos', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const photos = await storage.getProjectPhotos(projectId);
+      res.json(photos);
+    } catch (error) {
+      console.error("Error fetching project photos:", error);
+      res.status(500).json({ message: "Failed to fetch project photos" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
