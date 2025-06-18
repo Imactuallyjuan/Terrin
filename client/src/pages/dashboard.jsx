@@ -3,18 +3,28 @@ import { useFirebaseAuth } from "../hooks/useFirebaseAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, DollarSign, Clock, Plus, User, Building, Settings, Calculator } from "lucide-react";
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, MapPin, DollarSign, Clock, Plus, User, Building, Settings, Calculator, MessageCircle, Activity, TrendingUp } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import EstimateResults from "@/components/EstimateResults";
-import EstimateForm from "@/components/EstimateForm";
+import ProjectTimeline from "@/components/ProjectTimeline";
+import MessagingSystem from "@/components/MessagingSystem";
 
 export default function Dashboard() {
   const { user, userRole, loading, isAuthenticated } = useFirebaseAuth();
-  const [projects, setProjects] = useState([]);
-  const [estimates, setEstimates] = useState([]);
-  const [loadingData, setLoadingData] = useState(true);
+  const [selectedProject, setSelectedProject] = useState(null);
+
+  // Fetch projects using React Query
+  const { data: projects = [], isLoading: projectsLoading } = useQuery({
+    queryKey: ['/api/projects'],
+    enabled: !!user
+  });
+
+  // Fetch estimates using React Query
+  const { data: estimates = [], isLoading: estimatesLoading } = useQuery({
+    queryKey: ['/api/estimates'],
+    enabled: !!user
+  });
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {

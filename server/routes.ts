@@ -233,6 +233,147 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Project Management Routes
+  app.get('/api/projects/:id/updates', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const updates = await storage.getProjectUpdates(projectId);
+      res.json(updates);
+    } catch (error) {
+      console.error("Error fetching project updates:", error);
+      res.status(500).json({ message: "Failed to fetch project updates" });
+    }
+  });
+
+  app.post('/api/projects/:id/updates', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userId = req.user.uid;
+      
+      const update = await storage.createProjectUpdate({
+        projectId,
+        userId,
+        ...req.body
+      });
+      
+      res.json(update);
+    } catch (error) {
+      console.error("Error creating project update:", error);
+      res.status(500).json({ message: "Failed to create project update" });
+    }
+  });
+
+  app.patch('/api/projects/:id', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userId = req.user.uid;
+      const updates = req.body;
+
+      // Create update record for significant changes
+      if (updates.status || updates.completionPercentage !== undefined) {
+        await storage.createProjectUpdate({
+          projectId,
+          userId,
+          updateType: 'status_change',
+          title: `Project ${updates.status ? 'status changed' : 'progress updated'}`,
+          description: updates.status ? `Status changed to ${updates.status}` : `Progress updated to ${updates.completionPercentage}%`,
+          oldValue: '',
+          newValue: updates.status || updates.completionPercentage?.toString()
+        });
+      }
+
+      const project = await storage.updateProject(projectId, updates);
+      res.json(project);
+    } catch (error) {
+      console.error("Error updating project:", error);
+      res.status(500).json({ message: "Failed to update project" });
+    }
+  });
+
+  // Messaging System Routes
+  app.get('/api/conversations', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const userId = req.user.uid;
+      const conversations = await storage.getUserConversations(userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
+    }
+  });
+
+  app.post('/api/conversations', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const userId = req.user.uid;
+      const { projectId, participants, title } = req.body;
+      
+      // Check if conversation already exists for this project
+      let conversation;
+      if (projectId) {
+        conversation = await storage.getProjectConversation(projectId);
+      }
+      
+      if (!conversation) {
+        conversation = await storage.createConversation({
+          projectId,
+          participants: [...(participants || []), userId],
+          title
+        });
+      }
+      
+      res.json(conversation);
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+      res.status(500).json({ message: "Failed to create conversation" });
+    }
+  });
+
+  app.get('/api/conversations/:id/messages', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const messages = await storage.getConversationMessages(conversationId);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  app.post('/api/conversations/:id/messages', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const senderId = req.user.uid;
+      const { content, messageType = 'text', attachments = [] } = req.body;
+      
+      const message = await storage.createMessage({
+        conversationId,
+        senderId,
+        content,
+        messageType,
+        attachments,
+        readBy: [senderId]
+      });
+      
+      res.json(message);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  app.patch('/api/messages/:id/read', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      const userId = req.user.uid;
+      
+      await storage.markMessageAsRead(messageId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+      res.status(500).json({ message: "Failed to mark message as read" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
