@@ -336,10 +336,16 @@ export default function PostProject() {
 
                 <div className="flex justify-center space-x-4">
                   <Button
-                    type="submit"
+                    type="button"
                     variant="outline"
                     className="border-green-600 text-green-600 hover:bg-green-50 flex items-center"
-                    onClick={handleEstimateClick}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log('Get Estimate button clicked');
+                      setEstimateMode(true);
+                      // Trigger form submission for estimate
+                      form.handleSubmit(onSubmit)();
+                    }}
                     disabled={getEstimateMutation.isPending}
                   >
                     {getEstimateMutation.isPending ? (
@@ -351,9 +357,15 @@ export default function PostProject() {
                   </Button>
                   
                   <Button
-                    type="submit"
+                    type="button"
                     className="bg-blue-600 text-white hover:bg-blue-700 flex items-center"
-                    onClick={handleProjectClick}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log('Post Project button clicked');
+                      setEstimateMode(false);
+                      // Trigger form submission for project
+                      form.handleSubmit(onSubmit)();
+                    }}
                     disabled={createProjectMutation.isPending}
                   >
                     {createProjectMutation.isPending ? (
