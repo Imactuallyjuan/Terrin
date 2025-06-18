@@ -64,20 +64,37 @@ export default function PostProjectFirebase() {
 
     setLoading(true);
     try {
-      await addDoc(collection(db, 'projects'), {
-        ...data,
-        userId: user.uid,
-        userEmail: user.email,
-        createdAt: new Date(),
-        status: 'open',
+      console.log('Posting project with data:', data);
+      
+      const token = await user.getIdToken(true);
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const project = await response.json();
+      console.log('Project created:', project);
 
       toast({
         title: "Project Posted Successfully!",
-        description: "Your project has been posted and contractors can now view it.",
+        description: "Your project has been posted. Redirecting to your projects...",
       });
 
       form.reset();
+      
+      // Redirect to projects page after successful posting
+      setTimeout(() => {
+        window.location.href = '/projects';
+      }, 1500);
+      
     } catch (error) {
       console.error('Error posting project:', error);
       toast({
