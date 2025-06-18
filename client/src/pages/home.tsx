@@ -2,13 +2,18 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Calculator, Users, FileText } from "lucide-react";
+import { Plus, Calculator, Users, FileText, X } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Link } from "wouter";
+import { useState } from "react";
+import PostProjectFirebase from "@/components/PostProjectFirebase";
+import EstimateForm from "@/components/EstimateForm";
 
 export default function Home() {
   const { user } = useAuth();
+  const [showPostProject, setShowPostProject] = useState(false);
+  const [showEstimator, setShowEstimator] = useState(false);
   
   const { data: projects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ["/api/projects"],
@@ -41,7 +46,7 @@ export default function Home() {
               <p className="text-sm text-slate-600 mb-4">Describe your construction project and get started</p>
               <Button 
                 className="w-full bg-blue-600 hover:bg-blue-700"
-                onClick={() => window.location.href = '/#post-project'}
+                onClick={() => setShowPostProject(true)}
               >
                 Create Project
               </Button>
@@ -56,7 +61,7 @@ export default function Home() {
               <Button 
                 variant="outline" 
                 className="w-full border-orange-600 text-orange-600 hover:bg-orange-50"
-                onClick={() => window.location.href = '/#cost-estimator'}
+                onClick={() => setShowEstimator(true)}
               >
                 Get Estimate
               </Button>
@@ -185,6 +190,47 @@ export default function Home() {
       </main>
 
       <Footer />
+
+      {/* Modal Overlays */}
+      {showPostProject && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-4 right-4 z-10"
+              onClick={() => setShowPostProject(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <div className="p-6">
+              <PostProjectFirebase />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEstimator && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-4 right-4 z-10"
+              onClick={() => setShowEstimator(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <div className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Get Your AI-Powered Cost Estimate</h2>
+              <EstimateForm onEstimateComplete={(estimate) => {
+                console.log('Estimate completed:', estimate);
+                setShowEstimator(false);
+              }} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
