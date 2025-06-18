@@ -103,15 +103,15 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
   });
 
   // Data queries
-  const { data: costs = [] } = useQuery({
+  const { data: costs = [] } = useQuery<ProjectCost[]>({
     queryKey: [`/api/projects/${project.id}/costs`],
   });
 
-  const { data: milestones = [] } = useQuery({
+  const { data: milestones = [] } = useQuery<ProjectMilestone[]>({
     queryKey: [`/api/projects/${project.id}/milestones`],
   });
 
-  const { data: photos = [] } = useQuery({
+  const { data: photos = [] } = useQuery<ProjectPhoto[]>({
     queryKey: [`/api/projects/${project.id}/photos`],
   });
 
