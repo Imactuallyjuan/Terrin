@@ -36,13 +36,21 @@ export async function generateCostEstimate(projectData: ProjectData): Promise<Co
     const prompt = `
 You are a construction cost estimation expert with 20+ years of experience. Analyze the following project carefully and provide realistic, project-specific cost estimates.
 
-CRITICAL: Each project type has vastly different costs. Provide accurate estimates based on the actual project scope:
+CRITICAL: Each project type has vastly different costs AND location significantly affects pricing. Consider both project scope and regional cost variations:
+
+Project Type Base Ranges:
 - New home construction: $200,000-$500,000+
 - Large additions/major remodels: $50,000-$200,000
 - Garage additions: $15,000-$40,000
 - Kitchen remodels: $25,000-$75,000
 - Bathroom remodels: $8,000-$25,000
 - Small renovations: $3,000-$15,000
+
+Regional Cost Multipliers (adjust base ranges accordingly):
+- High-cost areas (CA, NY, WA, MA): 1.3-2.0x base costs
+- Medium-cost areas (TX, FL, CO, NC): 0.9-1.2x base costs
+- Lower-cost areas (AL, MS, OK, WV): 0.6-0.9x base costs
+- Rural vs Urban: Rural typically 15-25% less than urban areas
 
 Project Details:
 - Title: ${projectData.title}
@@ -52,7 +60,9 @@ Project Details:
 - Timeline: ${projectData.timeline}
 - Location: ${projectData.location}
 
-Based on the project type "${projectData.projectType}" and description "${projectData.description}", provide realistic cost estimates that reflect the actual scope of work.
+Based on the project type "${projectData.projectType}", description "${projectData.description}", and location "${projectData.location}", provide realistic cost estimates that reflect both the actual scope of work AND the regional pricing for this specific location.
+
+LOCATION ANALYSIS REQUIRED: Consider the cost of living, labor rates, material costs, and permit fees specific to "${projectData.location}". Factor in whether this is an urban or rural area, and apply appropriate regional multipliers to the base project costs.
 
 Return this exact JSON structure with realistic values for the project scope:
 {

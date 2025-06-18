@@ -40,10 +40,12 @@ Terrin is a modern full-stack web application built to connect homeowners with t
 - **Profile Photos**: Firebase Storage for contractor profile image uploads
 
 ### AI-Powered Cost Estimation
-- **Engine**: OpenAI GPT-4o for intelligent cost analysis
+- **Engine**: OpenAI GPT-4o-mini for cost-effective intelligent cost analysis
 - **Input Processing**: Structured project data with validation
 - **Output Format**: Detailed cost breakdown including materials, labor, permits, and contingency
-- **Error Handling**: Fallback mechanisms and validation
+- **Regional Pricing**: Location-aware estimates with regional cost multipliers
+- **Project-Specific Analysis**: Accurate estimates based on project type and scope
+- **Error Handling**: Enhanced validation without fallback defaults
 
 ### Project Management
 - **CRUD Operations**: Full project lifecycle management
