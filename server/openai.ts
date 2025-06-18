@@ -26,6 +26,17 @@ interface CostEstimate {
   permitsCostMax: string;
   contingencyCostMin: string;
   contingencyCostMax: string;
+  tradeBreakdowns: {
+    carpentry?: { min: string; max: string; };
+    electrical?: { min: string; max: string; };
+    plumbing?: { min: string; max: string; };
+    hvac?: { min: string; max: string; };
+    flooring?: { min: string; max: string; };
+    painting?: { min: string; max: string; };
+    roofing?: { min: string; max: string; };
+    concrete?: { min: string; max: string; };
+    landscaping?: { min: string; max: string; };
+  };
   analysis: any;
 }
 
@@ -77,6 +88,17 @@ Return this exact JSON structure with realistic values for the project scope:
   "permitsCostMax": "permits_cost_max",
   "contingencyCostMin": "contingency_cost_min",
   "contingencyCostMax": "contingency_cost_max",
+  "tradeBreakdowns": {
+    "carpentry": {"min": "cost_min", "max": "cost_max"},
+    "electrical": {"min": "cost_min", "max": "cost_max"},
+    "plumbing": {"min": "cost_min", "max": "cost_max"},
+    "hvac": {"min": "cost_min", "max": "cost_max"},
+    "flooring": {"min": "cost_min", "max": "cost_max"},
+    "painting": {"min": "cost_min", "max": "cost_max"},
+    "roofing": {"min": "cost_min", "max": "cost_max"},
+    "concrete": {"min": "cost_min", "max": "cost_max"},
+    "landscaping": {"min": "cost_min", "max": "cost_max"}
+  },
   "analysis": {
     "factors": ["project-specific cost factors"],
     "assumptions": ["project-specific assumptions"],
@@ -133,6 +155,7 @@ IMPORTANT: Return ONLY valid JSON. All cost values must be numeric strings witho
       permitsCostMax: result.permitsCostMax,
       contingencyCostMin: result.contingencyCostMin,
       contingencyCostMax: result.contingencyCostMax,
+      tradeBreakdowns: result.tradeBreakdowns || {},
       analysis: result.analysis
     };
 

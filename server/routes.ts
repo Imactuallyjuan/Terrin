@@ -115,6 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         contingencyCostMin: aiEstimate.contingencyCostMin,
         contingencyCostMax: aiEstimate.contingencyCostMax,
         aiAnalysis: aiEstimate.analysis,
+        tradeBreakdowns: aiEstimate.tradeBreakdowns,
         inputData: JSON.stringify({
           description,
           location,
