@@ -134,11 +134,22 @@ export default function Estimates() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xl">
-                      Cost Estimate #{estimate.id}
+                      {getEstimateName(estimate)}
                     </CardTitle>
-                    <Badge className="bg-green-600 hover:bg-green-600 text-white">
-                      AI Verified
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-green-600 hover:bg-green-600 text-white">
+                        AI Verified
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteEstimateMutation.mutate(estimate.id)}
+                        disabled={deleteEstimateMutation.isPending}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
