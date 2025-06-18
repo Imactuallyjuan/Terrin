@@ -546,6 +546,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/projects/milestones/:id', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const milestoneId = parseInt(req.params.id);
+      await storage.deleteProjectMilestone(milestoneId);
+      res.json({ message: "Milestone deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting project milestone:", error);
+      res.status(500).json({ message: "Failed to delete project milestone" });
+    }
+  });
+
   // Project photo routes
   app.post('/api/projects/:id/photos', verifyFirebaseToken, async (req: any, res) => {
     try {

@@ -140,6 +140,12 @@ Changelog:
   * Implemented project filtering and enhanced project cards with "Manage" button navigation
   * Enhanced database schema with projectCosts, projectMilestones, and projectPhotos tables
   * Added comprehensive API endpoints for cost tracking, milestone management, and photo uploads
+- June 18, 2025. Database Connection & Milestone Management Fixes
+  * Fixed critical database connection issues with improved Neon configuration and connection pooling
+  * Resolved timestamp handling bugs in cost tracking and milestone API endpoints
+  * Added complete milestone management functionality (create, toggle completion, delete)
+  * Fixed date conversion issues where strings weren't properly converted to Date objects
+  * Application now runs reliably with full CRUD operations for costs and milestones
 ```
 
 ## User Preferences

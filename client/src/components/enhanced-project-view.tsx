@@ -12,10 +12,10 @@ import { Progress } from "@/components/ui/progress";
 import { 
   Calendar, 
   DollarSign, 
-  Camera, 
+  Camera,
+  Trash2, 
   FileText, 
   Plus, 
-  Trash2, 
   Check, 
   Clock, 
   Target,
@@ -197,6 +197,19 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
       toast({
         title: "Cost Deleted",
         description: "The cost has been removed successfully.",
+      });
+    }
+  });
+
+  const deleteMilestoneMutation = useMutation({
+    mutationFn: async (milestoneId: number) => {
+      return await apiRequest('DELETE', `/api/projects/milestones/${milestoneId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/milestones`] });
+      toast({
+        title: "Milestone Deleted",
+        description: "The milestone has been removed successfully.",
       });
     }
   });
@@ -596,6 +609,15 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                             {milestone.completedDate && ` • Completed: ${new Date(milestone.completedDate).toLocaleDateString()}`}
                           </div>
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteMilestoneMutation.mutate(milestone.id)}
+                          disabled={deleteMilestoneMutation.isPending}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     ))}
                   </div>
