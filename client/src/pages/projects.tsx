@@ -81,6 +81,25 @@ export default function Projects() {
     );
   }
 
+  // Show enhanced project view when a project is selected
+  if (selectedProject) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Button 
+            variant="ghost" 
+            className="mb-6"
+            onClick={() => setSelectedProject(null)}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Projects
+          </Button>
+          <EnhancedProjectView project={selectedProject} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -144,11 +163,13 @@ export default function Projects() {
                         {project.status?.replace('_', ' ')}
                       </Badge>
                       <Button
-                        variant="ghost"
+                        variant="default"
                         size="sm"
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={() => setSelectedProject(project)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Eye className="h-4 w-4 mr-1" />
+                        Manage
                       </Button>
                       <Button
                         variant="ghost"
