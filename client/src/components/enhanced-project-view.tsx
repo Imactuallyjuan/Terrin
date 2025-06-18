@@ -214,7 +214,7 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     
     const costData = {
       ...newCost,
-      dateIncurred: new Date(newCost.dateIncurred)
+      dateIncurred: new Date(newCost.dateIncurred + 'T00:00:00Z')
     };
     
     addCostMutation.mutate(costData);
@@ -233,7 +233,7 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     const milestoneData = {
       ...newMilestone,
       order: (milestones as any[]).length + 1,
-      dueDate: newMilestone.dueDate ? new Date(newMilestone.dueDate) : null
+      dueDate: newMilestone.dueDate ? new Date(newMilestone.dueDate + 'T00:00:00Z') : null
     };
     
     addMilestoneMutation.mutate(milestoneData);
