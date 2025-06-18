@@ -14,6 +14,7 @@ export default function Home() {
   const { user } = useAuth();
   const [showPostProject, setShowPostProject] = useState(false);
   const [showEstimator, setShowEstimator] = useState(false);
+  const [currentEstimate, setCurrentEstimate] = useState(null);
   
   const { data: projects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ["/api/projects"],
@@ -222,11 +223,69 @@ export default function Home() {
               <X className="h-4 w-4" />
             </Button>
             <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Get Your AI-Powered Cost Estimate</h2>
-              <EstimateForm onEstimateComplete={(estimate) => {
-                console.log('Estimate completed:', estimate);
-                setShowEstimator(false);
-              }} />
+              {!currentEstimate ? (
+                <>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Get Your AI-Powered Cost Estimate</h2>
+                  <EstimateForm onEstimateComplete={(estimate: any) => {
+                    console.log('Estimate completed:', estimate);
+                    setCurrentEstimate(estimate);
+                  }} />
+                </>
+              ) : (
+                <>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Your AI-Powered Cost Estimate</h2>
+                  <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg p-6 mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-bold">Project Estimate</h3>
+                      <span className="bg-green-600 px-3 py-1 rounded-full text-sm font-medium">
+                        AI Verified
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="bg-white/10 rounded-lg p-4">
+                        <h4 className="font-semibold mb-2">Total Cost Range</h4>
+                        <p className="text-2xl font-bold">
+                          ${parseInt(currentEstimate.totalCostMin).toLocaleString()} - ${parseInt(currentEstimate.totalCostMax).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="bg-white/10 rounded-lg p-4">
+                        <h4 className="font-semibold mb-2">Timeline</h4>
+                        <p className="text-xl">{currentEstimate.timeline}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p><strong>Materials:</strong> ${parseInt(currentEstimate.materialsCostMin).toLocaleString()} - ${parseInt(currentEstimate.materialsCostMax).toLocaleString()}</p>
+                        <p><strong>Labor:</strong> ${parseInt(currentEstimate.laborCostMin).toLocaleString()} - ${parseInt(currentEstimate.laborCostMax).toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p><strong>Permits:</strong> ${parseInt(currentEstimate.permitsCostMin).toLocaleString()} - ${parseInt(currentEstimate.permitsCostMax).toLocaleString()}</p>
+                        <p><strong>Contingency:</strong> ${parseInt(currentEstimate.contingencyCostMin).toLocaleString()} - ${parseInt(currentEstimate.contingencyCostMax).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-center space-x-4">
+                    <Button
+                      onClick={() => {
+                        setCurrentEstimate(null);
+                        setShowEstimator(false);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Close
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setCurrentEstimate(null)}
+                    >
+                      New Estimate
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
