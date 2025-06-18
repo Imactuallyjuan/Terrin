@@ -8,6 +8,7 @@ import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { Link } from "wouter";
 import EstimateResults from "@/components/EstimateResults";
+import EstimateForm from "@/components/EstimateForm";
 
 export default function Dashboard() {
   const { user, userRole, loading, isAuthenticated } = useFirebaseAuth();
@@ -150,12 +151,22 @@ export default function Dashboard() {
         {/* Action Buttons */}
         <div className="mb-8 flex flex-wrap gap-4">
           {(userRole === 'homeowner' || userRole === 'both') && (
-            <Link href="/#post-project">
-              <Button className="bg-blue-600 text-white hover:bg-blue-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Post New Project
-              </Button>
-            </Link>
+            <>
+              <Link href="/#post-project">
+                <Button className="bg-blue-600 text-white hover:bg-blue-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Post New Project
+                </Button>
+              </Link>
+              <div className="flex-shrink-0">
+                <EstimateForm onEstimateComplete={(estimate) => {
+                  // Refresh estimates after new one is created
+                  if (user && userRole) {
+                    fetchDashboardData();
+                  }
+                }} />
+              </div>
+            </>
           )}
           
           {(userRole === 'contractor' || userRole === 'both') && (
@@ -174,11 +185,14 @@ export default function Dashboard() {
                 <Calculator className="h-5 w-5 mr-2" />
                 Recent Cost Estimates
               </h3>
-              <Link href="/#estimate">
-                <Button variant="outline" size="sm">
-                  Get New Estimate
-                </Button>
-              </Link>
+              <div className="flex-shrink-0">
+                <EstimateForm onEstimateComplete={(estimate) => {
+                  // Refresh estimates after new one is created
+                  if (user && userRole) {
+                    fetchDashboardData();
+                  }
+                }} />
+              </div>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
