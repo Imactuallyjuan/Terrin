@@ -152,12 +152,16 @@ export default function Dashboard() {
         <div className="mb-8 flex flex-wrap gap-4">
           {(userRole === 'homeowner' || userRole === 'both') && (
             <>
-              <Link href="/#post-project">
-                <Button className="bg-blue-600 text-white hover:bg-blue-700">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Post New Project
-                </Button>
-              </Link>
+              <Button 
+                className="bg-blue-600 text-white hover:bg-blue-700"
+                onClick={() => {
+                  // Navigate to landing page and scroll to post project section
+                  window.location.href = '/#post-project';
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Post New Project
+              </Button>
               <div className="flex-shrink-0">
                 <EstimateForm onEstimateComplete={(estimate) => {
                   // Refresh estimates after new one is created
@@ -170,7 +174,14 @@ export default function Dashboard() {
           )}
           
           {(userRole === 'contractor' || userRole === 'both') && (
-            <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+            <Button 
+              variant="outline" 
+              className="border-green-600 text-green-600 hover:bg-green-50"
+              onClick={() => {
+                // Navigate to contractor portal for profile updates
+                window.location.href = '/contractor-portal';
+              }}
+            >
               <Building className="h-4 w-4 mr-2" />
               Update Profile
             </Button>
