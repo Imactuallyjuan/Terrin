@@ -44,15 +44,35 @@ export default function PostProject() {
       const response = await apiRequest("POST", "/api/projects", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (project) => {
       toast({
         title: "Success!",
-        description: "Your project has been posted successfully.",
+        description: "Your project has been posted successfully. Redirecting to your projects...",
       });
       form.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      
+      // Redirect to projects page after successful posting
+      setTimeout(() => {
+        window.location.href = '/projects';
+      }, 1500);
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('Project creation error:', error);
+      
+      // Check if it's an authentication error
+      if (error.message && error.message.includes('401')) {
+        toast({
+          title: "Please sign in",
+          description: "You need to be signed in to post a project. Redirecting...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 1500);
+        return;
+      }
+      
       toast({
         title: "Error",
         description: "Failed to post project. Please try again.",

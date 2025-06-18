@@ -102,12 +102,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/estimate', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
-      const { description, location, squareFootage, projectType, budget } = req.body;
+      console.log('Request body:', req.body);
+      
+      // Handle both direct data and projectData wrapper
+      const projectData = req.body.projectData || req.body;
+      const { title, description, location, projectType, budgetRange, timeline } = projectData;
 
       // Validate required fields
-      if (!description || !location || !squareFootage) {
+      if (!description || !location) {
         return res.status(400).json({ 
-          message: "Missing required fields: description, location, and squareFootage are required" 
+          message: "Missing required fields: description and location are required" 
         });
       }
 
@@ -115,11 +119,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Generate AI-powered cost estimate
       const aiEstimate = await generateCostEstimate({
-        title: projectType || 'Construction Project',
+        title: title || projectType || 'Construction Project',
         description,
         projectType: projectType || 'General Construction',
-        budgetRange: budget || 'Not specified',
-        timeline: 'To be determined',
+        budgetRange: budgetRange || 'Not specified',
+        timeline: timeline || 'To be determined',
         location
       });
 
@@ -141,11 +145,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         aiAnalysis: aiEstimate.analysis,
         tradeBreakdowns: aiEstimate.tradeBreakdowns,
         inputData: JSON.stringify({
+          title,
           description,
           location,
-          squareFootage: parseInt(squareFootage),
           projectType,
-          budget
+          budgetRange,
+          timeline
         })
       });
 
@@ -155,11 +160,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: estimate.id,
         ...aiEstimate,
         inputData: {
+          title,
           description,
           location,
-          squareFootage: parseInt(squareFootage),
           projectType,
-          budget
+          budgetRange,
+          timeline
         },
         createdAt: estimate.createdAt
       });
