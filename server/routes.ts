@@ -74,6 +74,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete project
+  app.delete('/api/projects/:id', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const userId = req.user.uid;
+      const projectId = parseInt(req.params.id);
+      
+      // First check if project exists and belongs to user
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      if (project.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      await storage.deleteProject(projectId);
+      res.json({ message: "Project deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      res.status(500).json({ message: "Failed to delete project" });
+    }
+  });
+
   // Cost estimation routes
   app.post('/api/estimate', verifyFirebaseToken, async (req: any, res) => {
     try {

@@ -36,6 +36,7 @@ export interface IStorage {
   getProject(id: number): Promise<Project | undefined>;
   getUserProjects(userId: string): Promise<Project[]>;
   updateProject(id: number, updates: Partial<InsertProject>): Promise<Project | undefined>;
+  deleteProject(id: number): Promise<void>;
   
   // Estimate operations
   createEstimate(estimate: InsertEstimate): Promise<Estimate>;
@@ -122,6 +123,12 @@ export class DatabaseStorage implements IStorage {
       .where(eq(projects.id, id))
       .returning();
     return updatedProject;
+  }
+
+  async deleteProject(id: number): Promise<void> {
+    await db
+      .delete(projects)
+      .where(eq(projects.id, id));
   }
 
   // Estimate operations

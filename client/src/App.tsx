@@ -12,6 +12,7 @@ import ContractorPortal from "@/pages/contractor-portal";
 import Contractors from "@/pages/contractors";
 import SettingsPage from "@/pages/settings";
 import Estimates from "@/pages/estimates";
+import Projects from "@/pages/projects";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
@@ -54,6 +55,13 @@ function Router() {
       <Route path="/estimates">
         <ProtectedRoute requireAuth={true}>
           <Estimates />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Projects Page - Requires Authentication */}
+      <Route path="/projects">
+        <ProtectedRoute requireAuth={true}>
+          <Projects />
         </ProtectedRoute>
       </Route>
       
