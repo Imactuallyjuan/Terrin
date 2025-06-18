@@ -3,6 +3,9 @@ import {
   projects,
   estimates,
   contractors,
+  projectUpdates,
+  conversations,
+  messages,
   type User,
   type UpsertUser,
   type Project,
@@ -11,6 +14,12 @@ import {
   type InsertEstimate,
   type Contractor,
   type InsertContractor,
+  type ProjectUpdate,
+  type InsertProjectUpdate,
+  type Conversation,
+  type InsertConversation,
+  type Message,
+  type InsertMessage,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -39,6 +48,21 @@ export interface IStorage {
   getContractorsBySpecialty(specialty: string, limit?: number): Promise<Contractor[]>;
   getAllContractors(limit?: number): Promise<Contractor[]>;
   updateContractor(id: number, updates: Partial<InsertContractor>): Promise<Contractor | undefined>;
+  
+  // Project Updates operations
+  createProjectUpdate(update: InsertProjectUpdate): Promise<ProjectUpdate>;
+  getProjectUpdates(projectId: number): Promise<ProjectUpdate[]>;
+  
+  // Messaging operations
+  createConversation(conversation: InsertConversation): Promise<Conversation>;
+  getConversation(id: number): Promise<Conversation | undefined>;
+  getUserConversations(userId: string): Promise<Conversation[]>;
+  getProjectConversation(projectId: number): Promise<Conversation | undefined>;
+  
+  createMessage(message: InsertMessage): Promise<Message>;
+  getConversationMessages(conversationId: number): Promise<Message[]>;
+  markMessageAsRead(messageId: number, userId: string): Promise<void>;
+  getUnreadMessageCount(userId: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {

@@ -46,7 +46,17 @@ export const projects = pgTable("projects", {
   budgetRange: varchar("budget_range").notNull(),
   timeline: varchar("timeline").notNull(),
   location: text("location").notNull(),
-  status: varchar("status").default("active").notNull(),
+  status: varchar("status").default("planning").notNull(), // planning, active, in_progress, completed, cancelled
+  priority: varchar("priority").default("medium").notNull(), // low, medium, high, urgent
+  squareFootage: varchar("square_footage"),
+  contractorId: integer("contractor_id"),
+  actualCost: decimal("actual_cost"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  completionPercentage: integer("completion_percentage").default(0),
+  images: text("images").array(),
+  documents: text("documents").array(),
+  notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -89,6 +99,41 @@ export const contractors = pgTable("contractors", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Project updates and timeline tracking
+export const projectUpdates = pgTable("project_updates", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  updateType: varchar("update_type").notNull(), // status_change, progress, note, file_upload, milestone
+  title: text("title").notNull(),
+  description: text("description"),
+  oldValue: text("old_value"),
+  newValue: text("new_value"),
+  attachments: text("attachments").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Messaging system
+export const conversations = pgTable("conversations", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id"),
+  participants: text("participants").array().notNull(), // Array of user IDs
+  title: text("title"),
+  lastMessageAt: timestamp("last_message_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull(),
+  senderId: varchar("sender_id").notNull(),
+  content: text("content").notNull(),
+  messageType: varchar("message_type").default("text").notNull(), // text, image, document, system
+  attachments: text("attachments").array(),
+  readBy: text("read_by").array().default([]), // Array of user IDs who have read this message
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
@@ -116,3 +161,12 @@ export const insertContractorSchema = createInsertSchema(contractors).omit({
   createdAt: true,
   updatedAt: true,
 });
+
+export type ProjectUpdate = typeof projectUpdates.$inferSelect;
+export type InsertProjectUpdate = typeof projectUpdates.$inferInsert;
+
+export type Conversation = typeof conversations.$inferSelect;
+export type InsertConversation = typeof conversations.$inferInsert;
+
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = typeof messages.$inferInsert;
