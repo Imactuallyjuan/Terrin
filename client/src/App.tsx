@@ -13,6 +13,9 @@ import Contractors from "@/pages/contractors";
 import SettingsPage from "@/pages/settings";
 import Estimates from "@/pages/estimates";
 import Projects from "@/pages/projects";
+import HowItWorks from "@/pages/how-it-works";
+import FindContractors from "@/pages/find-contractors";
+import ForProfessionals from "@/pages/for-professionals";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
@@ -64,6 +67,11 @@ function Router() {
           <Projects />
         </ProtectedRoute>
       </Route>
+      
+      {/* Public Preview Pages - No Authentication Required */}
+      <Route path="/how-it-works" component={HowItWorks} />
+      <Route path="/find-contractors" component={FindContractors} />
+      <Route path="/for-professionals" component={ForProfessionals} />
       
       {/* Home/Landing Page */}
       {loading || !isAuthenticated ? (

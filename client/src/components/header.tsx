@@ -62,17 +62,17 @@ export default function Header() {
                 </>
               ) : (
                 <>
-                  <Link href="#how-it-works">
+                  <Link href="/how-it-works">
                     <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
                       How it Works
                     </span>
                   </Link>
-                  <Link href="#contractors">
+                  <Link href="/find-contractors">
                     <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
                       Find Contractors
                     </span>
                   </Link>
-                  <Link href="#professionals">
+                  <Link href="/for-professionals">
                     <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
                       For Professionals
                     </span>
