@@ -41,8 +41,11 @@ export default function PostProject() {
 
   const createProjectMutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
+      console.log('Creating project with data:', data);
       const response = await apiRequest("POST", "/api/projects", data);
-      return response.json();
+      const result = await response.json();
+      console.log('Project creation response:', result);
+      return result;
     },
     onSuccess: (project) => {
       toast({
@@ -158,6 +161,7 @@ export default function PostProject() {
       getEstimateMutation.mutate(data);
     } else {
       console.log('Triggering project creation...');
+      console.log('Project mutation pending:', createProjectMutation.isPending);
       createProjectMutation.mutate(data);
     }
   };
