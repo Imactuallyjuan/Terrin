@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Calculator, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function EstimateForm({ onEstimateComplete }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,18 +52,7 @@ export default function EstimateForm({ onEstimateComplete }) {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/estimate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to get estimate: ${response.statusText}`);
-      }
-
+      const response = await apiRequest('POST', '/api/estimate', formData);
       const estimate = await response.json();
       
       toast({
