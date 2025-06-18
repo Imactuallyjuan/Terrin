@@ -16,6 +16,9 @@ interface EstimateData {
   permitsCostMax: string;
   contingencyCostMin: string;
   contingencyCostMax: string;
+  tradeBreakdowns?: {
+    [key: string]: { min: string; max: string; };
+  };
   analysis?: {
     factors?: string[];
     assumptions?: string[];

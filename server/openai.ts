@@ -73,6 +73,17 @@ Project Details:
 
 Based on the project type "${projectData.projectType}", description "${projectData.description}", and location "${projectData.location}", provide realistic cost estimates that reflect both the actual scope of work AND the regional pricing for this specific location.
 
+TRADE BREAKDOWN ANALYSIS: Only include trades that are actually required for this specific project. Analyze the project type and description to determine which trades are needed:
+- Garage addition: typically needs carpentry, electrical, concrete, roofing (skip plumbing unless utilities required)
+- Concrete slab/driveway: concrete work only
+- Electrical rewiring: electrical work and permits only  
+- Kitchen remodel: carpentry, electrical, plumbing, flooring, painting
+- Bathroom remodel: plumbing, electrical, flooring, painting
+- Roof replacement: roofing only
+- HVAC installation: HVAC only
+- Basement finishing: carpentry, electrical, flooring, painting (plumbing if bathroom added)
+- Deck/patio: carpentry, concrete (if applicable)
+
 LOCATION ANALYSIS REQUIRED: Consider the cost of living, labor rates, material costs, and permit fees specific to "${projectData.location}". Factor in whether this is an urban or rural area, and apply appropriate regional multipliers to the base project costs.
 
 Return this exact JSON structure with realistic values for the project scope:
@@ -89,15 +100,14 @@ Return this exact JSON structure with realistic values for the project scope:
   "contingencyCostMin": "contingency_cost_min",
   "contingencyCostMax": "contingency_cost_max",
   "tradeBreakdowns": {
-    "carpentry": {"min": "cost_min", "max": "cost_max"},
-    "electrical": {"min": "cost_min", "max": "cost_max"},
-    "plumbing": {"min": "cost_min", "max": "cost_max"},
-    "hvac": {"min": "cost_min", "max": "cost_max"},
-    "flooring": {"min": "cost_min", "max": "cost_max"},
-    "painting": {"min": "cost_min", "max": "cost_max"},
-    "roofing": {"min": "cost_min", "max": "cost_max"},
-    "concrete": {"min": "cost_min", "max": "cost_max"},
-    "landscaping": {"min": "cost_min", "max": "cost_max"}
+    // ONLY include trades that are actually required for this specific project
+    // Examples by project type:
+    // - Garage addition: carpentry, electrical, concrete, roofing (skip plumbing if no utilities)
+    // - Concrete slab: concrete only
+    // - Electrical rewiring: electrical only
+    // - Kitchen remodel: carpentry, electrical, plumbing, flooring, painting
+    // - Bathroom remodel: plumbing, electrical, flooring, painting
+    // Format: "tradeName": {"min": "cost_min", "max": "cost_max"}
   },
   "analysis": {
     "factors": ["project-specific cost factors"],
@@ -107,7 +117,12 @@ Return this exact JSON structure with realistic values for the project scope:
   }
 }
 
-IMPORTANT: Return ONLY valid JSON. All cost values must be numeric strings without dollar signs or commas. Make sure costs accurately reflect the specific project type and description provided.
+IMPORTANT: 
+- Return ONLY valid JSON. All cost values must be numeric strings without dollar signs or commas. 
+- Make sure costs accurately reflect the specific project type and description provided.
+- In tradeBreakdowns, ONLY include trades that are actually needed for this specific project. Do not include all possible trades.
+- If a project only needs one trade (like "concrete driveway" = concrete only), only include that trade.
+- If a project doesn't need a particular trade (like "garage addition without plumbing"), don't include that trade.
 `;
 
     const response = await openai.chat.completions.create({
