@@ -6,6 +6,9 @@ import {
   projectUpdates,
   conversations,
   messages,
+  projectCosts,
+  projectMilestones,
+  projectPhotos,
   type User,
   type UpsertUser,
   type Project,
@@ -20,9 +23,15 @@ import {
   type InsertConversation,
   type Message,
   type InsertMessage,
+  type ProjectCost,
+  type InsertProjectCost,
+  type ProjectMilestone,
+  type InsertProjectMilestone,
+  type ProjectPhoto,
+  type InsertProjectPhoto,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -66,6 +75,23 @@ export interface IStorage {
   getConversationMessages(conversationId: number): Promise<Message[]>;
   markMessageAsRead(messageId: number, userId: string): Promise<void>;
   getUnreadMessageCount(userId: string): Promise<number>;
+  
+  // Cost tracking operations
+  createProjectCost(cost: InsertProjectCost): Promise<ProjectCost>;
+  getProjectCosts(projectId: number): Promise<ProjectCost[]>;
+  updateProjectCost(id: number, updates: Partial<InsertProjectCost>): Promise<ProjectCost | undefined>;
+  deleteProjectCost(id: number): Promise<void>;
+  
+  // Milestone operations
+  createProjectMilestone(milestone: InsertProjectMilestone): Promise<ProjectMilestone>;
+  getProjectMilestones(projectId: number): Promise<ProjectMilestone[]>;
+  updateProjectMilestone(id: number, updates: Partial<InsertProjectMilestone>): Promise<ProjectMilestone | undefined>;
+  deleteProjectMilestone(id: number): Promise<void>;
+  
+  // Photo operations
+  createProjectPhoto(photo: InsertProjectPhoto): Promise<ProjectPhoto>;
+  getProjectPhotos(projectId: number): Promise<ProjectPhoto[]>;
+  deleteProjectPhoto(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -310,6 +336,87 @@ export class DatabaseStorage implements IStorage {
     // This would need a more complex query in production
     // For now, return 0 as placeholder
     return 0;
+  }
+
+  // Cost tracking operations
+  async createProjectCost(cost: InsertProjectCost): Promise<ProjectCost> {
+    const [newCost] = await db
+      .insert(projectCosts)
+      .values(cost)
+      .returning();
+    return newCost;
+  }
+
+  async getProjectCosts(projectId: number): Promise<ProjectCost[]> {
+    return await db
+      .select()
+      .from(projectCosts)
+      .where(eq(projectCosts.projectId, projectId))
+      .orderBy(desc(projectCosts.dateIncurred));
+  }
+
+  async updateProjectCost(id: number, updates: Partial<InsertProjectCost>): Promise<ProjectCost | undefined> {
+    const [updatedCost] = await db
+      .update(projectCosts)
+      .set(updates)
+      .where(eq(projectCosts.id, id))
+      .returning();
+    return updatedCost;
+  }
+
+  async deleteProjectCost(id: number): Promise<void> {
+    await db.delete(projectCosts).where(eq(projectCosts.id, id));
+  }
+
+  // Milestone operations
+  async createProjectMilestone(milestone: InsertProjectMilestone): Promise<ProjectMilestone> {
+    const [newMilestone] = await db
+      .insert(projectMilestones)
+      .values(milestone)
+      .returning();
+    return newMilestone;
+  }
+
+  async getProjectMilestones(projectId: number): Promise<ProjectMilestone[]> {
+    return await db
+      .select()
+      .from(projectMilestones)
+      .where(eq(projectMilestones.projectId, projectId))
+      .orderBy(projectMilestones.order);
+  }
+
+  async updateProjectMilestone(id: number, updates: Partial<InsertProjectMilestone>): Promise<ProjectMilestone | undefined> {
+    const [updatedMilestone] = await db
+      .update(projectMilestones)
+      .set(updates)
+      .where(eq(projectMilestones.id, id))
+      .returning();
+    return updatedMilestone;
+  }
+
+  async deleteProjectMilestone(id: number): Promise<void> {
+    await db.delete(projectMilestones).where(eq(projectMilestones.id, id));
+  }
+
+  // Photo operations
+  async createProjectPhoto(photo: InsertProjectPhoto): Promise<ProjectPhoto> {
+    const [newPhoto] = await db
+      .insert(projectPhotos)
+      .values(photo)
+      .returning();
+    return newPhoto;
+  }
+
+  async getProjectPhotos(projectId: number): Promise<ProjectPhoto[]> {
+    return await db
+      .select()
+      .from(projectPhotos)
+      .where(eq(projectPhotos.projectId, projectId))
+      .orderBy(desc(projectPhotos.uploadedAt));
+  }
+
+  async deleteProjectPhoto(id: number): Promise<void> {
+    await db.delete(projectPhotos).where(eq(projectPhotos.id, id));
   }
 }
 

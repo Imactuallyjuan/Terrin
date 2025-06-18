@@ -171,3 +171,52 @@ export type InsertConversation = typeof conversations.$inferInsert;
 
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = typeof messages.$inferInsert;
+
+// Cost tracking for individual expenses
+export const projectCosts = pgTable("project_costs", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  category: varchar("category").notNull(), // materials, labor, permits, equipment, other
+  description: text("description").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  vendor: text("vendor"),
+  dateIncurred: timestamp("date_incurred").notNull(),
+  receipt: text("receipt"), // file path or URL
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Project milestones and timeline
+export const projectMilestones = pgTable("project_milestones", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  dueDate: timestamp("due_date"),
+  completedDate: timestamp("completed_date"),
+  status: varchar("status").default("pending").notNull(), // pending, in_progress, completed, overdue
+  order: integer("order").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Photo gallery for projects
+export const projectPhotos = pgTable("project_photos", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  fileName: text("file_name").notNull(),
+  filePath: text("file_path").notNull(),
+  caption: text("caption"),
+  category: varchar("category").default("progress").notNull(), // before, progress, after, materials, issues
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
+});
+
+export type ProjectCost = typeof projectCosts.$inferSelect;
+export type InsertProjectCost = typeof projectCosts.$inferInsert;
+
+export type ProjectMilestone = typeof projectMilestones.$inferSelect;
+export type InsertProjectMilestone = typeof projectMilestones.$inferInsert;
+
+export type ProjectPhoto = typeof projectPhotos.$inferSelect;
+export type InsertProjectPhoto = typeof projectPhotos.$inferInsert;
