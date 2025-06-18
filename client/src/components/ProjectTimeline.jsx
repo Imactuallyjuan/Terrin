@@ -318,7 +318,7 @@ export default function ProjectTimeline({ projectId }) {
                       <div className="flex items-center space-x-2">
                         <h4 className="text-sm font-medium text-gray-900">{update.title}</h4>
                         <Badge variant="outline" className="text-xs">
-                          {update.updateType.replace('_', ' ')}
+                          {update.updateType ? update.updateType.replace('_', ' ') : 'update'}
                         </Badge>
                       </div>
                       {update.description && (
