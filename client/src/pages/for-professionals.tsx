@@ -308,9 +308,9 @@ export default function ForProfessionals() {
         {/* Requirements */}
         <div className="mb-20">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Requirements to Join</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Join Our Community</h2>
             <p className="text-xl text-slate-600">
-              We maintain high standards to ensure quality for all users
+              We welcome professionals of all sizes - from solo freelancers to established companies
             </p>
           </div>
 
@@ -319,30 +319,30 @@ export default function ForProfessionals() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Shield className="h-5 w-5 text-blue-600" />
-                  Business Requirements
+                  Basic Requirements
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    Valid contractor license
+                    Valid trade license or certification (where required by local law)
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    General liability insurance ($1M minimum)
+                    Basic liability coverage (amount varies by project size)
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    Workers compensation insurance
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Business registration & tax ID
+                    Registered business entity or operating as sole proprietor
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
                     Clean background check
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Valid ID and tax documentation
                   </li>
                 </ul>
               </CardContent>
@@ -352,32 +352,58 @@ export default function ForProfessionals() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-orange-600" />
-                  Experience Requirements
+                  Professional Standards
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    Minimum 3 years experience
+                    Demonstrable skills in your trade
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    Portfolio of completed projects
+                    Examples of completed work (photos or references)
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    3+ customer references
+                    At least 1 customer reference (or work samples for new professionals)
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    Professional communication skills
+                    Reliable communication and professionalism
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    Commitment to quality service
+                    Commitment to quality workmanship
                   </li>
                 </ul>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="max-w-4xl mx-auto mt-8">
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-blue-900 mb-3">New to the Industry?</h3>
+                  <p className="text-blue-800 mb-4">
+                    We support emerging professionals! If you're just starting out, we offer mentorship programs 
+                    and can pair you with experienced contractors for larger projects.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Link href="/">
+                      <Button className="bg-blue-600 hover:bg-blue-700">
+                        Apply as New Professional
+                      </Button>
+                    </Link>
+                    <Link href="/">
+                      <Button variant="outline" className="border-blue-600 text-blue-600">
+                        Learn About Mentorship
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
