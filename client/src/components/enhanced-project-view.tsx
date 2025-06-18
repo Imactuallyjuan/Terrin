@@ -211,7 +211,13 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
       });
       return;
     }
-    addCostMutation.mutate(newCost);
+    
+    const costData = {
+      ...newCost,
+      dateIncurred: new Date(newCost.dateIncurred)
+    };
+    
+    addCostMutation.mutate(costData);
   };
 
   const handleAddMilestone = () => {
@@ -223,10 +229,14 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
       });
       return;
     }
-    addMilestoneMutation.mutate({
+    
+    const milestoneData = {
       ...newMilestone,
-      order: milestones.length + 1
-    });
+      order: (milestones as any[]).length + 1,
+      dueDate: newMilestone.dueDate ? new Date(newMilestone.dueDate) : null
+    };
+    
+    addMilestoneMutation.mutate(milestoneData);
   };
 
   const handleToggleMilestone = (milestone: ProjectMilestone) => {
@@ -235,7 +245,7 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
       id: milestone.id,
       updates: {
         status: isCompleted ? 'pending' : 'completed',
-        completedDate: isCompleted ? null : new Date().toISOString()
+        completedDate: isCompleted ? null : new Date()
       }
     });
   };
