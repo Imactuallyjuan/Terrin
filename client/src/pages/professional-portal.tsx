@@ -64,14 +64,14 @@ export default function ProfessionalPortal() {
   const isTerrinProfile = profile?.businessName === 'Terrin Construction Solutions' || profile?.id === 7;
 
   // Debug logging
-  console.log('Professional Portal Debug:', {
-    userId: user?.id,
-    userEmail: user?.email,
-    isPlatformOwner,
-    profileId: profile?.id,
-    profileBusinessName: profile?.businessName,
-    isTerrinProfile
-  });
+  console.log('Professional Portal Debug:');
+  console.log('- User ID:', user?.id);
+  console.log('- User Email:', user?.email);
+  console.log('- Is Platform Owner:', isPlatformOwner);
+  console.log('- Profile ID:', profile?.id);
+  console.log('- Profile Business Name:', profile?.businessName);
+  console.log('- Is Terrin Profile:', isTerrinProfile);
+  console.log('- Profile Array:', profile);
 
   // Fetch available projects
   const { data: availableProjects = [], isLoading: projectsLoading } = useQuery({
