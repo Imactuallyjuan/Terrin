@@ -205,6 +205,15 @@ Changelog:
   * Fixed progress bar to automatically refresh when milestones are toggled or edited without page reload
   * Added real-time calculation of completion percentage based on weighted milestone completion
   * Enhanced cost tracking interface with receipt indicators and visual receipt management
+- June 19, 2025. Cache Invalidation Fixes & Professional Portal Implementation
+  * Fixed cache invalidation issues preventing automatic UI refreshes after estimate generation and document uploads
+  * Added custom event dispatch in EstimateForm component with proper queryClient.invalidateQueries
+  * Enhanced document upload and deletion mutations with comprehensive cache invalidation
+  * Created comprehensive Professional Portal (/professional-portal) with profile management, project discovery, and analytics
+  * Built Find Professionals page (/find-professionals) with search filters, specialty filtering, and professional contact system
+  * Updated header navigation to properly link to new Professional Portal and Find Professionals pages
+  * Fixed routing issues and ensured all navigation buttons lead to functional pages
+  * Both estimate generation and document operations now refresh UI automatically without manual page refreshes
 ```
 
 ## User Preferences
