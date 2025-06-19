@@ -179,12 +179,12 @@ export default function FindContractors() {
 
                     {/* Action Buttons */}
                     <div className="flex flex-col gap-3 lg:w-48">
-                      <Link href="/">
+                      <Link href={`/contractor/${contractor.id}`}>
                         <Button className="w-full bg-blue-600 hover:bg-blue-700">
                           View Profile
                         </Button>
                       </Link>
-                      <Link href="/">
+                      <Link href={`/contractor/${contractor.id}`}>
                         <Button variant="outline" className="w-full">
                           Get Quote
                         </Button>
@@ -313,7 +313,7 @@ export default function FindContractors() {
                   Get Free Estimate
                 </Button>
               </Link>
-              <Link href="/">
+              <Link href="/contractors">
                 <Button size="lg" variant="outline" className="w-full border-white text-white hover:bg-white hover:text-blue-600">
                   Browse All Contractors
                 </Button>

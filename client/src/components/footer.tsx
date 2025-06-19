@@ -16,17 +16,17 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-4">For Homeowners</h4>
             <ul className="space-y-2 text-gray-300">
               <li>
-                <Link href="#post-project">
+                <Link href="/projects">
                   <span className="hover:text-orange-400 transition-colors cursor-pointer">Post a Project</span>
                 </Link>
               </li>
               <li>
-                <Link href="#cost-estimator">
+                <Link href="/estimates">
                   <span className="hover:text-orange-400 transition-colors cursor-pointer">Get Estimates</span>
                 </Link>
               </li>
               <li>
-                <Link href="#match-trades">
+                <Link href="/find-contractors">
                   <span className="hover:text-orange-400 transition-colors cursor-pointer">Find Contractors</span>
                 </Link>
               </li>

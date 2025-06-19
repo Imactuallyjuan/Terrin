@@ -47,6 +47,11 @@ export default function Header() {
                       Dashboard
                     </span>
                   </Link>
+                  <Link href="/messages">
+                    <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
+                      Messages
+                    </span>
+                  </Link>
                   {(userRole === 'contractor' || userRole === 'both') && (
                     <Link href="/contractor-portal">
                       <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">

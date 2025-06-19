@@ -18,6 +18,7 @@ import FindContractors from "@/pages/find-contractors";
 import ForProfessionals from "@/pages/for-professionals";
 import Messages from "@/pages/messages";
 import Gallery from "@/pages/gallery";
+import ContractorProfile from "@/pages/contractor-profile";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
@@ -82,6 +83,7 @@ function Router() {
       <Route path="/find-contractors" component={FindContractors} />
       <Route path="/for-professionals" component={ForProfessionals} />
       <Route path="/gallery" component={Gallery} />
+      <Route path="/contractor/:id" component={ContractorProfile} />
       
       {/* Home/Landing Page */}
       {loading || !isAuthenticated ? (

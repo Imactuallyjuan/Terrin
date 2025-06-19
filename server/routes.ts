@@ -598,6 +598,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Messages and conversations routes
+  app.get('/api/conversations', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const userId = req.user.uid;
+      const conversations = await storage.getUserConversations(userId);
+      res.json(conversations);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
+    }
+  });
+
+  app.get('/api/conversations/:id/messages', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const messages = await storage.getConversationMessages(conversationId);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  app.post('/api/messages', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const { conversationId, content } = req.body;
+      const senderId = req.user.uid;
+      
+      const message = await storage.createMessage({
+        conversationId,
+        senderId,
+        content,
+        messageType: 'text',
+        attachments: [],
+        readBy: [senderId]
+      });
+      
+      res.json(message);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // Gallery route for project photos
+  app.get('/api/gallery/photos', async (req, res) => {
+    try {
+      // This would fetch photos from all projects for the gallery
+      // For now, return empty array since we need to implement this properly
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching gallery photos:", error);
+      res.status(500).json({ message: "Failed to fetch gallery photos" });
+    }
+  });
+
+  // Quote requests
+  app.post('/api/quote-requests', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const { contractorId, projectDescription, timeline, budget, contactMethod, preferredStartDate } = req.body;
+      const clientId = req.user.uid;
+      
+      // Create a quote request (we'd need to add this to the schema)
+      // For now, just return success
+      res.json({ 
+        id: Date.now(),
+        contractorId,
+        clientId,
+        projectDescription,
+        timeline,
+        budget,
+        contactMethod,
+        preferredStartDate,
+        status: 'pending',
+        createdAt: new Date()
+      });
+    } catch (error) {
+      console.error("Error creating quote request:", error);
+      res.status(500).json({ message: "Failed to create quote request" });
+    }
+  });
+
+  // Contractor profile routes
+  app.get('/api/contractors/:id/reviews', async (req, res) => {
+    try {
+      const contractorId = parseInt(req.params.id);
+      // For now, return sample reviews - would need proper implementation
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching contractor reviews:", error);
+      res.status(500).json({ message: "Failed to fetch contractor reviews" });
+    }
+  });
+
+  app.get('/api/contractors/:id/portfolio', async (req, res) => {
+    try {
+      const contractorId = parseInt(req.params.id);
+      // For now, return empty portfolio - would need proper implementation  
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching contractor portfolio:", error);
+      res.status(500).json({ message: "Failed to fetch contractor portfolio" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
