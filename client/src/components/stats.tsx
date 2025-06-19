@@ -1,7 +1,7 @@
 export default function Stats() {
   const stats = [
     { value: "15,000+", label: "Projects Completed" },
-    { value: "2,500+", label: "Verified Contractors" },
+    { value: "2,500+", label: "Construction Professionals" },
     { value: "98%", label: "Customer Satisfaction" },
     { value: "$2.3M", label: "Saved on Projects" },
   ];

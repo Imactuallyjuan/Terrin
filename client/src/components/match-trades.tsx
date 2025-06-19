@@ -141,7 +141,7 @@ export default function MatchTrades() {
         ) : (
           <div className="text-center py-12">
             <Users className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Contractors Available</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Professionals Available</h3>
             <p className="text-slate-600">
               We're working on adding more verified professionals to our platform.
             </p>
@@ -154,7 +154,7 @@ export default function MatchTrades() {
               size="lg"
               className="bg-orange-600 text-white hover:bg-orange-700"
             >
-              View More Contractors
+              View More Professionals
             </Button>
           </div>
         )}

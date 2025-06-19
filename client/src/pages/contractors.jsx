@@ -77,7 +77,7 @@ export default function Contractors() {
     } catch (error) {
       console.error('Error fetching professionals:', error);
       toast({
-        title: "Error Loading Contractors",
+        title: "Error Loading Professionals",
         description: "Failed to load professional profiles. Please try again.",
         variant: "destructive",
       });
