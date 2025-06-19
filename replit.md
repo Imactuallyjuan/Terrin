@@ -221,6 +221,14 @@ Changelog:
   * Added 10 realistic contractor profiles across multiple specialties (Kitchen/Bath, Roofing, Electrical, Plumbing, etc.)
   * Platform now has complete professional directory with verified contractors and ratings
   * All navigation from home page to Find Professionals page works without errors
+- June 19, 2025. Platform Owner Profile Editing Permissions & Contractor Profile Display Fixes
+  * Fixed contractor profile display issues by updating field mappings to match actual database schema
+  * Removed references to non-existent database fields (phone, email, website, profilePhoto) from ContractorProfile component
+  * Added proper null safety checks and type conversion for rating display and loading states
+  * Implemented role-based editing permissions for Terrin Construction Solutions profile
+  * Only platform owner (user ID: IE5CjY6AxYZAHjfFB6OLLCnn5dF2) can edit the Terrin profile in Professional Portal
+  * Non-platform owners see "Platform Owner Profile" badge instead of edit button for Terrin profile
+  * Added access control validation to prevent unauthorized editing attempts
 ```
 
 ## User Preferences

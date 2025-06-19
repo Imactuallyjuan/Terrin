@@ -57,6 +57,12 @@ export default function ProfessionalPortal() {
     enabled: !!user?.id
   });
 
+  // Check if current user is the platform owner (can edit Terrin profile)
+  const isPlatformOwner = user?.uid === 'IE5CjY6AxYZAHjfFB6OLLCnn5dF2' || user?.email === 'juan@terrinplatform.com';
+  
+  // Check if editing the Terrin Construction Solutions profile
+  const isTerrinProfile = profile?.businessName === 'Terrin Construction Solutions' || profile?.id === 7;
+
   // Fetch available projects
   const { data: availableProjects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ['/api/projects', 'available'],
@@ -143,6 +149,16 @@ export default function ProfessionalPortal() {
       return;
     }
 
+    // Prevent non-platform owners from editing Terrin profile
+    if (isTerrinProfile && !isPlatformOwner) {
+      toast({
+        title: "Access Denied",
+        description: "Only the platform owner can edit the Terrin Construction Solutions profile.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     updateProfileMutation.mutate({
       ...profileData,
       yearsExperience: parseInt(profileData.yearsExperience) || 0
@@ -222,13 +238,29 @@ export default function ProfessionalPortal() {
                         <CardTitle className="flex items-center justify-between">
                           <span>{profile?.businessName || 'Your Business'}</span>
                           {!editingProfile && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setEditingProfile(true)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
+                            isTerrinProfile ? (
+                              isPlatformOwner ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setEditingProfile(true)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              ) : (
+                                <Badge variant="secondary" className="text-xs">
+                                  Platform Owner Profile
+                                </Badge>
+                              )
+                            ) : (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setEditingProfile(true)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            )
                           )}
                         </CardTitle>
                       </CardHeader>
