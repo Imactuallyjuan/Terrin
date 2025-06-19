@@ -58,10 +58,20 @@ export default function ProfessionalPortal() {
   });
 
   // Check if current user is the platform owner (can edit Terrin profile)
-  const isPlatformOwner = user?.uid === 'IE5CjY6AxYZAHjfFB6OLLCnn5dF2' || user?.email === 'juan@terrinplatform.com';
+  const isPlatformOwner = user?.id === 'IE5CjY6AxYZAHjfFB6OLLCnn5dF2' || user?.email === 'juan@terrinplatform.com';
   
   // Check if editing the Terrin Construction Solutions profile
   const isTerrinProfile = profile?.businessName === 'Terrin Construction Solutions' || profile?.id === 7;
+
+  // Debug logging
+  console.log('Professional Portal Debug:', {
+    userId: user?.id,
+    userEmail: user?.email,
+    isPlatformOwner,
+    profileId: profile?.id,
+    profileBusinessName: profile?.businessName,
+    isTerrinProfile
+  });
 
   // Fetch available projects
   const { data: availableProjects = [], isLoading: projectsLoading } = useQuery({
