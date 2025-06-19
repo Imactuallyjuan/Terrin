@@ -30,6 +30,7 @@ export default function PostProjectFirebase() {
   const [estimateMode, setEstimateMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [customBudget, setCustomBudget] = useState('');
+  const [showCustomBudget, setShowCustomBudget] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -281,8 +282,11 @@ export default function PostProjectFirebase() {
                         <FormLabel>Budget Range</FormLabel>
                         <Select onValueChange={(value) => {
                           if (value === 'custom') {
-                            field.onChange('custom');
+                            setShowCustomBudget(true);
+                            setCustomBudget('');
+                            field.onChange('');
                           } else {
+                            setShowCustomBudget(false);
                             field.onChange(value);
                             setCustomBudget('');
                           }
@@ -303,7 +307,7 @@ export default function PostProjectFirebase() {
                             <SelectItem value="custom">Type Custom Budget...</SelectItem>
                           </SelectContent>
                         </Select>
-                        {field.value === 'custom' ? (
+                        {showCustomBudget ? (
                           <div className="mt-2">
                             <Input
                               value={customBudget}

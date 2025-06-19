@@ -27,6 +27,7 @@ export default function PostProject() {
   const queryClient = useQueryClient();
   const [estimateMode, setEstimateMode] = useState(false);
   const [customBudget, setCustomBudget] = useState('');
+  const [showCustomBudget, setShowCustomBudget] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -278,8 +279,11 @@ export default function PostProject() {
                         <FormLabel>Budget Range</FormLabel>
                         <Select onValueChange={(value) => {
                           if (value === 'custom') {
-                            field.onChange('custom');
+                            setShowCustomBudget(true);
+                            setCustomBudget('');
+                            field.onChange('');
                           } else {
+                            setShowCustomBudget(false);
                             field.onChange(value);
                             setCustomBudget('');
                           }
@@ -300,7 +304,7 @@ export default function PostProject() {
                             <SelectItem value="custom">Type Custom Budget...</SelectItem>
                           </SelectContent>
                         </Select>
-                        {field.value === 'custom' ? (
+                        {showCustomBudget ? (
                           <div className="mt-2">
                             <Input
                               value={customBudget}
