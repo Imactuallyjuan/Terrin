@@ -201,7 +201,7 @@ export class DatabaseStorage implements IStorage {
   // Contractor operations
   async createContractor(professional: InsertContractor): Promise<Contractor> {
     const [newContractor] = await db
-      .insert(professionals)
+      .insert(contractors)
       .values(professional)
       .returning();
     return newContractor;
@@ -210,34 +210,34 @@ export class DatabaseStorage implements IStorage {
   async getContractor(id: number): Promise<Contractor | undefined> {
     const [professional] = await db
       .select()
-      .from(professionals)
-      .where(eq(professionals.id, id));
+      .from(contractors)
+      .where(eq(contractors.id, id));
     return professional;
   }
 
   async getContractorsBySpecialty(specialty: string, limit: number = 10): Promise<Contractor[]> {
     return await db
       .select()
-      .from(professionals)
-      .where(and(eq(professionals.specialty, specialty), eq(professionals.verified, true)))
-      .orderBy(desc(professionals.rating))
+      .from(contractors)
+      .where(and(eq(contractors.specialty, specialty), eq(contractors.verified, true)))
+      .orderBy(desc(contractors.rating))
       .limit(limit);
   }
 
   async getAllContractors(limit: number = 10): Promise<Contractor[]> {
     return await db
       .select()
-      .from(professionals)
-      .where(eq(professionals.verified, true))
-      .orderBy(desc(professionals.rating))
+      .from(contractors)
+      .where(eq(contractors.verified, true))
+      .orderBy(desc(contractors.rating))
       .limit(limit);
   }
 
   async updateContractor(id: number, updates: Partial<InsertContractor>): Promise<Contractor | undefined> {
     const [updatedContractor] = await db
-      .update(professionals)
+      .update(contractors)
       .set({ ...updates, updatedAt: new Date() })
-      .where(eq(professionals.id, id))
+      .where(eq(contractors.id, id))
       .returning();
     return updatedContractor;
   }
