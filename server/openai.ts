@@ -227,3 +227,150 @@ Respond with JSON in this format:
     throw new Error("Failed to analyze project complexity: " + (error as Error).message);
   }
 }
+
+interface ProjectMilestone {
+  title: string;
+  description: string;
+  order: number;
+  estimatedDays: number;
+  progressWeight: number;
+  dependencies?: string[];
+}
+
+interface TimelineData {
+  milestones: ProjectMilestone[];
+  totalDuration: number;
+  criticalPath: string[];
+  phases: {
+    name: string;
+    milestones: string[];
+    duration: number;
+  }[];
+}
+
+export async function generateProjectTimeline(projectData: ProjectData): Promise<TimelineData> {
+  try {
+    console.log("Generating timeline for project:", projectData.title);
+    
+    const prompt = `
+You are a construction project management expert with 25+ years of experience. Analyze the following project and create a comprehensive, realistic timeline with milestones.
+
+PROJECT DETAILS:
+- Title: ${projectData.title}
+- Description: ${projectData.description}
+- Project Type: ${projectData.projectType}
+- Location: ${projectData.location}
+- Timeline: ${projectData.timeline}
+- Budget: ${projectData.budgetRange}
+
+CRITICAL REQUIREMENTS:
+1. Create project-specific milestones based on the actual work described
+2. Consider logical dependencies (foundation before framing, plumbing rough-in before drywall, etc.)
+3. Assign realistic durations in days for each milestone
+4. Weight milestones by complexity (simple tasks 5-10%, major phases 15-25%)
+5. Include only necessary trades/phases for this specific project
+6. Consider weather, permits, inspections, and material delivery delays
+
+EXAMPLES OF PROJECT-SPECIFIC MILESTONES:
+
+Kitchen Renovation:
+- Design & Permits (7 days, 5%)
+- Demolition (3 days, 10%)
+- Electrical Rough-in (2 days, 8%)
+- Plumbing Rough-in (2 days, 8%)
+- Drywall & Paint (5 days, 15%)
+- Cabinet Installation (4 days, 20%)
+- Countertop Installation (2 days, 10%)
+- Flooring (3 days, 12%)
+- Final Fixtures & Cleanup (2 days, 12%)
+
+House Construction:
+- Site Preparation (5 days, 5%)
+- Foundation (10 days, 15%)
+- Framing (14 days, 20%)
+- Roofing (7 days, 12%)
+- Electrical Rough-in (5 days, 8%)
+- Plumbing Rough-in (4 days, 8%)
+- Insulation (3 days, 5%)
+- Drywall (8 days, 10%)
+- Flooring (6 days, 8%)
+- Final Fixtures (4 days, 5%)
+- Exterior Finish (5 days, 4%)
+
+Bathroom Renovation:
+- Design & Permits (5 days, 8%)
+- Demolition (2 days, 12%)
+- Plumbing Rough-in (2 days, 15%)
+- Electrical Rough-in (1 day, 8%)
+- Waterproofing (1 day, 10%)
+- Tile Work (4 days, 20%)
+- Vanity & Fixtures (2 days, 15%)
+- Final Plumbing (1 day, 12%)
+
+Return ONLY valid JSON in this format:
+{
+  "milestones": [
+    {
+      "title": "milestone_name",
+      "description": "detailed description of work",
+      "order": 1,
+      "estimatedDays": 5,
+      "progressWeight": 15,
+      "dependencies": ["previous_milestone_titles"]
+    }
+  ],
+  "totalDuration": 45,
+  "criticalPath": ["milestone_titles_on_critical_path"],
+  "phases": [
+    {
+      "name": "phase_name",
+      "milestones": ["milestone_titles_in_phase"],
+      "duration": 20
+    }
+  ]
+}
+
+IMPORTANT:
+- All progressWeight values must sum to 100%
+- estimatedDays should be realistic for the scope
+- Include dependencies for proper sequencing
+- Only include milestones actually needed for THIS project
+- Consider permit requirements, inspections, and material lead times
+`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert construction project manager. Create realistic, project-specific timelines with proper dependencies and sequencing. Return only valid JSON."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.1,
+      max_tokens: 2000,
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error("No response content from OpenAI");
+    }
+
+    console.log("Timeline response received, parsing...");
+    console.log("Raw timeline response:", content);
+
+    const timelineData: TimelineData = JSON.parse(content);
+    
+    console.log("Parsed timeline result:", timelineData);
+    console.log("Timeline generated successfully");
+
+    return timelineData;
+  } catch (error) {
+    console.error("Error generating timeline:", error);
+    throw new Error(`Failed to generate project timeline: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}

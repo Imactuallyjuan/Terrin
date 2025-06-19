@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { verifyFirebaseToken } from "./firebaseAuth";
 import { insertProjectSchema, insertContractorSchema } from "@shared/schema";
-import { generateCostEstimate } from "./openai";
+import { generateCostEstimate, generateProjectTimeline } from "./openai";
 import { z } from "zod";
 
 // Smart title generation function
@@ -291,6 +291,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching estimate:", error);
       res.status(500).json({ message: "Failed to fetch estimate" });
+    }
+  });
+
+  // Generate AI timeline for project
+  app.post('/api/projects/:id/generate-timeline', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userId = req.user.uid;
+      
+      // Get the project to verify ownership and get project details
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      if (project.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      console.log('Generating timeline for project:', projectId);
+      
+      // Generate AI-powered timeline
+      const timelineData = await generateProjectTimeline({
+        title: project.title,
+        description: project.description,
+        projectType: project.projectType || 'General Construction',
+        budgetRange: project.budgetRange || 'Not specified',
+        timeline: project.timeline || 'To be determined',
+        location: project.location
+      });
+
+      // Create milestones from the AI-generated timeline
+      const createdMilestones = [];
+      for (const milestone of timelineData.milestones) {
+        const createdMilestone = await storage.createProjectMilestone({
+          projectId: projectId,
+          title: milestone.title,
+          description: milestone.description || '',
+          status: 'pending',
+          order: milestone.order,
+          progressWeight: milestone.progressWeight,
+          estimatedDuration: milestone.estimatedDays
+        });
+        createdMilestones.push(createdMilestone);
+      }
+
+      console.log(`Created ${createdMilestones.length} milestones for project ${projectId}`);
+
+      res.json({
+        message: "Timeline generated successfully",
+        milestonesCreated: createdMilestones.length,
+        totalDuration: timelineData.totalDuration,
+        phases: timelineData.phases,
+        milestones: createdMilestones
+      });
+    } catch (error) {
+      console.error("Error generating timeline:", error);
+      res.status(500).json({ message: "Failed to generate timeline" });
     }
   });
 

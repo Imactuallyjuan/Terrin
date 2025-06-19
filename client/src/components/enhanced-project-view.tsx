@@ -210,6 +210,28 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     }
   });
 
+  const generateTimelineMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('POST', `/api/projects/${project.id}/generate-timeline`);
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/milestones`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      toast({
+        title: "AI Timeline Generated",
+        description: `Created ${data.milestonesCreated} smart milestones based on your project description.`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Generation Failed",
+        description: "Failed to generate timeline. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const updateMilestoneMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: number, updates: any }) => {
       return await apiRequest('PATCH', `/api/projects/milestones/${id}`, updates);
