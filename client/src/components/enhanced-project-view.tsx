@@ -307,16 +307,28 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     });
   };
 
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // In a real app, you'd upload to a file storage service
-      const mockPath = `/uploads/${file.name}`;
-      setNewPhoto({
-        ...newPhoto,
-        fileName: file.name,
-        filePath: mockPath
-      });
+      try {
+        // Convert file to base64 for storage
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64String = reader.result as string;
+          setNewPhoto({
+            ...newPhoto,
+            fileName: file.name,
+            filePath: base64String
+          });
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        toast({
+          title: "Upload Error",
+          description: "Failed to process the selected image.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
