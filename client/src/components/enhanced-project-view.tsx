@@ -324,7 +324,10 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
       return await apiRequest('POST', `/api/projects/${project.id}/documents`, documentData);
     },
     onSuccess: () => {
+      // Invalidate all related queries to ensure UI refreshes
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/documents`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       setNewDocument({
         fileName: '',
         filePath: '',
@@ -345,7 +348,10 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
       return await apiRequest('DELETE', `/api/projects/documents/${documentId}`);
     },
     onSuccess: () => {
+      // Invalidate all related queries to ensure UI refreshes
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/documents`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       toast({
         title: "Document Deleted",
         description: "The document has been removed successfully.",
