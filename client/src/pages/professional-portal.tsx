@@ -37,7 +37,7 @@ export default function ProfessionalPortal() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editingProfile, setEditingProfile] = useState(false);
-  const [profileData, setProfileData] = useState({
+  const [formData, setFormData] = useState({
     businessName: '',
     specialties: [],
     yearsExperience: '',
@@ -52,10 +52,13 @@ export default function ProfessionalPortal() {
   });
 
   // Fetch professional profile
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const { data: profileArray, isLoading: profileLoading } = useQuery({
     queryKey: [`/api/contractors/user/${user?.id}`],
     enabled: !!user?.id
   });
+
+  // Extract first profile from array (API returns array)
+  const profile = Array.isArray(profileArray) ? profileArray[0] : profileArray;
 
   // Check if current user is the platform owner (can edit Terrin profile)
   const isPlatformOwner = user?.id === 'IE5CjY6AxYZAHjfFB6OLLCnn5dF2' || user?.email === 'juan@terrinplatform.com';
@@ -133,24 +136,24 @@ export default function ProfessionalPortal() {
 
   useEffect(() => {
     if (profile) {
-      setProfileData({
+      setFormData({
         businessName: profile.businessName || '',
-        specialties: profile.specialties || [],
+        specialties: profile.specialty ? [profile.specialty] : [],
         yearsExperience: profile.yearsExperience?.toString() || '',
         serviceArea: profile.serviceArea || '',
         description: profile.description || '',
-        phone: profile.phone || '',
-        email: profile.email || user?.email || '',
-        website: profile.website || '',
+        phone: '',
+        email: user?.email || '',
+        website: '',
         licenseNumber: profile.licenseNumber || '',
-        insurance: profile.insurance || false,
-        bondedAndInsured: profile.bondedAndInsured || false
+        insurance: false,
+        bondedAndInsured: false
       });
     }
   }, [profile, user]);
 
   const handleProfileSave = () => {
-    if (!profileData.businessName || !profileData.specialties.length) {
+    if (!formData.businessName || !formData.specialties.length) {
       toast({
         title: "Missing Information",
         description: "Please fill in business name and at least one specialty.",
@@ -170,13 +173,13 @@ export default function ProfessionalPortal() {
     }
 
     updateProfileMutation.mutate({
-      ...profileData,
-      yearsExperience: parseInt(profileData.yearsExperience) || 0
+      ...formData,
+      yearsExperience: parseInt(formData.yearsExperience) || 0
     });
   };
 
   const handleSpecialtyChange = (specialty: string) => {
-    setProfileData(prev => ({
+    setFormData(prev => ({
       ...prev,
       specialties: prev.specialties.includes(specialty)
         ? prev.specialties.filter(s => s !== specialty)

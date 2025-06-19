@@ -1,0 +1,50 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+useAuth.ts:11 Auth state: Object
+professional-portal.tsx:67 Professional Portal Debug:
+professional-portal.tsx:68 - User ID: undefined
+professional-portal.tsx:69 - User Email: undefined
+professional-portal.tsx:70 - Is Platform Owner: false
+professional-portal.tsx:71 - Profile ID: undefined
+professional-portal.tsx:72 - Profile Business Name: undefined
+professional-portal.tsx:73 - Is Terrin Profile: false
+professional-portal.tsx:74 - Profile Array: undefined
+api/projects?status=open:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+useAuth.ts:11 Auth state: Object
+professional-portal.tsx:67 Professional Portal Debug:
+professional-portal.tsx:68 - User ID: undefined
+professional-portal.tsx:69 - User Email: undefined
+professional-portal.tsx:70 - Is Platform Owner: false
+professional-portal.tsx:71 - Profile ID: undefined
+professional-portal.tsx:72 - Profile Business Name: undefined
+professional-portal.tsx:73 - Is Terrin Profile: false
+professional-portal.tsx:74 - Profile Array: undefined
+useAuth.ts:11 Auth state: Object
+professional-portal.tsx:67 Professional Portal Debug:
+professional-portal.tsx:68 - User ID: IE5CjY6AxYZAHjfFB6OLLCnn5dF2
+professional-portal.tsx:69 - User Email: juanlaratrejo@gmail.com
+professional-portal.tsx:70 - Is Platform Owner: true
+professional-portal.tsx:71 - Profile ID: undefined
+professional-portal.tsx:72 - Profile Business Name: undefined
+professional-portal.tsx:73 - Is Terrin Profile: false
+professional-portal.tsx:74 - Profile Array: undefined
+useAuth.ts:11 Auth state: Object
+professional-portal.tsx:67 Professional Portal Debug:
+professional-portal.tsx:68 - User ID: IE5CjY6AxYZAHjfFB6OLLCnn5dF2
+professional-portal.tsx:69 - User Email: juanlaratrejo@gmail.com
+professional-portal.tsx:70 - Is Platform Owner: true
+professional-portal.tsx:71 - Profile ID: undefined
+professional-portal.tsx:72 - Profile Business Name: undefined
+professional-portal.tsx:73 - Is Terrin Profile: false
+professional-portal.tsx:74 - Profile Array: Array(1)
+useAuth.ts:11 Auth state: Object
+professional-portal.tsx:67 Professional Portal Debug:
+professional-portal.tsx:68 - User ID: IE5CjY6AxYZAHjfFB6OLLCnn5dF2
+professional-portal.tsx:69 - User Email: juanlaratrejo@gmail.com
+professional-portal.tsx:70 - Is Platform Owner: true
+professional-portal.tsx:71 - Profile ID: undefined
+professional-portal.tsx:72 - Profile Business Name: undefined
+professional-portal.tsx:73 - Is Terrin Profile: false
+professional-portal.tsx:74 - Profile Array: Array(1)
