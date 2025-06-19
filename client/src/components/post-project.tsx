@@ -12,7 +12,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Calculator, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { z } from "zod";
 
 const formSchema = insertProjectSchema.extend({
@@ -86,68 +86,7 @@ export default function PostProject() {
     },
   });
 
-  const getEstimateMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof formSchema>) => {
-      console.log('Starting estimate mutation with data:', data);
-      
-      // Trigger loading state
-      window.dispatchEvent(new CustomEvent('estimateStarted'));
-      
-      try {
-        const response = await apiRequest("POST", "/api/estimate", { projectData: data });
-        const result = await response.json();
-        console.log('Estimate response:', result);
-        return result;
-      } catch (error) {
-        console.error('Estimate API error:', error);
-        throw error;
-      }
-    },
-    onSuccess: (estimate) => {
-      console.log('Estimate generated successfully:', estimate);
-      
-      toast({
-        title: "Estimate Generated!",
-        description: "Your AI-powered cost estimate is ready.",
-      });
-      
-      // Scroll to cost estimator section
-      setTimeout(() => {
-        const element = document.getElementById('cost-estimator');
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
-      
-      // Store estimate data for display
-      window.dispatchEvent(new CustomEvent('estimateGenerated', { detail: estimate }));
-    },
-    onError: (error: any) => {
-      console.error('Estimate mutation error:', error);
-      
-      // Stop loading state on error
-      window.dispatchEvent(new CustomEvent('estimateGenerated', { detail: null }));
-      
-      // Check if it's an authentication error
-      if (error.message && error.message.includes('401')) {
-        toast({
-          title: "Please sign in",
-          description: "You need to be signed in to get an estimate. Redirecting...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 1500);
-        return;
-      }
-      
-      toast({
-        title: "Error",
-        description: "Failed to generate estimate. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     console.log('Form submitted with data:', data);
@@ -332,38 +271,10 @@ export default function PostProject() {
                   )}
                 />
 
-                <div className="flex justify-center space-x-4">
+                <div className="flex justify-center">
                   <Button
-                    type="button"
-                    variant="outline"
-                    className="border-green-600 text-green-600 hover:bg-green-50 flex items-center"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      console.log('Get Estimate button clicked');
-                      setEstimateMode(true);
-                      // Trigger form submission for estimate
-                      form.handleSubmit(onSubmit)();
-                    }}
-                    disabled={getEstimateMutation.isPending}
-                  >
-                    {getEstimateMutation.isPending ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600 mr-2"></div>
-                    ) : (
-                      <Calculator className="mr-2 h-4 w-4" />
-                    )}
-                    Get AI Estimate
-                  </Button>
-                  
-                  <Button
-                    type="button"
+                    type="submit"
                     className="bg-blue-600 text-white hover:bg-blue-700 flex items-center"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      console.log('Post Project button clicked');
-                      setEstimateMode(false);
-                      // Trigger form submission for project
-                      form.handleSubmit(onSubmit)();
-                    }}
                     disabled={createProjectMutation.isPending}
                   >
                     {createProjectMutation.isPending ? (
