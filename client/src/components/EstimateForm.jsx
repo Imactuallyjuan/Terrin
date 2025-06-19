@@ -60,6 +60,12 @@ export default function EstimateForm({ onEstimateComplete }) {
         description: "Your construction cost estimate is ready!",
       });
 
+      // Dispatch custom event for home page cache invalidation
+      const estimateEvent = new CustomEvent('estimateGenerated', {
+        detail: estimate
+      });
+      window.dispatchEvent(estimateEvent);
+
       if (onEstimateComplete) {
         onEstimateComplete(estimate);
       }
