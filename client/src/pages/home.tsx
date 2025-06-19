@@ -92,13 +92,14 @@ export default function Home() {
               <Users className="h-12 w-12 text-green-600 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Find Professionals</h3>
               <p className="text-sm text-slate-600 mb-4">Connect with construction professionals</p>
-              <Button 
-                variant="outline" 
-                className="w-full border-green-600 text-green-600 hover:bg-green-50"
-                onClick={() => window.location.href = '/contractors'}
-              >
-                Browse Professionals
-              </Button>
+              <Link href="/find-professionals">
+                <Button 
+                  variant="outline" 
+                  className="w-full border-green-600 text-green-600 hover:bg-green-50"
+                >
+                  Browse Professionals
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
