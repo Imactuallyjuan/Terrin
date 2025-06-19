@@ -38,7 +38,7 @@ export default function FindProfessionals() {
     queryKey: ['/api/contractors', searchFilters],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (searchFilters.specialty) params.append('specialty', searchFilters.specialty);
+      if (searchFilters.specialty && searchFilters.specialty !== 'all') params.append('specialty', searchFilters.specialty);
       if (searchFilters.location) params.append('location', searchFilters.location);
       if (searchFilters.search) params.append('search', searchFilters.search);
       
@@ -126,7 +126,7 @@ export default function FindProfessionals() {
                     <SelectValue placeholder="All specialties" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All specialties</SelectItem>
+                    <SelectItem value="all">All specialties</SelectItem>
                     {specialtyOptions.map((specialty) => (
                       <SelectItem key={specialty} value={specialty}>
                         {specialty}
