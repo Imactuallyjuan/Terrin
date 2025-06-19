@@ -314,7 +314,7 @@ export default function FindContractors() {
                 </Button>
               </Link>
               <Link href="/">
-                <Button size="lg" variant="outline" className="w-full border-white text-white hover:bg-white/10">
+                <Button size="lg" variant="outline" className="w-full border-white text-white hover:bg-white hover:text-blue-600">
                   Browse All Contractors
                 </Button>
               </Link>

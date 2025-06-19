@@ -238,7 +238,7 @@ export default function MatchTradesFirebase() {
             </Button>
             <Button 
               variant="outline" 
-              className="border-blue-600 text-blue-600 hover:bg-blue-50"
+              className="border-blue-600 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
               onClick={() => window.location.href = '/find-contractors'}
             >
               Browse All Contractors

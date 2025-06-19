@@ -153,6 +153,11 @@ Changelog:
   * Enhanced milestone interface with progress weight badges and visual feedback
   * Added comprehensive photo deletion functionality with backend API and frontend interface
   * Progress bar now accurately reflects real construction phase completion
+- June 19, 2025. UI/UX Button Visibility Fixes
+  * Fixed "Browse Contractors" button text visibility issues on How It Works and Find Contractors pages
+  * Resolved white-on-white text problem by adding proper hover state color definitions
+  * Enhanced button accessibility across all landing page components
+  * Improved user experience with consistent button styling and visibility
 ```
 
 ## User Preferences

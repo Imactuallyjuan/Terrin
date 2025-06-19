@@ -249,7 +249,7 @@ export default function HowItWorks() {
               </Button>
             </Link>
             <Link href="/find-contractors">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
                 Browse Contractors
               </Button>
             </Link>
