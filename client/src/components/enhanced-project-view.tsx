@@ -120,6 +120,9 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     progressWeight: 10
   });
 
+  // Receipt viewing modal state
+  const [viewingReceipt, setViewingReceipt] = useState<string | null>(null);
+
   // Construction milestone presets with realistic weights
   const constructionPresets = [
     { title: 'Site Preparation', description: 'Clear land, excavation, utilities setup', weight: 5 },
@@ -807,7 +810,7 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                                 src={cost.receipt} 
                                 alt="Receipt" 
                                 className="w-24 h-24 object-cover rounded border cursor-pointer hover:opacity-80"
-                                onClick={() => window.open(cost.receipt, '_blank')}
+                                onClick={() => setViewingReceipt(cost.receipt || '')}
                               />
                               <p className="text-xs text-muted-foreground mt-1">Click to view full size</p>
                             </div>
@@ -1359,6 +1362,32 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Receipt Viewing Modal */}
+      {viewingReceipt && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4" onClick={() => setViewingReceipt(null)}>
+          <div className="relative max-w-4xl max-h-full">
+            <img
+              src={viewingReceipt}
+              alt="Receipt"
+              className="max-w-full max-h-full object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              className="absolute top-4 right-4 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors"
+              onClick={() => setViewingReceipt(null)}
+            >
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="absolute bottom-4 left-4 right-4 bg-black bg-opacity-60 text-white p-3 rounded">
+              <p className="text-sm">Receipt Image</p>
+              <p className="text-xs opacity-75 mt-1">Click outside to close</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Photo Expansion Modal */}
       {selectedPhoto && (
