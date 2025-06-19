@@ -485,12 +485,6 @@ export default function ContractorProfile() {
                   Send Message
                 </Button>
                 
-                {professional.phone && (
-                  <Button variant="outline" className="w-full">
-                    <Phone className="h-4 w-4 mr-2" />
-                    Call Now
-                  </Button>
-                )}
               </CardContent>
             </Card>
 
@@ -507,19 +501,17 @@ export default function ContractorProfile() {
                   </div>
                 )}
                 
-                {professional.insuranceExpiry && (
-                  <div>
-                    <p className="font-medium text-sm">Insurance Valid Until</p>
-                    <p className="text-gray-600">
-                      {new Date(professional.insuranceExpiry).toLocaleDateString()}
-                    </p>
-                  </div>
-                )}
+                <div>
+                  <p className="font-medium text-sm">Verification Status</p>
+                  <p className="text-gray-600">
+                    {professional.verified ? 'Verified Professional' : 'Unverified'}
+                  </p>
+                </div>
                 
                 <div>
                   <p className="font-medium text-sm">Member Since</p>
                   <p className="text-gray-600">
-                    {new Date(professional.createdAt).toLocaleDateString()}
+                    {professional.createdAt ? new Date(professional.createdAt).toLocaleDateString() : 'Unknown'}
                   </p>
                 </div>
               </CardContent>
