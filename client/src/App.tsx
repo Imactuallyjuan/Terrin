@@ -85,7 +85,7 @@ function Router() {
       <Route path="/find-professionals" component={FindProfessionals} />
       <Route path="/for-professionals" component={ForProfessionals} />
       <Route path="/gallery" component={Gallery} />
-      <Route path="/contractor/:id" component={ContractorProfile} />
+      <Route path="/professionals/:id" component={ContractorProfile} />
       
       {/* Home/Landing Page */}
       {loading || !isAuthenticated ? (

@@ -85,7 +85,7 @@ const quoteSchema = z.object({
 });
 
 export default function ContractorProfile() {
-  const [match, params] = useRoute("/professional/:id");
+  const [match, params] = useRoute("/professionals/:id");
   const { user } = useFirebaseAuth();
   const [showQuoteDialog, setShowQuoteDialog] = useState(false);
   
