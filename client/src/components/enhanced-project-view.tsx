@@ -731,6 +731,36 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
 
         <TabsContent value="timeline">
           <div className="space-y-6">
+            {/* AI Timeline Generation */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Project Timeline</CardTitle>
+                  <Button
+                    onClick={() => generateTimelineMutation.mutate()}
+                    disabled={generateTimelineMutation.isPending}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  >
+                    {generateTimelineMutation.isPending ? (
+                      <>
+                        <Clock className="mr-2 h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Target className="mr-2 h-4 w-4" />
+                        Generate AI Timeline
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Let AI create a complete project timeline with intelligent milestones based on your project description. 
+                  Perfect for construction phases like foundation, framing, electrical, plumbing, and finishing work.
+                </p>
+              </CardHeader>
+            </Card>
+
             {/* Add Milestone Form */}
             <Card>
               <CardHeader>
