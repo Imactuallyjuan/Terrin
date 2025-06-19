@@ -26,8 +26,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/find-professionals">
-                  <span className="hover:text-orange-400 transition-colors cursor-pointer">Find Contractors</span>
+                <Link href="/find-contractors">
+                  <span className="hover:text-orange-400 transition-colors cursor-pointer">Find Professionals</span>
                 </Link>
               </li>
               <li>

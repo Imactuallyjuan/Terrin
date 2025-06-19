@@ -53,7 +53,7 @@ export default function Header() {
                     </span>
                   </Link>
                   {(userRole === 'professional' || userRole === 'both') && (
-                    <Link href="/professional-portal">
+                    <Link href="/contractor-portal">
                       <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
                         Professional Portal
                       </span>
@@ -72,9 +72,9 @@ export default function Header() {
                       How it Works
                     </span>
                   </Link>
-                  <Link href="/find-professionals">
+                  <Link href="/find-contractors">
                     <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
-                      Find Contractors
+                      Find Professionals
                     </span>
                   </Link>
                   <Link href="/for-professionals">
