@@ -32,29 +32,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { queryClient } from "@/lib/queryClient";
-
-interface Contractor {
-  id: number;
-  businessName: string;
-  specialty: string;
-  description?: string;
-  location: string;
-  phone?: string;
-  email?: string;
-  website?: string;
-  yearsExperience?: number;
-  licenseNumber?: string;
-  insuranceExpiry?: string;
-  rating?: number;
-  reviewCount?: number;
-  completedProjects?: number;
-  responseTime?: string;
-  hourlyRate?: string;
-  serviceAreas?: string[];
-  certifications?: string[];
-  profilePhoto?: string;
-  createdAt: string;
-}
+import { Contractor } from "@/../../shared/schema";
 
 interface Review {
   id: number;
@@ -108,9 +86,7 @@ export default function ContractorProfile() {
     enabled: !!professionalId
   });
 
-  // Debug logging to see what data we're getting
-  console.log('Professional data:', professional);
-  console.log('Professional ID:', professionalId);
+
 
   // Fetch professional reviews
   const { data: reviews = [] } = useQuery<Review[]>({
@@ -195,7 +171,7 @@ export default function ContractorProfile() {
     );
   }
 
-  const averageRating = professional.rating || 0;
+  const averageRating = parseFloat(professional.rating || '0');
   const totalReviews = professional.reviewCount || reviews.length;
 
   return (
@@ -219,7 +195,6 @@ export default function ContractorProfile() {
               <CardContent className="p-6">
                 <div className="flex items-start gap-6">
                   <Avatar className="w-24 h-24">
-                    <AvatarImage src={professional.profilePhoto} />
                     <AvatarFallback className="text-2xl">
                       {professional?.businessName?.charAt(0) || 'P'}
                     </AvatarFallback>
@@ -404,40 +379,33 @@ export default function ContractorProfile() {
               <TabsContent value="contact" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Contact Information</CardTitle>
+                    <CardTitle>Professional Details</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {professional.phone && (
-                      <div className="flex items-center gap-3">
-                        <Phone className="h-5 w-5 text-gray-400" />
-                        <div>
-                          <p className="font-medium">Phone</p>
-                          <p className="text-gray-600">{professional.phone}</p>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="font-medium">Location</p>
+                        <p className="text-gray-600">{professional.location}</p>
                       </div>
-                    )}
-                    
-                    {professional.email && (
-                      <div className="flex items-center gap-3">
-                        <Mail className="h-5 w-5 text-gray-400" />
-                        <div>
-                          <p className="font-medium">Email</p>
-                          <p className="text-gray-600">{professional.email}</p>
-                        </div>
+                      <div>
+                        <p className="font-medium">Service Area</p>
+                        <p className="text-gray-600">{professional.serviceArea}</p>
                       </div>
-                    )}
-                    
-                    {professional.website && (
-                      <div className="flex items-center gap-3">
-                        <Building className="h-5 w-5 text-gray-400" />
-                        <div>
-                          <p className="font-medium">Website</p>
-                          <a href={professional.website} className="text-blue-600 hover:underline">
-                            {professional.website}
-                          </a>
-                        </div>
+                      <div>
+                        <p className="font-medium">Years Experience</p>
+                        <p className="text-gray-600">{professional.yearsExperience} years</p>
                       </div>
-                    )}
+                      <div>
+                        <p className="font-medium">Hourly Rate</p>
+                        <p className="text-gray-600">${professional.hourlyRate}/hour</p>
+                      </div>
+                      {professional.licenseNumber && (
+                        <div className="md:col-span-2">
+                          <p className="font-medium">License Number</p>
+                          <p className="text-gray-600">{professional.licenseNumber}</p>
+                        </div>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
