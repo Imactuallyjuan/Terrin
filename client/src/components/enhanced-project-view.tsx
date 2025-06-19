@@ -550,7 +550,11 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
             </div>
           </div>
           <div className="mt-4">
-            <Progress value={project.completionPercentage} className="w-full" />
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-muted-foreground">Progress</span>
+              <span className="text-sm font-medium">{completionPercentage}%</span>
+            </div>
+            <Progress value={completionPercentage} className="w-full" />
           </div>
         </CardContent>
       </Card>
@@ -603,7 +607,7 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Completion:</span>
-                    <span className="font-semibold">{project.completionPercentage}%</span>
+                    <span className="font-semibold">{completionPercentage}%</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Milestones:</span>
