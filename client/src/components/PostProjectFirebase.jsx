@@ -29,6 +29,7 @@ export default function PostProjectFirebase() {
   const { isAuthenticated, user, userRole } = useFirebaseAuth();
   const [estimateMode, setEstimateMode] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [customBudget, setCustomBudget] = useState('');
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -278,10 +279,17 @@ export default function PostProjectFirebase() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Budget Range</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={(value) => {
+                          if (value === 'custom') {
+                            field.onChange(customBudget);
+                          } else {
+                            field.onChange(value);
+                            setCustomBudget('');
+                          }
+                        }} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select budget range" />
+                              <SelectValue placeholder="Select or type budget range" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -290,9 +298,24 @@ export default function PostProjectFirebase() {
                             <SelectItem value="$15,000 - $30,000">$15,000 - $30,000</SelectItem>
                             <SelectItem value="$30,000 - $50,000">$30,000 - $50,000</SelectItem>
                             <SelectItem value="$50,000 - $100,000">$50,000 - $100,000</SelectItem>
-                            <SelectItem value="Over $100,000">Over $100,000</SelectItem>
+                            <SelectItem value="$100,000 - $250,000">$100,000 - $250,000</SelectItem>
+                            <SelectItem value="Over $250,000">Over $250,000</SelectItem>
+                            <SelectItem value="custom">Type Custom Budget...</SelectItem>
                           </SelectContent>
                         </Select>
+                        {field.value === 'custom' || (field.value && !['Under $5,000', '$5,000 - $15,000', '$15,000 - $30,000', '$30,000 - $50,000', '$50,000 - $100,000', '$100,000 - $250,000', 'Over $250,000'].includes(field.value)) ? (
+                          <div className="mt-2">
+                            <Input
+                              value={customBudget || field.value}
+                              onChange={(e) => {
+                                setCustomBudget(e.target.value);
+                                field.onChange(e.target.value);
+                              }}
+                              placeholder="Enter custom budget range (e.g., $75,000 - $125,000)"
+                              className="w-full"
+                            />
+                          </div>
+                        ) : null}
                         <FormMessage />
                       </FormItem>
                     )}

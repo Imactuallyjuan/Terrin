@@ -182,6 +182,14 @@ Changelog:
   * Maintained database table structure as "contractors" while updating all user-facing terminology
   * Fixed routing and component reference issues caused by global terminology changes
   * Platform now welcomes all types of construction professionals: contractors, freelancers, specialists, and independent experts
+- June 19, 2025. Custom Budget Input Implementation for Project Creation
+  * Added custom budget range functionality to both project creation forms (PostProjectFirebase.jsx and post-project.tsx)
+  * Enhanced budget options with additional ranges: $100,000 - $250,000 and Over $250,000
+  * Implemented "Type Custom Budget..." option with dynamic text input field
+  * Users can now enter any custom budget range (e.g., "$85,000 - $120,000" or "Budget flexible")
+  * Added custom budget category input to cost tracking system within project management
+  * Expanded cost tracking categories: materials, labor, permits, equipment, utilities, inspection, transportation, tools
+  * Both project creation and cost tracking now support unlimited custom categories and budget ranges
 ```
 
 ## User Preferences
