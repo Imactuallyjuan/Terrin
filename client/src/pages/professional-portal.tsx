@@ -39,7 +39,7 @@ export default function ProfessionalPortal() {
   const [editingProfile, setEditingProfile] = useState(false);
   const [formData, setFormData] = useState({
     businessName: '',
-    specialties: [],
+    specialties: [] as string[],
     yearsExperience: '',
     serviceArea: '',
     description: '',
@@ -360,8 +360,8 @@ export default function ProfessionalPortal() {
                             <div>
                               <Label htmlFor="businessName">Business Name *</Label>
                               <Input
-                                value={profileData.businessName}
-                                onChange={(e) => setProfileData({...profileData, businessName: e.target.value})}
+                                value={formData.businessName}
+                                onChange={(e) => setFormData({...formData, businessName: e.target.value})}
                                 placeholder="Your business name"
                               />
                             </div>
@@ -369,8 +369,8 @@ export default function ProfessionalPortal() {
                               <Label htmlFor="yearsExperience">Years of Experience</Label>
                               <Input
                                 type="number"
-                                value={profileData.yearsExperience}
-                                onChange={(e) => setProfileData({...profileData, yearsExperience: e.target.value})}
+                                value={formData.yearsExperience}
+                                onChange={(e) => setFormData({...formData, yearsExperience: e.target.value})}
                                 placeholder="5"
                               />
                             </div>
@@ -383,7 +383,7 @@ export default function ProfessionalPortal() {
                                 <label key={specialty} className="flex items-center space-x-2 text-sm">
                                   <input
                                     type="checkbox"
-                                    checked={profileData.specialties.includes(specialty)}
+                                    checked={formData.specialties.includes(specialty)}
                                     onChange={() => handleSpecialtyChange(specialty)}
                                     className="rounded"
                                   />
@@ -396,8 +396,8 @@ export default function ProfessionalPortal() {
                           <div>
                             <Label htmlFor="serviceArea">Service Area</Label>
                             <Input
-                              value={profileData.serviceArea}
-                              onChange={(e) => setProfileData({...profileData, serviceArea: e.target.value})}
+                              value={formData.serviceArea}
+                              onChange={(e) => setFormData({...formData, serviceArea: e.target.value})}
                               placeholder="Cities and regions you serve"
                             />
                           </div>
@@ -405,8 +405,8 @@ export default function ProfessionalPortal() {
                           <div>
                             <Label htmlFor="description">Business Description</Label>
                             <Textarea
-                              value={profileData.description}
-                              onChange={(e) => setProfileData({...profileData, description: e.target.value})}
+                              value={formData.description}
+                              onChange={(e) => setFormData({...formData, description: e.target.value})}
                               placeholder="Tell potential clients about your business, experience, and what sets you apart..."
                               rows={4}
                             />
@@ -416,8 +416,8 @@ export default function ProfessionalPortal() {
                             <div>
                               <Label htmlFor="phone">Phone Number</Label>
                               <Input
-                                value={profileData.phone}
-                                onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                                value={formData.phone}
+                                onChange={(e) => setFormData({...formData, phone: e.target.value})}
                                 placeholder="(555) 123-4567"
                               />
                             </div>
