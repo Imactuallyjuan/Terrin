@@ -70,7 +70,7 @@ export default function ContractorProfile() {
 
     setPhotoUploading(true);
     try {
-      const photoRef = ref(storage, `contractors/${user.uid}/profile.jpg`);
+      const photoRef = ref(storage, `professionals/${user.uid}/profile.jpg`);
       await uploadBytes(photoRef, profilePhoto);
       const downloadURL = await getDownloadURL(photoRef);
       return downloadURL;
@@ -91,7 +91,7 @@ export default function ContractorProfile() {
     if (!user) {
       toast({
         title: "Authentication required",
-        description: "Please sign in to create a contractor profile.",
+        description: "Please sign in to create a professional profile.",
         variant: "destructive",
       });
       return;
@@ -110,8 +110,8 @@ export default function ContractorProfile() {
         }
       }
 
-      // Save contractor profile to Firestore
-      await setDoc(doc(db, 'contractors', user.uid), {
+      // Save professional profile to Firestore
+      await setDoc(doc(db, 'professionals', user.uid), {
         ...data,
         userId: user.uid,
         email: user.email,
@@ -123,25 +123,25 @@ export default function ContractorProfile() {
         updatedAt: new Date(),
       });
 
-      // Update user role to contractor
+      // Update user role to professional
       await setDoc(doc(db, 'users', user.uid), {
         email: user.email,
-        role: 'contractor',
+        role: 'professional',
         profilePhotoUrl: photoUrl,
         createdAt: new Date(),
       }, { merge: true });
 
       toast({
         title: "Profile created successfully!",
-        description: "Your contractor profile is now live and visible to homeowners.",
+        description: "Your professional profile is now live and visible to homeowners.",
       });
 
       form.reset();
     } catch (error) {
-      console.error('Error creating contractor profile:', error);
+      console.error('Error creating professional profile:', error);
       toast({
         title: "Error",
-        description: "Failed to create contractor profile. Please try again.",
+        description: "Failed to create professional profile. Please try again.",
         variant: "destructive",
       });
     } finally {

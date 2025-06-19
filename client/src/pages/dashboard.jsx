@@ -101,7 +101,7 @@ export default function Dashboard() {
             Welcome back, {user?.email?.split('@')[0]}
           </h2>
           <p className="text-gray-600 mt-2">
-            Manage your construction projects and communicate with contractors
+            Manage your construction projects and communicate with professionals
           </p>
         </div>
 

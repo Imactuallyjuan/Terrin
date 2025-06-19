@@ -77,7 +77,7 @@ export default function Home() {
               <Button 
                 variant="outline" 
                 className="w-full border-green-600 text-green-600 hover:bg-green-50"
-                onClick={() => window.location.href = '/contractors'}
+                onClick={() => window.location.href = '/professionals'}
               >
                 Browse Contractors
               </Button>

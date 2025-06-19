@@ -389,7 +389,7 @@ export default function ForProfessionals() {
                   <h3 className="text-lg font-semibold text-blue-900 mb-3">New to the Industry?</h3>
                   <p className="text-blue-800 mb-4">
                     We support emerging professionals! If you're just starting out, we offer mentorship programs 
-                    and can pair you with experienced contractors for larger projects.
+                    and can pair you with experienced professionals for larger projects.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link href="/">

@@ -50,7 +50,7 @@ export default function Dashboard() {
           where('userId', '==', user.uid),
           orderBy('createdAt', 'desc')
         );
-      } else if (userRole === 'contractor') {
+      } else if (userRole === 'professional') {
         projectsQuery = query(
           collection(db, 'projects'),
           where('status', '==', 'open'),
@@ -152,7 +152,7 @@ export default function Dashboard() {
             Welcome back, {user?.email?.split('@')[0]}
           </h2>
           <p className="text-gray-600 mt-2">
-            Manage your construction projects and communicate with contractors
+            Manage your construction projects and communicate with professionals
           </p>
         </div>
 
@@ -407,17 +407,17 @@ export default function Dashboard() {
             <Card>
               <CardContent className="p-12 text-center">
                 <div className="mb-4">
-                  {userRole === 'contractor' ? (
+                  {userRole === 'professional' ? (
                     <Building className="h-12 w-12 text-gray-400 mx-auto" />
                   ) : (
                     <Plus className="h-12 w-12 text-gray-400 mx-auto" />
                   )}
                 </div>
                 <h4 className="text-lg font-medium text-gray-900 mb-2">
-                  {userRole === 'contractor' ? 'No projects available' : 'No projects yet'}
+                  {userRole === 'professional' ? 'No projects available' : 'No projects yet'}
                 </h4>
                 <p className="text-gray-600 mb-6">
-                  {userRole === 'contractor' 
+                  {userRole === 'professional' 
                     ? 'New projects will appear here when homeowners post them.'
                     : 'Start by posting your first construction project.'
                   }
@@ -471,7 +471,7 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="mt-4 pt-4 border-t">
-                      {userRole === 'contractor' ? (
+                      {userRole === 'professional' ? (
                         <Button variant="outline" size="sm" className="w-full">
                           View Details & Bid
                         </Button>
@@ -494,7 +494,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Stats for Contractors */}
-        {userRole === 'contractor' && (
+        {userRole === 'professional' && (
           <div className="mt-12">
             <h3 className="text-xl font-semibold text-gray-900 mb-6">Your Stats</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

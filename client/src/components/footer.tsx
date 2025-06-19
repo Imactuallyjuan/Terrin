@@ -8,7 +8,7 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-2">
             <h3 className="text-2xl font-bold text-orange-400 mb-4">Terrin</h3>
             <p className="text-gray-300 max-w-md">
-              Connecting homeowners with trusted construction professionals. Get accurate estimates and find the right contractor for your project.
+              Connecting homeowners with trusted construction professionals. Get accurate estimates and find the right professional for your project.
             </p>
           </div>
           
@@ -26,7 +26,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/find-contractors">
+                <Link href="/find-professionals">
                   <span className="hover:text-orange-400 transition-colors cursor-pointer">Find Contractors</span>
                 </Link>
               </li>

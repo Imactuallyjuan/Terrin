@@ -64,7 +64,7 @@ export default function HowItWorks() {
             <CardContent>
               <p className="text-slate-600">
                 Connect with local professionals who match your project needs. 
-                Browse profiles, ratings, and previous work examples from contractors and freelancers.
+                Browse profiles, ratings, and previous work examples from professionals and freelancers.
               </p>
             </CardContent>
           </Card>
@@ -79,7 +79,7 @@ export default function HowItWorks() {
             <CardContent>
               <p className="text-slate-600">
                 Use our project dashboard to track timeline, budget, and milestones. 
-                Communicate with contractors and monitor progress in real-time.
+                Communicate with professionals and monitor progress in real-time.
               </p>
             </CardContent>
           </Card>
@@ -217,7 +217,7 @@ export default function HowItWorks() {
                 </div>
                 <h3 className="font-semibold mb-2">All Types of Professionals</h3>
                 <p className="text-sm text-slate-600">
-                  Connect with contractors, freelancers, and specialists in your area
+                  Connect with professionals, freelancers, and specialists in your area
                 </p>
               </CardContent>
             </Card>
@@ -248,7 +248,7 @@ export default function HowItWorks() {
                 Get Free Estimate
               </Button>
             </Link>
-            <Link href="/find-contractors">
+            <Link href="/find-professionals">
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
                 Browse Contractors
               </Button>

@@ -238,59 +238,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Contractor routes
-  app.post('/api/contractors', verifyFirebaseToken, async (req: any, res) => {
+  app.post('/api/professionals', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
-      const contractorData = insertContractorSchema.parse(req.body);
+      const professionalData = insertContractorSchema.parse(req.body);
       
-      const contractor = await storage.createContractor({
-        ...contractorData,
+      const professional = await storage.createContractor({
+        ...professionalData,
         userId,
       });
 
-      res.json(contractor);
+      res.json(professional);
     } catch (error) {
-      console.error("Error creating contractor profile:", error);
+      console.error("Error creating professional profile:", error);
       if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid contractor data", errors: error.errors });
+        res.status(400).json({ message: "Invalid professional data", errors: error.errors });
       } else {
-        res.status(500).json({ message: "Failed to create contractor profile" });
+        res.status(500).json({ message: "Failed to create professional profile" });
       }
     }
   });
 
-  app.get('/api/contractors', async (req, res) => {
+  app.get('/api/professionals', async (req, res) => {
     try {
       const { specialty, limit = "10" } = req.query;
       const limitNum = parseInt(limit as string);
 
-      let contractors;
+      let professionals;
       if (specialty && typeof specialty === 'string') {
-        contractors = await storage.getContractorsBySpecialty(specialty, limitNum);
+        professionals = await storage.getContractorsBySpecialty(specialty, limitNum);
       } else {
-        contractors = await storage.getAllContractors(limitNum);
+        professionals = await storage.getAllContractors(limitNum);
       }
 
-      res.json(contractors);
+      res.json(professionals);
     } catch (error) {
-      console.error("Error fetching contractors:", error);
-      res.status(500).json({ message: "Failed to fetch contractors" });
+      console.error("Error fetching professionals:", error);
+      res.status(500).json({ message: "Failed to fetch professionals" });
     }
   });
 
-  app.get('/api/contractors/:id', async (req, res) => {
+  app.get('/api/professionals/:id', async (req, res) => {
     try {
-      const contractorId = parseInt(req.params.id);
-      const contractor = await storage.getContractor(contractorId);
+      const professionalId = parseInt(req.params.id);
+      const professional = await storage.getContractor(professionalId);
       
-      if (!contractor) {
+      if (!professional) {
         return res.status(404).json({ message: "Contractor not found" });
       }
 
-      res.json(contractor);
+      res.json(professional);
     } catch (error) {
-      console.error("Error fetching contractor:", error);
-      res.status(500).json({ message: "Failed to fetch contractor" });
+      console.error("Error fetching professional:", error);
+      res.status(500).json({ message: "Failed to fetch professional" });
     }
   });
 
@@ -657,14 +657,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Quote requests
   app.post('/api/quote-requests', verifyFirebaseToken, async (req: any, res) => {
     try {
-      const { contractorId, projectDescription, timeline, budget, contactMethod, preferredStartDate } = req.body;
+      const { professionalId, projectDescription, timeline, budget, contactMethod, preferredStartDate } = req.body;
       const clientId = req.user.uid;
       
       // Create a quote request (we'd need to add this to the schema)
       // For now, just return success
       res.json({ 
         id: Date.now(),
-        contractorId,
+        professionalId,
         clientId,
         projectDescription,
         timeline,
@@ -681,25 +681,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Contractor profile routes
-  app.get('/api/contractors/:id/reviews', async (req, res) => {
+  app.get('/api/professionals/:id/reviews', async (req, res) => {
     try {
-      const contractorId = parseInt(req.params.id);
+      const professionalId = parseInt(req.params.id);
       // For now, return sample reviews - would need proper implementation
       res.json([]);
     } catch (error) {
-      console.error("Error fetching contractor reviews:", error);
-      res.status(500).json({ message: "Failed to fetch contractor reviews" });
+      console.error("Error fetching professional reviews:", error);
+      res.status(500).json({ message: "Failed to fetch professional reviews" });
     }
   });
 
-  app.get('/api/contractors/:id/portfolio', async (req, res) => {
+  app.get('/api/professionals/:id/portfolio', async (req, res) => {
     try {
-      const contractorId = parseInt(req.params.id);
+      const professionalId = parseInt(req.params.id);
       // For now, return empty portfolio - would need proper implementation  
       res.json([]);
     } catch (error) {
-      console.error("Error fetching contractor portfolio:", error);
-      res.status(500).json({ message: "Failed to fetch contractor portfolio" });
+      console.error("Error fetching professional portfolio:", error);
+      res.status(500).json({ message: "Failed to fetch professional portfolio" });
     }
   });
 

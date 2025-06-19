@@ -21,12 +21,12 @@ export default function UserRoleSettings() {
     {
       value: 'homeowner',
       label: 'Homeowner',
-      description: 'Post projects and hire contractors',
+      description: 'Post projects and hire professionals',
       icon: User,
       color: 'bg-blue-100 text-blue-800'
     },
     {
-      value: 'contractor',
+      value: 'professional',
       label: 'Contractor',
       description: 'Find projects and submit bids',
       icon: Building,
@@ -35,7 +35,7 @@ export default function UserRoleSettings() {
     {
       value: 'both',
       label: 'Both',
-      description: 'Post projects and work as contractor',
+      description: 'Post projects and work as professional',
       icon: Users,
       color: 'bg-purple-100 text-purple-800'
     },
@@ -198,7 +198,7 @@ export default function UserRoleSettings() {
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
             <p className="text-sm text-yellow-800">
               <strong>Note:</strong> Changing your role will affect which features and pages you can access. 
-              {newRole === 'contractor' && " You'll be able to access the contractor portal."}
+              {newRole === 'professional' && " You'll be able to access the professional portal."}
               {newRole === 'homeowner' && " You'll be able to post projects and get estimates."}
               {newRole === 'both' && " You'll have access to all features."}
               {newRole === 'visitor' && " You'll have limited access to platform features."}

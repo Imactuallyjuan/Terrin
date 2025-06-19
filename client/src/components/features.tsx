@@ -40,7 +40,7 @@ export default function Features() {
             </div>
             <h3 className="mt-6 text-xl font-semibold text-gray-900">3. Match with Experts</h3>
             <p className="mt-4 text-slate-600">
-              Connect with verified, licensed contractors who specialize in your type of project and are available in your area.
+              Connect with verified, licensed professionals who specialize in your type of project and are available in your area.
             </p>
           </div>
         </div>

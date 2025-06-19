@@ -37,8 +37,8 @@ function Router() {
       </Route>
       
       {/* Protected Contractor Portal - Contractors and Both only */}
-      <Route path="/contractor-portal">
-        <ProtectedRoute requireAuth={true} allowedRoles={['contractor', 'both']}>
+      <Route path="/professional-portal">
+        <ProtectedRoute requireAuth={true} allowedRoles={['professional', 'both']}>
           <ContractorPortal />
         </ProtectedRoute>
       </Route>
@@ -51,7 +51,7 @@ function Router() {
       </Route>
       
       {/* Contractors Browsing - Requires Authentication */}
-      <Route path="/contractors">
+      <Route path="/professionals">
         <ProtectedRoute requireAuth={true}>
           <Contractors />
         </ProtectedRoute>

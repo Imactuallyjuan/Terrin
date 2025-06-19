@@ -113,7 +113,7 @@ export default function Messages() {
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
-              <p className="text-gray-600">Communicate with contractors and clients</p>
+              <p className="text-gray-600">Communicate with professionals and clients</p>
             </div>
           </div>
         </div>

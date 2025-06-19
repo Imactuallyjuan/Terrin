@@ -13,7 +13,7 @@ import { Link } from "wouter";
 export default function ContractorPortal() {
   const { user, userRole } = useFirebaseAuth();
   const [hasProfile, setHasProfile] = useState(false);
-  const [contractorProfile, setContractorProfile] = useState(null);
+  const [professionalProfile, setContractorProfile] = useState(null);
   const [availableProjects, setAvailableProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,13 +26,13 @@ export default function ContractorPortal() {
 
   const checkContractorProfile = async () => {
     try {
-      const contractorDoc = await getDoc(doc(db, 'contractors', user.uid));
-      if (contractorDoc.exists()) {
+      const professionalDoc = await getDoc(doc(db, 'professionals', user.uid));
+      if (professionalDoc.exists()) {
         setHasProfile(true);
-        setContractorProfile(contractorDoc.data());
+        setContractorProfile(professionalDoc.data());
       }
     } catch (error) {
-      console.error('Error checking contractor profile:', error);
+      console.error('Error checking professional profile:', error);
     }
   };
 
@@ -126,7 +126,7 @@ export default function ContractorPortal() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900">
-            Welcome back, {contractorProfile?.businessName || 'Contractor'}!
+            Welcome back, {professionalProfile?.businessName || 'Contractor'}!
           </h2>
           <p className="text-gray-600 mt-2">
             Manage your business profile and find new project opportunities.
@@ -231,22 +231,22 @@ export default function ContractorPortal() {
               <CardContent>
                 <div className="flex items-start space-x-6">
                   <img
-                    src={contractorProfile?.profilePhotoUrl || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face'}
+                    src={professionalProfile?.profilePhotoUrl || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face'}
                     alt="Profile"
                     className="w-24 h-24 rounded-full object-cover"
                   />
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold text-gray-900">
-                      {contractorProfile?.businessName}
+                      {professionalProfile?.businessName}
                     </h3>
-                    <p className="text-gray-600 mb-2">{contractorProfile?.specialties}</p>
+                    <p className="text-gray-600 mb-2">{professionalProfile?.specialties}</p>
                     <p className="text-sm text-gray-600 mb-4">
-                      {contractorProfile?.description}
+                      {professionalProfile?.description}
                     </p>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
-                      <span>{contractorProfile?.location}</span>
-                      <span>{contractorProfile?.experience}</span>
-                      <span>{contractorProfile?.phone}</span>
+                      <span>{professionalProfile?.location}</span>
+                      <span>{professionalProfile?.experience}</span>
+                      <span>{professionalProfile?.phone}</span>
                     </div>
                   </div>
                   <Button variant="outline">
@@ -280,7 +280,7 @@ export default function ContractorPortal() {
                 <CardContent className="p-6 text-center">
                   <Star className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-gray-900">
-                    {contractorProfile?.rating || 5.0}
+                    {professionalProfile?.rating || 5.0}
                   </div>
                   <div className="text-sm text-gray-600">Average Rating</div>
                 </CardContent>

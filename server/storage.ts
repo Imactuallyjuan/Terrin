@@ -55,7 +55,7 @@ export interface IStorage {
   deleteEstimate(id: number): Promise<void>;
   
   // Contractor operations
-  createContractor(contractor: InsertContractor): Promise<Contractor>;
+  createContractor(professional: InsertContractor): Promise<Contractor>;
   getContractor(id: number): Promise<Contractor | undefined>;
   getContractorsBySpecialty(specialty: string, limit?: number): Promise<Contractor[]>;
   getAllContractors(limit?: number): Promise<Contractor[]>;
@@ -199,45 +199,45 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Contractor operations
-  async createContractor(contractor: InsertContractor): Promise<Contractor> {
+  async createContractor(professional: InsertContractor): Promise<Contractor> {
     const [newContractor] = await db
-      .insert(contractors)
-      .values(contractor)
+      .insert(professionals)
+      .values(professional)
       .returning();
     return newContractor;
   }
 
   async getContractor(id: number): Promise<Contractor | undefined> {
-    const [contractor] = await db
+    const [professional] = await db
       .select()
-      .from(contractors)
-      .where(eq(contractors.id, id));
-    return contractor;
+      .from(professionals)
+      .where(eq(professionals.id, id));
+    return professional;
   }
 
   async getContractorsBySpecialty(specialty: string, limit: number = 10): Promise<Contractor[]> {
     return await db
       .select()
-      .from(contractors)
-      .where(and(eq(contractors.specialty, specialty), eq(contractors.verified, true)))
-      .orderBy(desc(contractors.rating))
+      .from(professionals)
+      .where(and(eq(professionals.specialty, specialty), eq(professionals.verified, true)))
+      .orderBy(desc(professionals.rating))
       .limit(limit);
   }
 
   async getAllContractors(limit: number = 10): Promise<Contractor[]> {
     return await db
       .select()
-      .from(contractors)
-      .where(eq(contractors.verified, true))
-      .orderBy(desc(contractors.rating))
+      .from(professionals)
+      .where(eq(professionals.verified, true))
+      .orderBy(desc(professionals.rating))
       .limit(limit);
   }
 
   async updateContractor(id: number, updates: Partial<InsertContractor>): Promise<Contractor | undefined> {
     const [updatedContractor] = await db
-      .update(contractors)
+      .update(professionals)
       .set({ ...updates, updatedAt: new Date() })
-      .where(eq(contractors.id, id))
+      .where(eq(professionals.id, id))
       .returning();
     return updatedContractor;
   }

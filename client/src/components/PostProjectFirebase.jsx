@@ -53,7 +53,7 @@ export default function PostProjectFirebase() {
       return;
     }
 
-    if (userRole === 'contractor') {
+    if (userRole === 'professional') {
       toast({
         title: "Access Restricted",
         description: "Contractors cannot post projects. Switch to homeowner mode or create a new account.",

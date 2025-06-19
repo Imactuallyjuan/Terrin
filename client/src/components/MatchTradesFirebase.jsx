@@ -8,7 +8,7 @@ import { db } from "../lib/firebase";
 import { useFirebaseAuth } from "../hooks/useFirebaseAuth";
 
 export default function MatchTradesFirebase() {
-  const [contractors, setContractors] = useState([]);
+  const [professionals, setContractors] = useState([]);
   const [loading, setLoading] = useState(true);
   const { userRole } = useFirebaseAuth();
 
@@ -18,18 +18,18 @@ export default function MatchTradesFirebase() {
 
   const fetchContractors = async () => {
     try {
-      const contractorsRef = collection(db, 'contractors');
-      const q = query(contractorsRef, orderBy('createdAt', 'desc'), limit(6));
+      const professionalsRef = collection(db, 'professionals');
+      const q = query(professionalsRef, orderBy('createdAt', 'desc'), limit(6));
       const querySnapshot = await getDocs(q);
       
-      const contractorData = querySnapshot.docs.map(doc => ({
+      const professionalData = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
       
-      setContractors(contractorData);
+      setContractors(professionalData);
     } catch (error) {
-      console.error('Error fetching contractors:', error);
+      console.error('Error fetching professionals:', error);
       // Fallback to sample data if Firestore is empty
       setContractors([
         {
@@ -77,9 +77,9 @@ export default function MatchTradesFirebase() {
     }
   };
 
-  const handleContactContractor = (contractor) => {
-    const message = `Hi ${contractor.businessName}, I found your profile on Terrin and I'm interested in your ${contractor.specialties.toLowerCase()} services. Could we discuss my project?`;
-    const phoneNumber = contractor.phone?.replace(/\D/g, '');
+  const handleContactContractor = (professional) => {
+    const message = `Hi ${professional.businessName}, I found your profile on Terrin and I'm interested in your ${professional.specialties.toLowerCase()} services. Could we discuss my project?`;
+    const phoneNumber = professional.phone?.replace(/\D/g, '');
     
     if (phoneNumber) {
       window.open(`tel:${phoneNumber}`, '_blank');
@@ -115,45 +115,45 @@ export default function MatchTradesFirebase() {
             Meet Our Verified Professionals
           </h2>
           <p className="mt-4 text-lg text-slate-600">
-            Connect with top-rated contractors in your area
+            Connect with top-rated professionals in your area
           </p>
         </div>
 
-        {contractors.length === 0 ? (
+        {professionals.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-lg text-gray-600 mb-6">
-              No contractors found. Be the first to join our platform!
+              No professionals found. Be the first to join our platform!
             </p>
-            {userRole === 'contractor' || userRole === 'both' ? (
+            {userRole === 'professional' || userRole === 'both' ? (
               <Button className="bg-blue-600 text-white hover:bg-blue-700">
                 Create Contractor Profile
               </Button>
             ) : (
               <p className="text-sm text-gray-500">
-                Are you a contractor? Sign up to create your profile.
+                Are you a professional? Sign up to create your profile.
               </p>
             )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {contractors.map((contractor) => (
-              <Card key={contractor.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            {professionals.map((professional) => (
+              <Card key={professional.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4 mb-4">
                     <img
-                      src={contractor.profilePhotoUrl || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face'}
-                      alt={contractor.businessName}
+                      src={professional.profilePhotoUrl || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face'}
+                      alt={professional.businessName}
                       className="w-16 h-16 rounded-full object-cover"
                     />
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg text-gray-900 truncate">
-                        {contractor.businessName}
+                        {professional.businessName}
                       </h3>
                       <div className="flex items-center space-x-2">
                         <Badge variant="secondary" className="text-xs">
-                          {contractor.specialties}
+                          {professional.specialties}
                         </Badge>
-                        {contractor.verified && (
+                        {professional.verified && (
                           <Award className="h-4 w-4 text-blue-600" title="Verified Professional" />
                         )}
                       </div>
@@ -163,7 +163,7 @@ export default function MatchTradesFirebase() {
                   <div className="space-y-3 mb-4">
                     <div className="flex items-center space-x-2 text-sm text-gray-600">
                       <MapPin className="h-4 w-4" />
-                      <span>{contractor.location}</span>
+                      <span>{professional.location}</span>
                     </div>
 
                     <div className="flex items-center space-x-2">
@@ -172,7 +172,7 @@ export default function MatchTradesFirebase() {
                           <Star
                             key={i}
                             className={`h-4 w-4 ${
-                              i < Math.floor(contractor.rating || 5)
+                              i < Math.floor(professional.rating || 5)
                                 ? 'text-yellow-400 fill-current'
                                 : 'text-gray-300'
                             }`}
@@ -180,17 +180,17 @@ export default function MatchTradesFirebase() {
                         ))}
                       </div>
                       <span className="text-sm text-gray-600">
-                        {contractor.rating || 5.0} ({contractor.reviewCount || 0} reviews)
+                        {professional.rating || 5.0} ({professional.reviewCount || 0} reviews)
                       </span>
                     </div>
 
                     <div className="text-sm text-gray-600">
-                      <span className="font-medium">Experience:</span> {contractor.experience}
+                      <span className="font-medium">Experience:</span> {professional.experience}
                     </div>
                   </div>
 
                   <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                    {contractor.description}
+                    {professional.description}
                   </p>
 
                   <div className="flex space-x-2">
@@ -198,17 +198,17 @@ export default function MatchTradesFirebase() {
                       variant="outline"
                       size="sm"
                       className="flex-1"
-                      onClick={() => handleContactContractor(contractor)}
+                      onClick={() => handleContactContractor(professional)}
                     >
                       <Phone className="h-4 w-4 mr-1" />
                       Contact
                     </Button>
                     
-                    {contractor.website && (
+                    {professional.website && (
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(contractor.website, '_blank')}
+                        onClick={() => window.open(professional.website, '_blank')}
                       >
                         <Globe className="h-4 w-4" />
                       </Button>
@@ -239,7 +239,7 @@ export default function MatchTradesFirebase() {
             <Button 
               variant="outline" 
               className="border-blue-600 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-              onClick={() => window.location.href = '/contractors'}
+              onClick={() => window.location.href = '/professionals'}
             >
               Browse All Contractors
             </Button>

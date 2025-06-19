@@ -18,7 +18,7 @@ interface ProjectPhoto {
   category: string;
   uploadedAt: string;
   location?: string;
-  contractorName?: string;
+  professionalName?: string;
 }
 
 export default function Gallery() {
@@ -36,7 +36,7 @@ export default function Gallery() {
     const matchesSearch = !searchTerm || 
       photo.projectTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
       photo.caption?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      photo.contractorName?.toLowerCase().includes(searchTerm.toLowerCase());
+      photo.professionalName?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = categoryFilter === "all" || photo.category === categoryFilter;
     
@@ -93,7 +93,7 @@ export default function Gallery() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
-              placeholder="Search projects, contractors, or descriptions..."
+              placeholder="Search projects, professionals, or descriptions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -189,9 +189,9 @@ export default function Gallery() {
                       </div>
                     )}
                   </div>
-                  {photo.contractorName && (
+                  {photo.professionalName && (
                     <p className="text-xs text-blue-600 mt-1 font-medium">
-                      by {photo.contractorName}
+                      by {photo.professionalName}
                     </p>
                   )}
                 </CardContent>
@@ -239,9 +239,9 @@ export default function Gallery() {
                 {selectedImage.caption && (
                   <p className="text-gray-700 mb-4">{selectedImage.caption}</p>
                 )}
-                {selectedImage.contractorName && (
+                {selectedImage.professionalName && (
                   <p className="text-sm text-blue-600 font-medium">
-                    Project by {selectedImage.contractorName}
+                    Project by {selectedImage.professionalName}
                   </p>
                 )}
               </div>

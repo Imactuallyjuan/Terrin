@@ -27,7 +27,7 @@ export default function Hero() {
             <span className="text-orange-400">Construction Professionals</span>
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-xl text-blue-100">
-            Get accurate cost estimates powered by AI and find vetted contractors for your construction projects. From small repairs to major renovations.
+            Get accurate cost estimates powered by AI and find vetted professionals for your construction projects. From small repairs to major renovations.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             <Button

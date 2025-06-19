@@ -131,7 +131,7 @@ export default function SignUp({ onSwitchToLogin }) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="homeowner">Post Projects (Homeowner)</SelectItem>
-              <SelectItem value="contractor">Find Work (Contractor)</SelectItem>
+              <SelectItem value="professional">Find Work (Contractor)</SelectItem>
               <SelectItem value="both">Both</SelectItem>
               <SelectItem value="visitor">Just Browsing</SelectItem>
             </SelectContent>

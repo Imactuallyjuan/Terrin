@@ -58,7 +58,7 @@ interface Contractor {
 
 interface Review {
   id: number;
-  contractorId: number;
+  professionalId: number;
   clientName: string;
   rating: number;
   comment: string;
@@ -85,11 +85,11 @@ const quoteSchema = z.object({
 });
 
 export default function ContractorProfile() {
-  const [match, params] = useRoute("/contractor/:id");
+  const [match, params] = useRoute("/professional/:id");
   const { user } = useFirebaseAuth();
   const [showQuoteDialog, setShowQuoteDialog] = useState(false);
   
-  const contractorId = params?.id ? parseInt(params.id) : null;
+  const professionalId = params?.id ? parseInt(params.id) : null;
 
   const form = useForm({
     resolver: zodResolver(quoteSchema),
@@ -102,22 +102,22 @@ export default function ContractorProfile() {
     }
   });
 
-  // Fetch contractor details
-  const { data: contractor, isLoading } = useQuery<Contractor>({
-    queryKey: ['/api/contractors', contractorId],
-    enabled: !!contractorId
+  // Fetch professional details
+  const { data: professional, isLoading } = useQuery<Contractor>({
+    queryKey: ['/api/professionals', professionalId],
+    enabled: !!professionalId
   });
 
-  // Fetch contractor reviews
+  // Fetch professional reviews
   const { data: reviews = [] } = useQuery<Review[]>({
-    queryKey: ['/api/contractors', contractorId, 'reviews'],
-    enabled: !!contractorId
+    queryKey: ['/api/professionals', professionalId, 'reviews'],
+    enabled: !!professionalId
   });
 
-  // Fetch contractor portfolio
+  // Fetch professional portfolio
   const { data: portfolio = [] } = useQuery<Project[]>({
-    queryKey: ['/api/contractors', contractorId, 'portfolio'],
-    enabled: !!contractorId
+    queryKey: ['/api/professionals', professionalId, 'portfolio'],
+    enabled: !!professionalId
   });
 
   // Submit quote request
@@ -127,7 +127,7 @@ export default function ContractorProfile() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contractorId,
+          professionalId,
           clientId: user?.uid,
           ...data
         })
@@ -142,12 +142,12 @@ export default function ContractorProfile() {
     }
   });
 
-  if (!match || !contractorId) {
+  if (!match || !professionalId) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Contractor Not Found</h1>
-          <Link href="/find-contractors">
+          <Link href="/find-professionals">
             <Button>Browse Contractors</Button>
           </Link>
         </div>
@@ -177,13 +177,13 @@ export default function ContractorProfile() {
     );
   }
 
-  if (!contractor) {
+  if (!professional) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Contractor Not Found</h1>
-          <p className="text-gray-600 mb-6">The contractor you're looking for doesn't exist or has been removed.</p>
-          <Link href="/find-contractors">
+          <p className="text-gray-600 mb-6">The professional you're looking for doesn't exist or has been removed.</p>
+          <Link href="/find-professionals">
             <Button>Browse Contractors</Button>
           </Link>
         </div>
@@ -191,15 +191,15 @@ export default function ContractorProfile() {
     );
   }
 
-  const averageRating = contractor.rating || 0;
-  const totalReviews = contractor.reviewCount || reviews.length;
+  const averageRating = professional.rating || 0;
+  const totalReviews = professional.reviewCount || reviews.length;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <Link href="/find-contractors">
+          <Link href="/find-professionals">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Search
@@ -215,9 +215,9 @@ export default function ContractorProfile() {
               <CardContent className="p-6">
                 <div className="flex items-start gap-6">
                   <Avatar className="w-24 h-24">
-                    <AvatarImage src={contractor.profilePhoto} />
+                    <AvatarImage src={professional.profilePhoto} />
                     <AvatarFallback className="text-2xl">
-                      {contractor.businessName.charAt(0)}
+                      {professional.businessName.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   
@@ -225,20 +225,20 @@ export default function ContractorProfile() {
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                          {contractor.businessName}
+                          {professional.businessName}
                         </h1>
                         <p className="text-xl text-blue-600 font-medium mb-2">
-                          {contractor.specialty}
+                          {professional.specialty}
                         </p>
                         <div className="flex items-center gap-4 text-gray-600">
                           <div className="flex items-center gap-1">
                             <MapPin className="h-4 w-4" />
-                            <span>{contractor.location}</span>
+                            <span>{professional.location}</span>
                           </div>
-                          {contractor.yearsExperience && (
+                          {professional.yearsExperience && (
                             <div className="flex items-center gap-1">
                               <Award className="h-4 w-4" />
-                              <span>{contractor.yearsExperience}+ years experience</span>
+                              <span>{professional.yearsExperience}+ years experience</span>
                             </div>
                           )}
                         </div>
@@ -255,28 +255,28 @@ export default function ContractorProfile() {
                         <p className="text-sm text-gray-600">{totalReviews} reviews</p>
                       </div>
                       
-                      {contractor.completedProjects && (
+                      {professional.completedProjects && (
                         <div className="text-center">
                           <div className="text-2xl font-bold text-blue-600 mb-1">
-                            {contractor.completedProjects}+
+                            {professional.completedProjects}+
                           </div>
                           <p className="text-sm text-gray-600">Projects</p>
                         </div>
                       )}
                       
-                      {contractor.responseTime && (
+                      {professional.responseTime && (
                         <div className="text-center">
                           <div className="text-2xl font-bold text-green-600 mb-1">
-                            {contractor.responseTime}
+                            {professional.responseTime}
                           </div>
                           <p className="text-sm text-gray-600">Response</p>
                         </div>
                       )}
                       
-                      {contractor.hourlyRate && (
+                      {professional.hourlyRate && (
                         <div className="text-center">
                           <div className="text-2xl font-bold text-purple-600 mb-1">
-                            {contractor.hourlyRate}
+                            {professional.hourlyRate}
                           </div>
                           <p className="text-sm text-gray-600">Hourly Rate</p>
                         </div>
@@ -299,29 +299,29 @@ export default function ContractorProfile() {
               <TabsContent value="about" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>About {contractor.businessName}</CardTitle>
+                    <CardTitle>About {professional.businessName}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-700 mb-6">
-                      {contractor.description || "No description provided."}
+                      {professional.description || "No description provided."}
                     </p>
                     
-                    {contractor.serviceAreas && contractor.serviceAreas.length > 0 && (
+                    {professional.serviceAreas && professional.serviceAreas.length > 0 && (
                       <div className="mb-6">
                         <h4 className="font-semibold mb-3">Service Areas</h4>
                         <div className="flex flex-wrap gap-2">
-                          {contractor.serviceAreas.map((area, index) => (
+                          {professional.serviceAreas.map((area, index) => (
                             <Badge key={index} variant="outline">{area}</Badge>
                           ))}
                         </div>
                       </div>
                     )}
                     
-                    {contractor.certifications && contractor.certifications.length > 0 && (
+                    {professional.certifications && professional.certifications.length > 0 && (
                       <div>
                         <h4 className="font-semibold mb-3">Certifications</h4>
                         <div className="flex flex-wrap gap-2">
-                          {contractor.certifications.map((cert, index) => (
+                          {professional.certifications.map((cert, index) => (
                             <Badge key={index} className="bg-green-100 text-green-800">{cert}</Badge>
                           ))}
                         </div>
@@ -406,33 +406,33 @@ export default function ContractorProfile() {
                     <CardTitle>Contact Information</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {contractor.phone && (
+                    {professional.phone && (
                       <div className="flex items-center gap-3">
                         <Phone className="h-5 w-5 text-gray-400" />
                         <div>
                           <p className="font-medium">Phone</p>
-                          <p className="text-gray-600">{contractor.phone}</p>
+                          <p className="text-gray-600">{professional.phone}</p>
                         </div>
                       </div>
                     )}
                     
-                    {contractor.email && (
+                    {professional.email && (
                       <div className="flex items-center gap-3">
                         <Mail className="h-5 w-5 text-gray-400" />
                         <div>
                           <p className="font-medium">Email</p>
-                          <p className="text-gray-600">{contractor.email}</p>
+                          <p className="text-gray-600">{professional.email}</p>
                         </div>
                       </div>
                     )}
                     
-                    {contractor.website && (
+                    {professional.website && (
                       <div className="flex items-center gap-3">
                         <Building className="h-5 w-5 text-gray-400" />
                         <div>
                           <p className="font-medium">Website</p>
-                          <a href={contractor.website} className="text-blue-600 hover:underline">
-                            {contractor.website}
+                          <a href={professional.website} className="text-blue-600 hover:underline">
+                            {professional.website}
                           </a>
                         </div>
                       </div>
@@ -516,7 +516,7 @@ export default function ContractorProfile() {
                   Send Message
                 </Button>
                 
-                {contractor.phone && (
+                {professional.phone && (
                   <Button variant="outline" className="w-full">
                     <Phone className="h-4 w-4 mr-2" />
                     Call Now
@@ -531,18 +531,18 @@ export default function ContractorProfile() {
                 <CardTitle>Business Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {contractor.licenseNumber && (
+                {professional.licenseNumber && (
                   <div>
                     <p className="font-medium text-sm">License Number</p>
-                    <p className="text-gray-600">{contractor.licenseNumber}</p>
+                    <p className="text-gray-600">{professional.licenseNumber}</p>
                   </div>
                 )}
                 
-                {contractor.insuranceExpiry && (
+                {professional.insuranceExpiry && (
                   <div>
                     <p className="font-medium text-sm">Insurance Valid Until</p>
                     <p className="text-gray-600">
-                      {new Date(contractor.insuranceExpiry).toLocaleDateString()}
+                      {new Date(professional.insuranceExpiry).toLocaleDateString()}
                     </p>
                   </div>
                 )}
@@ -550,7 +550,7 @@ export default function ContractorProfile() {
                 <div>
                   <p className="font-medium text-sm">Member Since</p>
                   <p className="text-gray-600">
-                    {new Date(contractor.createdAt).toLocaleDateString()}
+                    {new Date(professional.createdAt).toLocaleDateString()}
                   </p>
                 </div>
               </CardContent>
