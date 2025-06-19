@@ -155,36 +155,36 @@ export default function ContractorProfile() {
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-200 rounded w-48"></div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="h-64 bg-gray-200 rounded-lg"></div>
-                <div className="h-32 bg-gray-200 rounded-lg"></div>
-              </div>
-              <div className="space-y-6">
-                <div className="h-48 bg-gray-200 rounded-lg"></div>
-                <div className="h-32 bg-gray-200 rounded-lg"></div>
+  if (isLoading || !professional) {
+    if (isLoading) {
+      return (
+        <div className="min-h-screen bg-gray-50 p-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="animate-pulse space-y-6">
+              <div className="h-8 bg-gray-200 rounded w-48"></div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                  <div className="h-64 bg-gray-200 rounded-lg"></div>
+                  <div className="h-32 bg-gray-200 rounded-lg"></div>
+                </div>
+                <div className="space-y-6">
+                  <div className="h-48 bg-gray-200 rounded-lg"></div>
+                  <div className="h-32 bg-gray-200 rounded-lg"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  if (!professional) {
+      );
+    }
+    
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Contractor Not Found</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Professional Not Found</h1>
           <p className="text-gray-600 mb-6">The professional you're looking for doesn't exist or has been removed.</p>
           <Link href="/find-professionals">
-            <Button>Browse Contractors</Button>
+            <Button>Browse Professionals</Button>
           </Link>
         </div>
       </div>
@@ -217,7 +217,7 @@ export default function ContractorProfile() {
                   <Avatar className="w-24 h-24">
                     <AvatarImage src={professional.profilePhoto} />
                     <AvatarFallback className="text-2xl">
-                      {professional.businessName.charAt(0)}
+                      {professional?.businessName?.charAt(0) || 'P'}
                     </AvatarFallback>
                   </Avatar>
                   
