@@ -123,9 +123,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('Generating estimate for user:', userId);
       
+      // Generate a descriptive title from the description
+      let estimateTitle = title;
+      if (!estimateTitle || estimateTitle === projectType) {
+        // Extract a meaningful title from the description
+        const descWords = description.trim().split(' ');
+        if (descWords.length <= 6) {
+          estimateTitle = description;
+        } else {
+          // Take first 6 words and add "..." if longer
+          estimateTitle = descWords.slice(0, 6).join(' ') + (descWords.length > 6 ? '...' : '');
+        }
+        // Capitalize first letter
+        estimateTitle = estimateTitle.charAt(0).toUpperCase() + estimateTitle.slice(1);
+      }
+      
       // Generate AI-powered cost estimate
       const aiEstimate = await generateCostEstimate({
-        title: title || projectType || 'Construction Project',
+        title: estimateTitle,
         description,
         projectType: projectType || 'General Construction',
         budgetRange: budgetRange || 'Not specified',
@@ -151,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         aiAnalysis: aiEstimate.analysis,
         tradeBreakdowns: aiEstimate.tradeBreakdowns,
         inputData: JSON.stringify({
-          title,
+          title: estimateTitle,
           description,
           location,
           projectType,
@@ -166,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: estimate.id,
         ...aiEstimate,
         inputData: {
-          title,
+          title: estimateTitle,
           description,
           location,
           projectType,
