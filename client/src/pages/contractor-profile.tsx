@@ -108,6 +108,10 @@ export default function ContractorProfile() {
     enabled: !!professionalId
   });
 
+  // Debug logging to see what data we're getting
+  console.log('Professional data:', professional);
+  console.log('Professional ID:', professionalId);
+
   // Fetch professional reviews
   const { data: reviews = [] } = useQuery<Review[]>({
     queryKey: ['/api/professionals', professionalId, 'reviews'],
@@ -238,7 +242,7 @@ export default function ContractorProfile() {
                           {professional.yearsExperience && (
                             <div className="flex items-center gap-1">
                               <Award className="h-4 w-4" />
-                              <span>{professional.yearsExperience}+ years experience</span>
+                              <span>{professional.yearsExperience} years experience</span>
                             </div>
                           )}
                         </div>
@@ -255,32 +259,26 @@ export default function ContractorProfile() {
                         <p className="text-sm text-gray-600">{totalReviews} reviews</p>
                       </div>
                       
-                      {professional.completedProjects && (
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-blue-600 mb-1">
-                            {professional.completedProjects}+
-                          </div>
-                          <p className="text-sm text-gray-600">Projects</p>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600 mb-1">
+                          {professional.yearsExperience}
                         </div>
-                      )}
+                        <p className="text-sm text-gray-600">Years Experience</p>
+                      </div>
                       
-                      {professional.responseTime && (
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600 mb-1">
-                            {professional.responseTime}
-                          </div>
-                          <p className="text-sm text-gray-600">Response</p>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600 mb-1">
+                          {professional.verified ? '✓' : '○'}
                         </div>
-                      )}
+                        <p className="text-sm text-gray-600">{professional.verified ? 'Verified' : 'Unverified'}</p>
+                      </div>
                       
-                      {professional.hourlyRate && (
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-purple-600 mb-1">
-                            {professional.hourlyRate}
-                          </div>
-                          <p className="text-sm text-gray-600">Hourly Rate</p>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-purple-600 mb-1">
+                          ${professional.hourlyRate}
                         </div>
-                      )}
+                        <p className="text-sm text-gray-600">Hourly Rate</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -306,27 +304,30 @@ export default function ContractorProfile() {
                       {professional.description || "No description provided."}
                     </p>
                     
-                    {professional.serviceAreas && professional.serviceAreas.length > 0 && (
+                    {professional.serviceArea && (
                       <div className="mb-6">
-                        <h4 className="font-semibold mb-3">Service Areas</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {professional.serviceAreas.map((area, index) => (
-                            <Badge key={index} variant="outline">{area}</Badge>
-                          ))}
-                        </div>
+                        <h4 className="font-semibold mb-3">Service Area</h4>
+                        <Badge variant="outline">{professional.serviceArea}</Badge>
                       </div>
                     )}
                     
-                    {professional.certifications && professional.certifications.length > 0 && (
-                      <div>
-                        <h4 className="font-semibold mb-3">Certifications</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {professional.certifications.map((cert, index) => (
-                            <Badge key={index} className="bg-green-100 text-green-800">{cert}</Badge>
-                          ))}
-                        </div>
+                    {professional.licenseNumber && (
+                      <div className="mb-6">
+                        <h4 className="font-semibold mb-3">License Information</h4>
+                        <p className="text-gray-600">License #: {professional.licenseNumber}</p>
                       </div>
                     )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-semibold mb-2">Experience</h4>
+                        <p className="text-gray-600">{professional.yearsExperience} years</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2">Hourly Rate</h4>
+                        <p className="text-gray-600">${professional.hourlyRate}/hour</p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
