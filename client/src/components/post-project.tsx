@@ -278,7 +278,7 @@ export default function PostProject() {
                         <FormLabel>Budget Range</FormLabel>
                         <Select onValueChange={(value) => {
                           if (value === 'custom') {
-                            field.onChange(customBudget);
+                            field.onChange('custom');
                           } else {
                             field.onChange(value);
                             setCustomBudget('');
@@ -300,16 +300,17 @@ export default function PostProject() {
                             <SelectItem value="custom">Type Custom Budget...</SelectItem>
                           </SelectContent>
                         </Select>
-                        {field.value === 'custom' || (field.value && !['Under $5,000', '$5,000 - $15,000', '$15,000 - $30,000', '$30,000 - $50,000', '$50,000 - $100,000', '$100,000 - $250,000', 'Over $250,000'].includes(field.value)) ? (
+                        {field.value === 'custom' ? (
                           <div className="mt-2">
                             <Input
-                              value={customBudget || field.value}
+                              value={customBudget}
                               onChange={(e) => {
                                 setCustomBudget(e.target.value);
                                 field.onChange(e.target.value);
                               }}
                               placeholder="Enter custom budget range (e.g., $75,000 - $125,000)"
                               className="w-full"
+                              autoFocus
                             />
                           </div>
                         ) : null}
