@@ -450,13 +450,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const professional = await storage.getContractor(professionalId);
       
       if (!professional) {
-        return res.status(404).json({ message: "Contractor not found" });
+        return res.status(404).json({ message: "Professional not found" });
       }
 
       res.json(professional);
     } catch (error) {
       console.error("Error fetching professional:", error);
       res.status(500).json({ message: "Failed to fetch professional" });
+    }
+  });
+
+  app.get('/api/contractors/:id', async (req, res) => {
+    try {
+      const contractorId = parseInt(req.params.id);
+      const contractor = await storage.getContractor(contractorId);
+      
+      if (!contractor) {
+        return res.status(404).json({ message: "Contractor not found" });
+      }
+
+      res.json(contractor);
+    } catch (error) {
+      console.error("Error fetching contractor:", error);
+      res.status(500).json({ message: "Failed to fetch contractor" });
     }
   });
 
