@@ -16,6 +16,8 @@ import Projects from "@/pages/projects";
 import HowItWorks from "@/pages/how-it-works";
 import FindContractors from "@/pages/find-contractors";
 import ForProfessionals from "@/pages/for-professionals";
+import Messages from "@/pages/messages";
+import Gallery from "@/pages/gallery";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
@@ -68,10 +70,18 @@ function Router() {
         </ProtectedRoute>
       </Route>
       
+      {/* Messages Page - Requires Authentication */}
+      <Route path="/messages">
+        <ProtectedRoute requireAuth={true}>
+          <Messages />
+        </ProtectedRoute>
+      </Route>
+      
       {/* Public Preview Pages - No Authentication Required */}
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/find-contractors" component={FindContractors} />
       <Route path="/for-professionals" component={ForProfessionals} />
+      <Route path="/gallery" component={Gallery} />
       
       {/* Home/Landing Page */}
       {loading || !isAuthenticated ? (
