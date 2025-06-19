@@ -425,8 +425,8 @@ export default function ProfessionalPortal() {
                               <Label htmlFor="email">Email</Label>
                               <Input
                                 type="email"
-                                value={profileData.email}
-                                onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                                value={formData.email}
+                                onChange={(e) => setFormData({...formData, email: e.target.value})}
                                 placeholder="your@email.com"
                               />
                             </div>
@@ -436,16 +436,16 @@ export default function ProfessionalPortal() {
                             <div>
                               <Label htmlFor="website">Website</Label>
                               <Input
-                                value={profileData.website}
-                                onChange={(e) => setProfileData({...profileData, website: e.target.value})}
+                                value={formData.website}
+                                onChange={(e) => setFormData({...formData, website: e.target.value})}
                                 placeholder="https://yourwebsite.com"
                               />
                             </div>
                             <div>
                               <Label htmlFor="licenseNumber">License Number</Label>
                               <Input
-                                value={profileData.licenseNumber}
-                                onChange={(e) => setProfileData({...profileData, licenseNumber: e.target.value})}
+                                value={formData.licenseNumber}
+                                onChange={(e) => setFormData({...formData, licenseNumber: e.target.value})}
                                 placeholder="Optional license number"
                               />
                             </div>
@@ -455,8 +455,8 @@ export default function ProfessionalPortal() {
                             <label className="flex items-center space-x-2">
                               <input
                                 type="checkbox"
-                                checked={profileData.insurance}
-                                onChange={(e) => setProfileData({...profileData, insurance: e.target.checked})}
+                                checked={formData.insurance}
+                                onChange={(e) => setFormData({...formData, insurance: e.target.checked})}
                                 className="rounded"
                               />
                               <span>I carry liability insurance</span>
@@ -464,8 +464,8 @@ export default function ProfessionalPortal() {
                             <label className="flex items-center space-x-2">
                               <input
                                 type="checkbox"
-                                checked={profileData.bondedAndInsured}
-                                onChange={(e) => setProfileData({...profileData, bondedAndInsured: e.target.checked})}
+                                checked={formData.bondedAndInsured}
+                                onChange={(e) => setFormData({...formData, bondedAndInsured: e.target.checked})}
                                 className="rounded"
                               />
                               <span>I am bonded and insured</span>
