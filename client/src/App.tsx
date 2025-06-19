@@ -8,13 +8,14 @@ import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import AuthPage from "@/pages/auth";
 import Dashboard from "@/pages/dashboard";
-import ContractorPortal from "@/pages/contractor-portal";
+import ProfessionalPortal from "@/pages/professional-portal";
 import Contractors from "@/pages/contractors";
 import SettingsPage from "@/pages/settings";
 import Estimates from "@/pages/estimates";
 import Projects from "@/pages/projects";
 import HowItWorks from "@/pages/how-it-works";
 import FindContractors from "@/pages/find-contractors";
+import FindProfessionals from "@/pages/find-professionals";
 import ForProfessionals from "@/pages/for-professionals";
 import Messages from "@/pages/messages";
 import Gallery from "@/pages/gallery";
@@ -36,10 +37,10 @@ function Router() {
         </ProtectedRoute>
       </Route>
       
-      {/* Protected Contractor Portal - Contractors and Both only */}
+      {/* Protected Professional Portal - Professionals and Both only */}
       <Route path="/professional-portal">
         <ProtectedRoute requireAuth={true} allowedRoles={['professional', 'both']}>
-          <ContractorPortal />
+          <ProfessionalPortal />
         </ProtectedRoute>
       </Route>
       
@@ -81,6 +82,7 @@ function Router() {
       {/* Public Preview Pages - No Authentication Required */}
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/find-contractors" component={FindContractors} />
+      <Route path="/find-professionals" component={FindProfessionals} />
       <Route path="/for-professionals" component={ForProfessionals} />
       <Route path="/gallery" component={Gallery} />
       <Route path="/contractor/:id" component={ContractorProfile} />
