@@ -215,9 +215,9 @@ export default function HowItWorks() {
                 <div className="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
                   <Users className="h-6 w-6 text-orange-600" />
                 </div>
-                <h3 className="font-semibold mb-2">Verified Contractors</h3>
+                <h3 className="font-semibold mb-2">All Types of Professionals</h3>
                 <p className="text-sm text-slate-600">
-                  Connect with pre-screened professionals in your area
+                  Connect with contractors, freelancers, and specialists in your area
                 </p>
               </CardContent>
             </Card>

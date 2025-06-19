@@ -158,6 +158,13 @@ Changelog:
   * Resolved white-on-white text problem by adding proper hover state color definitions
   * Enhanced button accessibility across all landing page components
   * Improved user experience with consistent button styling and visibility
+- June 19, 2025. Inclusive Professional Platform Language
+  * Removed exclusive "pre-screened" and "verified" language throughout the platform
+  * Updated all pages to welcome contractors, freelancers, and specialists of all sizes
+  * Changed "Find Verified Contractors" to "Find Construction Professionals"
+  * Replaced verification process with user choice and profile browsing features
+  * Made platform messaging inclusive of solo experts and established companies
+  * Updated professional onboarding to focus on profile creation rather than verification requirements
 ```
 
 ## User Preferences

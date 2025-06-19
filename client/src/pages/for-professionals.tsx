@@ -189,9 +189,9 @@ export default function ForProfessionals() {
               <div className="bg-orange-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-orange-600">1</span>
               </div>
-              <h3 className="text-lg font-semibold mb-2">Apply & Get Verified</h3>
+              <h3 className="text-lg font-semibold mb-2">Create Your Profile</h3>
               <p className="text-slate-600">
-                Submit your application with business credentials. Our team verifies your license, insurance, and references.
+                Sign up and create your professional profile. Share your experience, specialties, and work samples.
               </p>
             </div>
 
@@ -199,9 +199,9 @@ export default function ForProfessionals() {
               <div className="bg-orange-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-orange-600">2</span>
               </div>
-              <h3 className="text-lg font-semibold mb-2">Build Your Profile</h3>
+              <h3 className="text-lg font-semibold mb-2">Showcase Your Work</h3>
               <p className="text-slate-600">
-                Showcase your expertise, upload project photos, and set your service areas and specialties.
+                Upload project photos, highlight your specialties, and set your service areas to attract the right clients.
               </p>
             </div>
 
