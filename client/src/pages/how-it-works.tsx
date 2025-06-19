@@ -59,12 +59,12 @@ export default function HowItWorks() {
               <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 <Users className="h-8 w-8 text-green-600" />
               </div>
-              <CardTitle className="text-xl">2. Find Verified Contractors</CardTitle>
+              <CardTitle className="text-xl">2. Find Construction Professionals</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-slate-600">
-                Connect with pre-screened, local contractors who match your project needs. 
-                Browse profiles, ratings, and previous work examples.
+                Connect with local professionals who match your project needs. 
+                Browse profiles, ratings, and previous work examples from contractors and freelancers.
               </p>
             </CardContent>
           </Card>

@@ -140,10 +140,10 @@ export default function Contractors() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Find Trusted Contractors
+            Find Construction Professionals
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Connect with verified construction professionals in your area
+            Connect with construction professionals in your area
           </p>
         </div>
 

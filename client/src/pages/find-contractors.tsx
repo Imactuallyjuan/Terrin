@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Star, MapPin, Phone, Mail, Award, Clock, CheckCircle } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Phone, Mail, Award, Clock, CheckCircle, Users, MessageSquare } from "lucide-react";
 import { Link } from "wouter";
 
 export default function FindContractors() {
@@ -73,11 +73,11 @@ export default function FindContractors() {
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Find Verified Contractors
+            Find Construction Professionals
           </h1>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
-            Connect with pre-screened, highly-rated construction professionals in your area. 
-            Every contractor is verified, insured, and ready to bring your project to life.
+            Connect with skilled construction professionals in your area. 
+            Browse contractors, freelancers, and specialists ready to bring your project to life.
           </p>
           
           {/* Search Preview */}
@@ -205,12 +205,12 @@ export default function FindContractors() {
           </div>
         </div>
 
-        {/* Verification Process */}
+        {/* Quality & Choice */}
         <div className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Verification Process</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Quality Professionals, Your Choice</h2>
             <p className="text-xl text-slate-600">
-              Every contractor goes through our rigorous screening process
+              Browse profiles, read reviews, and choose the professional that fits your project needs
             </p>
           </div>
 
@@ -218,11 +218,11 @@ export default function FindContractors() {
             <Card className="text-center">
               <CardContent className="pt-6">
                 <div className="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="h-6 w-6 text-blue-600" />
+                  <Star className="h-6 w-6 text-blue-600" />
                 </div>
-                <h3 className="font-semibold mb-2">License Verification</h3>
+                <h3 className="font-semibold mb-2">Browse Profiles</h3>
                 <p className="text-sm text-slate-600">
-                  Valid business license and contractor certifications verified
+                  View detailed profiles with portfolios, specialties, and experience
                 </p>
               </CardContent>
             </Card>
@@ -230,11 +230,11 @@ export default function FindContractors() {
             <Card className="text-center">
               <CardContent className="pt-6">
                 <div className="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                  <Award className="h-6 w-6 text-green-600" />
+                  <Users className="h-6 w-6 text-green-600" />
                 </div>
-                <h3 className="font-semibold mb-2">Insurance Check</h3>
+                <h3 className="font-semibold mb-2">Read Reviews</h3>
                 <p className="text-sm text-slate-600">
-                  General liability and workers compensation insurance confirmed
+                  See ratings and feedback from previous clients and projects
                 </p>
               </CardContent>
             </Card>
@@ -242,11 +242,11 @@ export default function FindContractors() {
             <Card className="text-center">
               <CardContent className="pt-6">
                 <div className="bg-orange-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                  <Star className="h-6 w-6 text-orange-600" />
+                  <MessageSquare className="h-6 w-6 text-orange-600" />
                 </div>
-                <h3 className="font-semibold mb-2">Reference Review</h3>
+                <h3 className="font-semibold mb-2">Direct Contact</h3>
                 <p className="text-sm text-slate-600">
-                  Past client references and project portfolio evaluated
+                  Message professionals directly to discuss your project needs
                 </p>
               </CardContent>
             </Card>
@@ -254,11 +254,11 @@ export default function FindContractors() {
             <Card className="text-center">
               <CardContent className="pt-6">
                 <div className="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                  <Clock className="h-6 w-6 text-purple-600" />
+                  <CheckCircle className="h-6 w-6 text-purple-600" />
                 </div>
-                <h3 className="font-semibold mb-2">Background Check</h3>
+                <h3 className="font-semibold mb-2">Your Choice</h3>
                 <p className="text-sm text-slate-600">
-                  Criminal background and business history screening completed
+                  Select the professional that best matches your project and budget
                 </p>
               </CardContent>
             </Card>
@@ -273,8 +273,8 @@ export default function FindContractors() {
               <div className="flex items-start gap-3">
                 <CheckCircle className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold">Pre-Screened Professionals</h3>
-                  <p className="text-slate-600">Every contractor is verified, licensed, and insured before joining our platform.</p>
+                  <h3 className="font-semibold">Diverse Professionals</h3>
+                  <p className="text-slate-600">Find contractors, freelancers, and specialists of all sizes - from solo experts to established companies.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
