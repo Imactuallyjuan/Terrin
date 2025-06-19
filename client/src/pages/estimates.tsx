@@ -41,6 +41,10 @@ export default function Estimates() {
     try {
       if (estimate.inputData) {
         const inputData = JSON.parse(estimate.inputData);
+        // Use the improved title if available, otherwise fall back to old format
+        if (inputData.title) {
+          return inputData.title;
+        }
         const type = inputData.projectType || 'Construction Project';
         const location = inputData.location ? ` in ${inputData.location}` : '';
         return `${type}${location}`;

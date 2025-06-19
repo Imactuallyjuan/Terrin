@@ -166,17 +166,24 @@ export default function Home() {
                 </div>
               ) : estimates.length > 0 ? (
                 <div className="space-y-4">
-                  {estimates.slice(0, 3).map((estimate: any) => (
-                    <div key={estimate.id} className="border-l-4 border-green-600 pl-4">
-                      <h4 className="font-semibold text-gray-900">
-                        ${estimate.totalCostMin} - ${estimate.totalCostMax}
-                      </h4>
-                      <p className="text-sm text-slate-600">{estimate.timeline}</p>
-                      <p className="text-xs text-slate-500">
-                        Generated {new Date(estimate.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  ))}
+                  {estimates.slice(0, 3).map((estimate: any) => {
+                    const inputData = estimate.inputData ? JSON.parse(estimate.inputData) : {};
+                    const projectTitle = inputData.title || 'Construction Project';
+                    
+                    return (
+                      <div key={estimate.id} className="border-l-4 border-green-600 pl-4">
+                        <h4 className="font-semibold text-gray-900">
+                          {projectTitle}
+                        </h4>
+                        <p className="text-sm text-slate-600">
+                          ${parseInt(estimate.totalCostMin).toLocaleString()} - ${parseInt(estimate.totalCostMax).toLocaleString()}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          {estimate.timeline} • Generated {new Date(estimate.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-8">

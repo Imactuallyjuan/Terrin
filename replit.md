@@ -190,6 +190,12 @@ Changelog:
   * Added custom budget category input to cost tracking system within project management
   * Expanded cost tracking categories: materials, labor, permits, equipment, utilities, inspection, transportation, tools
   * Both project creation and cost tracking now support unlimited custom categories and budget ranges
+- June 19, 2025. AI Estimate Title Generation & Project Creation Streamlining
+  * Removed AI estimate functionality from project creation forms to streamline the interface
+  * Updated AI estimate title generation to use project descriptions instead of "Other - City, State"
+  * Enhanced estimate titles to show meaningful descriptions like "Bedroom renovation from 900 square..."
+  * Fixed frontend display of estimate titles on both home page and estimates page
+  * Simplified project creation to focus on single "Post Project" button workflow
 ```
 
 ## User Preferences

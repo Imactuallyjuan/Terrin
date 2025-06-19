@@ -6,6 +6,57 @@ import { insertProjectSchema, insertContractorSchema } from "@shared/schema";
 import { generateCostEstimate } from "./openai";
 import { z } from "zod";
 
+// Smart title generation function
+function generateSmartTitle(description: string): string {
+  const desc = description.toLowerCase().trim();
+  
+  // Project type keywords and their corresponding titles
+  const projectPatterns = [
+    { keywords: ['kitchen', 'cabinet', 'countertop', 'appliance'], title: 'Kitchen Renovation' },
+    { keywords: ['bathroom', 'shower', 'bathtub', 'toilet', 'vanity'], title: 'Bathroom Renovation' },
+    { keywords: ['bedroom', 'master bedroom', 'guest room'], title: 'Bedroom Renovation' },
+    { keywords: ['living room', 'family room', 'great room'], title: 'Living Room Renovation' },
+    { keywords: ['basement', 'cellar', 'lower level'], title: 'Basement Renovation' },
+    { keywords: ['attic', 'loft', 'upper level'], title: 'Attic Renovation' },
+    { keywords: ['roof', 'roofing', 'shingle', 'gutter'], title: 'Roofing Project' },
+    { keywords: ['deck', 'patio', 'outdoor'], title: 'Deck/Patio Project' },
+    { keywords: ['fence', 'fencing', 'gate'], title: 'Fencing Project' },
+    { keywords: ['driveway', 'walkway', 'sidewalk'], title: 'Concrete Work' },
+    { keywords: ['paint', 'painting', 'interior paint', 'exterior paint'], title: 'Painting Project' },
+    { keywords: ['floor', 'flooring', 'hardwood', 'tile', 'carpet'], title: 'Flooring Project' },
+    { keywords: ['addition', 'add on', 'extension'], title: 'Home Addition' },
+    { keywords: ['garage', 'carport'], title: 'Garage Project' },
+    { keywords: ['window', 'door', 'entry'], title: 'Windows & Doors' },
+    { keywords: ['plumbing', 'pipe', 'leak', 'faucet'], title: 'Plumbing Work' },
+    { keywords: ['electrical', 'wiring', 'outlet', 'switch'], title: 'Electrical Work' },
+    { keywords: ['hvac', 'heating', 'cooling', 'air conditioning'], title: 'HVAC Project' },
+    { keywords: ['landscaping', 'garden', 'yard', 'lawn'], title: 'Landscaping Project' },
+    { keywords: ['siding', 'exterior', 'brick', 'stucco'], title: 'Exterior Work' }
+  ];
+  
+  // Find matching project type
+  for (const pattern of projectPatterns) {
+    if (pattern.keywords.some(keyword => desc.includes(keyword))) {
+      // Add size/scope information if available
+      const sizeMatch = desc.match(/(\d+)\s*(square feet|sq ft|sf)/i);
+      if (sizeMatch) {
+        return `${pattern.title} (${sizeMatch[1]} sq ft)`;
+      }
+      return pattern.title;
+    }
+  }
+  
+  // If no specific pattern matches, create a smart truncated title
+  const words = description.trim().split(' ');
+  if (words.length <= 4) {
+    return description.charAt(0).toUpperCase() + description.slice(1);
+  }
+  
+  // Extract first meaningful phrase (up to 4 words)
+  const meaningfulWords = words.slice(0, 4);
+  return meaningfulWords.join(' ').charAt(0).toUpperCase() + meaningfulWords.join(' ').slice(1);
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
 
   // Auth routes
@@ -126,16 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate a descriptive title from the description
       let estimateTitle = title;
       if (!estimateTitle || estimateTitle === projectType) {
-        // Extract a meaningful title from the description
-        const descWords = description.trim().split(' ');
-        if (descWords.length <= 6) {
-          estimateTitle = description;
-        } else {
-          // Take first 6 words and add "..." if longer
-          estimateTitle = descWords.slice(0, 6).join(' ') + (descWords.length > 6 ? '...' : '');
-        }
-        // Capitalize first letter
-        estimateTitle = estimateTitle.charAt(0).toUpperCase() + estimateTitle.slice(1);
+        estimateTitle = generateSmartTitle(description);
       }
       
       // Generate AI-powered cost estimate
