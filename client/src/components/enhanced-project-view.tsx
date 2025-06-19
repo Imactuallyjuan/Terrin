@@ -112,6 +112,13 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     progressWeight: 10
   });
 
+  const [editingMilestone, setEditingMilestone] = useState<number | null>(null);
+  const [editMilestoneData, setEditMilestoneData] = useState({
+    title: '',
+    description: '',
+    progressWeight: 10
+  });
+
   // Construction milestone presets with realistic weights
   const constructionPresets = [
     { title: 'Site Preparation', description: 'Clear land, excavation, utilities setup', weight: 5 },
@@ -388,7 +395,31 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
         completedDate: isCompleted ? null : new Date()
       }
     });
+  }
+
+  const startEditingMilestone = (milestone: ProjectMilestone) => {
+    setEditingMilestone(milestone.id);
+    setEditMilestoneData({
+      title: milestone.title,
+      description: milestone.description || '',
+      progressWeight: milestone.progressWeight || 10
+    });
   };
+
+  const saveEditedMilestone = () => {
+    if (editingMilestone) {
+      updateMilestoneMutation.mutate({ 
+        id: editingMilestone, 
+        updates: editMilestoneData 
+      });
+      setEditingMilestone(null);
+    }
+  };
+
+  const cancelEditingMilestone = () => {
+    setEditingMilestone(null);
+    setEditMilestoneData({ title: '', description: '', progressWeight: 10 });
+  };;
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -470,6 +501,12 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
   const totalCosts = costs.reduce((sum: number, cost: ProjectCost) => {
     return sum + parseFloat(cost.amount || '0');
   }, 0);
+
+  // Calculate project completion percentage based on completed milestones
+  const completionPercentage = milestones.length > 0 ? 
+    milestones
+      .filter((m: ProjectMilestone) => m.status === 'completed')
+      .reduce((sum: number, m: ProjectMilestone) => sum + (m.progressWeight || 10), 0) : 0;
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -900,7 +937,7 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                 ) : (
                   <div className="space-y-4">
                     {milestones.map((milestone: ProjectMilestone) => (
-                      <div key={milestone.id} className="flex items-center space-x-4 p-4 border rounded-lg">
+                      <div key={milestone.id} className="flex items-start space-x-4 p-4 border rounded-lg">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -909,35 +946,95 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                         >
                           <Check className={`h-4 w-4 ${milestone.status === 'completed' ? 'text-green-600' : 'text-muted-foreground'}`} />
                         </Button>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2">
-                            <span className={`font-medium ${milestone.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
-                              {milestone.title}
-                            </span>
-                            <Badge variant={milestone.status === 'completed' ? 'outline' : 'default'}>
-                              {milestone.status}
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs">
-                              {milestone.progressWeight || 10}% weight
-                            </Badge>
+                        
+                        {editingMilestone === milestone.id ? (
+                          <div className="flex-1 space-y-3">
+                            <Input
+                              value={editMilestoneData.title}
+                              onChange={(e) => setEditMilestoneData({...editMilestoneData, title: e.target.value})}
+                              placeholder="Milestone title"
+                              className="font-medium"
+                            />
+                            <Textarea
+                              value={editMilestoneData.description}
+                              onChange={(e) => setEditMilestoneData({...editMilestoneData, description: e.target.value})}
+                              placeholder="Description (optional)"
+                              className="text-sm"
+                              rows={2}
+                            />
+                            <div className="flex items-center space-x-2">
+                              <Label htmlFor={`weight-${milestone.id}`} className="text-sm">Weight:</Label>
+                              <Select 
+                                value={editMilestoneData.progressWeight.toString()} 
+                                onValueChange={(value) => setEditMilestoneData({...editMilestoneData, progressWeight: parseInt(value)})}
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="2">2%</SelectItem>
+                                  <SelectItem value="5">5%</SelectItem>
+                                  <SelectItem value="8">8%</SelectItem>
+                                  <SelectItem value="10">10%</SelectItem>
+                                  <SelectItem value="15">15%</SelectItem>
+                                  <SelectItem value="20">20%</SelectItem>
+                                  <SelectItem value="25">25%</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button size="sm" onClick={saveEditedMilestone} disabled={updateMilestoneMutation.isPending}>
+                                Save
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={cancelEditingMilestone}>
+                                Cancel
+                              </Button>
+                            </div>
                           </div>
-                          {milestone.description && (
-                            <div className="text-sm text-muted-foreground mt-1">{milestone.description}</div>
+                        ) : (
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <span className={`font-medium ${milestone.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+                                {milestone.title}
+                              </span>
+                              <Badge variant={milestone.status === 'completed' ? 'outline' : 'default'}>
+                                {milestone.status}
+                              </Badge>
+                              <Badge variant="secondary" className="text-xs">
+                                {milestone.progressWeight || 10}% weight
+                              </Badge>
+                            </div>
+                            {milestone.description && (
+                              <div className="text-sm text-muted-foreground mt-1">{milestone.description}</div>
+                            )}
+                            <div className="text-sm text-muted-foreground mt-1">
+                              {milestone.dueDate && `Due: ${new Date(milestone.dueDate).toLocaleDateString()}`}
+                              {milestone.completedDate && ` • Completed: ${new Date(milestone.completedDate).toLocaleDateString()}`}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="flex space-x-2">
+                          {editingMilestone !== milestone.id && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => startEditingMilestone(milestone)}
+                              className="text-blue-500 hover:text-blue-700"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
                           )}
-                          <div className="text-sm text-muted-foreground mt-1">
-                            {milestone.dueDate && `Due: ${new Date(milestone.dueDate).toLocaleDateString()}`}
-                            {milestone.completedDate && ` • Completed: ${new Date(milestone.completedDate).toLocaleDateString()}`}
-                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteMilestoneMutation.mutate(milestone.id)}
+                            disabled={deleteMilestoneMutation.isPending}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deleteMilestoneMutation.mutate(milestone.id)}
-                          disabled={deleteMilestoneMutation.isPending}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
                       </div>
                     ))}
                   </div>
