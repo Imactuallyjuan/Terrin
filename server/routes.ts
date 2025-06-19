@@ -393,6 +393,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Contractors API endpoint (alias for professionals)
+  app.get('/api/contractors', async (req, res) => {
+    try {
+      const { specialty, location, search, limit = '50' } = req.query;
+      const limitNum = parseInt(limit as string);
+
+      let professionals;
+      if (specialty && typeof specialty === 'string' && specialty !== 'all') {
+        professionals = await storage.getContractorsBySpecialty(specialty, limitNum);
+      } else {
+        professionals = await storage.getAllContractors(limitNum);
+      }
+
+      // Apply additional filters if provided
+      let filteredProfessionals = professionals;
+      
+      if (search && typeof search === 'string') {
+        const searchTerm = search.toLowerCase();
+        filteredProfessionals = filteredProfessionals.filter(p => 
+          p.businessName.toLowerCase().includes(searchTerm) ||
+          p.description.toLowerCase().includes(searchTerm) ||
+          p.specialty.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      if (location && typeof location === 'string') {
+        const locationTerm = location.toLowerCase();
+        filteredProfessionals = filteredProfessionals.filter(p => 
+          p.location.toLowerCase().includes(locationTerm) ||
+          p.serviceArea.toLowerCase().includes(locationTerm)
+        );
+      }
+
+      res.json(filteredProfessionals);
+    } catch (error) {
+      console.error("Error fetching contractors:", error);
+      res.status(500).json({ message: "Failed to fetch contractors" });
+    }
+  });
+
+  app.get('/api/contractors/user/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const contractors = await storage.getUserContractors(userId);
+      res.json(contractors);
+    } catch (error) {
+      console.error("Error fetching user contractors:", error);
+      res.status(500).json({ message: "Failed to fetch user contractors" });
+    }
+  });
+
   app.get('/api/professionals/:id', async (req, res) => {
     try {
       const professionalId = parseInt(req.params.id);

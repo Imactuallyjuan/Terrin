@@ -62,6 +62,7 @@ export interface IStorage {
   getContractor(id: number): Promise<Contractor | undefined>;
   getContractorsBySpecialty(specialty: string, limit?: number): Promise<Contractor[]>;
   getAllContractors(limit?: number): Promise<Contractor[]>;
+  getUserContractors(userId: string): Promise<Contractor[]>;
   updateContractor(id: number, updates: Partial<InsertContractor>): Promise<Contractor | undefined>;
   
   // Project Updates operations
@@ -239,6 +240,14 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contractors.verified, true))
       .orderBy(desc(contractors.rating))
       .limit(limit);
+  }
+
+  async getUserContractors(userId: string): Promise<Contractor[]> {
+    return await db
+      .select()
+      .from(contractors)
+      .where(eq(contractors.userId, userId))
+      .orderBy(desc(contractors.createdAt));
   }
 
   async updateContractor(id: number, updates: Partial<InsertContractor>): Promise<Contractor | undefined> {
