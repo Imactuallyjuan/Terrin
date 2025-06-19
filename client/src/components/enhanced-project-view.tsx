@@ -444,6 +444,35 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
         });
       }
     }
+  }
+
+  const handleReceiptUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      try {
+        // Convert file to base64 for storage
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64String = reader.result as string;
+          setNewCost({
+            ...newCost,
+            receipt: base64String
+          });
+        };
+        reader.readAsDataURL(file);
+        
+        toast({
+          title: "Receipt Uploaded",
+          description: "Receipt photo has been attached to this cost entry.",
+        });
+      } catch (error) {
+        toast({
+          title: "Upload Error",
+          description: "Failed to process the receipt image.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const handleAddPhoto = () => {
@@ -535,10 +564,14 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="flex items-center space-x-2">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm">Budget: {project.budgetRange}</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <DollarSign className="h-4 w-4 text-green-600" />
+              <span className="text-sm">Actual: ${totalCosts.toFixed(2)}</span>
             </div>
             <div className="flex items-center space-x-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
@@ -546,7 +579,7 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
             </div>
             <div className="flex items-center space-x-2">
               <Target className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Progress: {project.completionPercentage}%</span>
+              <span className="text-sm">Progress: {completionPercentage}%</span>
             </div>
           </div>
           <div className="mt-4">
@@ -713,6 +746,18 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                       placeholder="Additional notes..."
                     />
                   </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="receipt">Receipt Photo (optional)</Label>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleReceiptUpload}
+                      className="mt-1"
+                    />
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Upload a photo of your receipt to keep track of expenses
+                    </p>
+                  </div>
                 </div>
                 <Button 
                   onClick={handleAddCost} 
@@ -736,11 +781,16 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                 ) : (
                   <div className="space-y-4">
                     {costs.map((cost: ProjectCost) => (
-                      <div key={cost.id} className="flex justify-between items-center p-4 border rounded-lg">
+                      <div key={cost.id} className="flex justify-between items-start p-4 border rounded-lg">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2">
                             <Badge variant="outline">{cost.category}</Badge>
                             <span className="font-medium">{cost.description}</span>
+                            {cost.receipt && (
+                              <Badge variant="secondary" className="text-xs">
+                                📄 Receipt
+                              </Badge>
+                            )}
                           </div>
                           <div className="text-sm text-muted-foreground mt-1">
                             {cost.vendor && `${cost.vendor} • `}
@@ -748,6 +798,17 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                           </div>
                           {cost.notes && (
                             <div className="text-sm text-muted-foreground mt-1">{cost.notes}</div>
+                          )}
+                          {cost.receipt && (
+                            <div className="mt-2">
+                              <img 
+                                src={cost.receipt} 
+                                alt="Receipt" 
+                                className="w-24 h-24 object-cover rounded border cursor-pointer hover:opacity-80"
+                                onClick={() => window.open(cost.receipt, '_blank')}
+                              />
+                              <p className="text-xs text-muted-foreground mt-1">Click to view full size</p>
+                            </div>
                           )}
                         </div>
                         <div className="flex items-center space-x-2">
