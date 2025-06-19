@@ -102,6 +102,8 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     notes: ''
   });
 
+  const [customCategory, setCustomCategory] = useState('');
+
   const [newMilestone, setNewMilestone] = useState({
     title: '',
     description: '',
@@ -569,18 +571,42 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="category">Category</Label>
-                    <Select value={newCost.category} onValueChange={(value) => setNewCost({...newCost, category: value})}>
+                    <Select value={newCost.category} onValueChange={(value) => {
+                      if (value === 'custom') {
+                        setNewCost({...newCost, category: customCategory});
+                      } else {
+                        setNewCost({...newCost, category: value});
+                        setCustomCategory('');
+                      }
+                    }}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder="Select or type category" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="materials">Materials</SelectItem>
                         <SelectItem value="labor">Labor</SelectItem>
                         <SelectItem value="permits">Permits</SelectItem>
                         <SelectItem value="equipment">Equipment</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="utilities">Utilities</SelectItem>
+                        <SelectItem value="inspection">Inspection</SelectItem>
+                        <SelectItem value="transportation">Transportation</SelectItem>
+                        <SelectItem value="tools">Tools</SelectItem>
+                        <SelectItem value="custom">Type Custom Category...</SelectItem>
                       </SelectContent>
                     </Select>
+                    {newCost.category === 'custom' || (newCost.category && !['materials', 'labor', 'permits', 'equipment', 'utilities', 'inspection', 'transportation', 'tools'].includes(newCost.category)) ? (
+                      <div className="mt-2">
+                        <Input
+                          value={customCategory || newCost.category}
+                          onChange={(e) => {
+                            setCustomCategory(e.target.value);
+                            setNewCost({...newCost, category: e.target.value});
+                          }}
+                          placeholder="Enter custom category"
+                          className="w-full"
+                        />
+                      </div>
+                    ) : null}
                   </div>
                   <div>
                     <Label htmlFor="amount">Amount ($)</Label>
