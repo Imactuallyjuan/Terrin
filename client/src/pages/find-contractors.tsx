@@ -5,8 +5,8 @@ import { ArrowLeft, Star, MapPin, Phone, Mail, Award, Clock, CheckCircle, Users,
 import { Link } from "wouter";
 
 export default function FindContractors() {
-  // Sample contractor data for preview
-  const sampleContractors = [
+  // Sample professional data for preview
+  const sampleProfessionals = [
     {
       id: 1,
       name: "Bay Area Construction Co.",
@@ -77,7 +77,7 @@ export default function FindContractors() {
           </h1>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
             Connect with skilled construction professionals in your area. 
-            Browse contractors, freelancers, and specialists ready to bring your project to life.
+            Browse professionals, freelancers, and specialists ready to bring your project to life.
           </p>
           
           {/* Search Preview */}
@@ -111,15 +111,15 @@ export default function FindContractors() {
         {/* Sample Contractors */}
         <div className="mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Contractors</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Professionals</h2>
             <p className="text-lg text-slate-600">
               See the quality of professionals available on our platform
             </p>
           </div>
 
           <div className="space-y-6">
-            {sampleContractors.map((contractor) => (
-              <Card key={contractor.id} className="hover:shadow-lg transition-shadow">
+            {sampleProfessionals.map((professional) => (
+              <Card key={professional.id} className="hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex flex-col lg:flex-row gap-6">
                     {/* Contractor Info */}
@@ -127,30 +127,30 @@ export default function FindContractors() {
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-4">
                           <img 
-                            src={contractor.photo} 
-                            alt={contractor.name}
+                            src={professional.photo} 
+                            alt={professional.name}
                             className="w-16 h-16 rounded-full object-cover"
                           />
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <h3 className="text-xl font-semibold">{contractor.name}</h3>
-                              {contractor.verified && (
+                              <h3 className="text-xl font-semibold">{professional.name}</h3>
+                              {professional.verified && (
                                 <Badge className="bg-green-600 text-white">
                                   <CheckCircle className="h-3 w-3 mr-1" />
                                   Verified
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-slate-600">{contractor.specialty}</p>
+                            <p className="text-slate-600">{professional.specialty}</p>
                             <div className="flex items-center gap-4 mt-2">
                               <div className="flex items-center">
                                 <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                                <span className="ml-1 font-medium">{contractor.rating}</span>
-                                <span className="text-slate-500 ml-1">({contractor.reviews} reviews)</span>
+                                <span className="ml-1 font-medium">{professional.rating}</span>
+                                <span className="text-slate-500 ml-1">({professional.reviews} reviews)</span>
                               </div>
                               <div className="flex items-center text-slate-600">
                                 <MapPin className="h-4 w-4 mr-1" />
-                                {contractor.location}
+                                {professional.location}
                               </div>
                             </div>
                           </div>
@@ -160,15 +160,15 @@ export default function FindContractors() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
                           <span className="text-slate-500">Experience:</span>
-                          <p className="font-medium">{contractor.experience}</p>
+                          <p className="font-medium">{professional.experience}</p>
                         </div>
                         <div>
                           <span className="text-slate-500">Projects:</span>
-                          <p className="font-medium">{contractor.completedProjects}+ completed</p>
+                          <p className="font-medium">{professional.completedProjects}+ completed</p>
                         </div>
                         <div>
                           <span className="text-slate-500">Response Time:</span>
-                          <p className="font-medium">{contractor.responseTime}</p>
+                          <p className="font-medium">{professional.responseTime}</p>
                         </div>
                         <div className="flex items-center">
                           <Award className="h-4 w-4 text-blue-600 mr-1" />
@@ -179,12 +179,12 @@ export default function FindContractors() {
 
                     {/* Action Buttons */}
                     <div className="flex flex-col gap-3 lg:w-48">
-                      <Link href={`/contractor/${contractor.id}`}>
+                      <Link href={`/professional/${professional.id}`}>
                         <Button className="w-full bg-blue-600 hover:bg-blue-700">
                           View Profile
                         </Button>
                       </Link>
-                      <Link href={`/contractor/${contractor.id}`}>
+                      <Link href={`/professional/${professional.id}`}>
                         <Button variant="outline" className="w-full">
                           Get Quote
                         </Button>
@@ -274,7 +274,7 @@ export default function FindContractors() {
                 <CheckCircle className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold">Diverse Professionals</h3>
-                  <p className="text-slate-600">Find contractors, freelancers, and specialists of all sizes - from solo experts to established companies.</p>
+                  <p className="text-slate-600">Find professionals, freelancers, and specialists of all sizes - from solo experts to established companies.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -304,7 +304,7 @@ export default function FindContractors() {
           <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-8 text-white">
             <h3 className="text-2xl font-bold mb-4">Ready to Find Your Contractor?</h3>
             <p className="text-blue-100 mb-6">
-              Join thousands of homeowners who found their perfect contractor through Terrin. 
+              Join thousands of homeowners who found their perfect professional through Terrin. 
               Get started with a free estimate and browse verified professionals in your area.
             </p>
             <div className="space-y-3">
@@ -313,7 +313,7 @@ export default function FindContractors() {
                   Get Free Estimate
                 </Button>
               </Link>
-              <Link href="/contractors">
+              <Link href="/professionals">
                 <Button size="lg" variant="outline" className="w-full border-white text-white hover:bg-white hover:text-blue-600">
                   Browse All Contractors
                 </Button>
