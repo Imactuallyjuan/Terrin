@@ -1,17 +1,18 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Calculator, Users, FileText, X } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PostProjectFirebase from "@/components/PostProjectFirebase";
 import EstimateForm from "@/components/EstimateForm";
 
 export default function Home() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [showPostProject, setShowPostProject] = useState(false);
   const [showEstimator, setShowEstimator] = useState(false);
   const [currentEstimate, setCurrentEstimate] = useState(null);
@@ -23,6 +24,23 @@ export default function Home() {
   const { data: estimates = [], isLoading: estimatesLoading } = useQuery({
     queryKey: ["/api/estimates"],
   });
+
+  // Handle estimate generation events
+  useEffect(() => {
+    const handleEstimateGenerated = (event: CustomEvent) => {
+      console.log('Estimate generated event received:', event.detail);
+      // Invalidate estimates cache to trigger UI refresh
+      queryClient.invalidateQueries({ queryKey: ['/api/estimates'] });
+      setCurrentEstimate(event.detail);
+    };
+
+    // Listen for estimate generation events
+    window.addEventListener('estimateGenerated', handleEstimateGenerated as EventListener);
+    
+    return () => {
+      window.removeEventListener('estimateGenerated', handleEstimateGenerated as EventListener);
+    };
+  }, [queryClient]);
 
   return (
     <div className="min-h-screen bg-slate-50">
