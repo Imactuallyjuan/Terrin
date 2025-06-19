@@ -99,7 +99,8 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     amount: '',
     vendor: '',
     dateIncurred: new Date().toISOString().split('T')[0],
-    notes: ''
+    notes: '',
+    receipt: ''
   });
 
   const [customCategory, setCustomCategory] = useState('');
@@ -186,7 +187,8 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
         amount: '',
         vendor: '',
         dateIncurred: new Date().toISOString().split('T')[0],
-        notes: ''
+        notes: '',
+        receipt: ''
       });
       toast({
         title: "Cost Added",

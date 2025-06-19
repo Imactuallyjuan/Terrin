@@ -196,6 +196,15 @@ Changelog:
   * Enhanced estimate titles to show meaningful descriptions like "Bedroom renovation from 900 square..."
   * Fixed frontend display of estimate titles on both home page and estimates page
   * Simplified project creation to focus on single "Post Project" button workflow
+- June 19, 2025. Comprehensive Cost Tracking with Receipt Attachments & Real-time Progress Updates
+  * Enhanced project header to display both budget range and actual costs side-by-side
+  * Added receipt photo attachment functionality to cost entry system
+  * Users can now upload receipt photos for each expense with base64 storage
+  * Cost list displays receipt thumbnails with click-to-expand functionality
+  * Implemented milestone inline editing with save/cancel functionality for title, description, and progress weight
+  * Fixed progress bar to automatically refresh when milestones are toggled or edited without page reload
+  * Added real-time calculation of completion percentage based on weighted milestone completion
+  * Enhanced cost tracking interface with receipt indicators and visual receipt management
 ```
 
 ## User Preferences
