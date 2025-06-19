@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { useFirebaseAuth } from "../hooks/useFirebaseAuth";
-import { Calculator, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { z } from "zod";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -27,7 +27,6 @@ const formSchema = z.object({
 export default function PostProjectFirebase() {
   const { toast } = useToast();
   const { isAuthenticated, user, userRole } = useFirebaseAuth();
-  const [estimateMode, setEstimateMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [customBudget, setCustomBudget] = useState('');
   const [showCustomBudget, setShowCustomBudget] = useState(false);
@@ -109,67 +108,10 @@ export default function PostProjectFirebase() {
     }
   };
 
-  const handleGetEstimate = async (data) => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to get an estimate.",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    setLoading(true);
-    window.dispatchEvent(new CustomEvent('estimateStarted'));
-
-    try {
-      const response = await fetch('/api/estimate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ projectData: data }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate estimate');
-      }
-
-      const estimate = await response.json();
-      
-      toast({
-        title: "Estimate Generated!",
-        description: "Your AI-powered cost estimate is ready.",
-      });
-      
-      setTimeout(() => {
-        const element = document.getElementById('cost-estimator');
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
-      
-      window.dispatchEvent(new CustomEvent('estimateGenerated', { detail: estimate }));
-    } catch (error) {
-      console.error('Error generating estimate:', error);
-      window.dispatchEvent(new CustomEvent('estimateGenerated', { detail: null }));
-      
-      toast({
-        title: "Error",
-        description: "Failed to generate estimate. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const onSubmit = (data) => {
-    if (estimateMode) {
-      handleGetEstimate(data);
-    } else {
-      handlePostProject(data);
-    }
+    handlePostProject(data);
   };
 
   // Show auth prompt for non-authenticated users
@@ -382,29 +324,13 @@ export default function PostProjectFirebase() {
                   />
                 </div>
 
-                <div className="flex justify-center space-x-4">
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    className="border-green-600 text-green-600 hover:bg-green-50 flex items-center"
-                    onClick={() => setEstimateMode(true)}
-                    disabled={loading}
-                  >
-                    {loading && estimateMode ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600 mr-2"></div>
-                    ) : (
-                      <Calculator className="mr-2 h-4 w-4" />
-                    )}
-                    Get AI Estimate
-                  </Button>
-                  
+                <div className="flex justify-center">
                   <Button
                     type="submit"
                     className="bg-blue-600 text-white hover:bg-blue-700 flex items-center"
-                    onClick={() => setEstimateMode(false)}
                     disabled={loading}
                   >
-                    {loading && !estimateMode ? (
+                    {loading ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                     ) : (
                       <Send className="mr-2 h-4 w-4" />

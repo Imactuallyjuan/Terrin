@@ -25,7 +25,7 @@ export default function PostProject() {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
-  const [estimateMode, setEstimateMode] = useState(false);
+
   const [customBudget, setCustomBudget] = useState('');
   const [showCustomBudget, setShowCustomBudget] = useState(false);
 
@@ -151,46 +151,15 @@ export default function PostProject() {
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     console.log('Form submitted with data:', data);
-    console.log('Estimate mode:', estimateMode);
     console.log('Is authenticated:', isAuthenticated);
     console.log('Form errors:', form.formState.errors);
     
-    // Skip auth check here - let the API handle authentication
-    // If not authenticated, the API will return 401 and we'll handle it in the mutation
-    
-    if (estimateMode) {
-      console.log('Triggering estimate mutation...');
-      getEstimateMutation.mutate(data);
-    } else {
-      console.log('Triggering project creation...');
-      console.log('Project mutation pending:', createProjectMutation.isPending);
-      createProjectMutation.mutate(data);
-    }
+    console.log('Triggering project creation...');
+    console.log('Project mutation pending:', createProjectMutation.isPending);
+    createProjectMutation.mutate(data);
   };
 
-  const handleEstimateClick = (e: React.MouseEvent) => {
-    console.log('Get Estimate button clicked');
-    setEstimateMode(true);
-    
-    // Check if form is valid first
-    const isValid = form.trigger();
-    console.log('Form validation result:', isValid);
-    
-    if (!form.formState.isValid) {
-      console.log('Form validation errors:', form.formState.errors);
-      toast({
-        title: "Please complete all required fields",
-        description: "Make sure to fill in all the project details before getting an estimate.",
-        variant: "destructive",
-      });
-      return;
-    }
-  };
 
-  const handleProjectClick = (e: React.MouseEvent) => {
-    console.log('Post Project button clicked');
-    setEstimateMode(false);
-  };
 
   return (
     <section className="py-16 bg-slate-50" id="post-project">
