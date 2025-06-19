@@ -598,6 +598,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Project document routes
+  app.post('/api/projects/:id/documents', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userId = req.user.uid;
+      
+      const document = await storage.createProjectDocument({
+        ...req.body,
+        projectId,
+        userId,
+      });
+      
+      res.json(document);
+    } catch (error) {
+      console.error("Error creating project document:", error);
+      res.status(500).json({ message: "Failed to create project document" });
+    }
+  });
+
+  app.get('/api/projects/:id/documents', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const documents = await storage.getProjectDocuments(projectId);
+      res.json(documents);
+    } catch (error) {
+      console.error("Error fetching project documents:", error);
+      res.status(500).json({ message: "Failed to fetch project documents" });
+    }
+  });
+
+  app.delete('/api/projects/documents/:id', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const documentId = parseInt(req.params.id);
+      await storage.deleteProjectDocument(documentId);
+      res.json({ message: "Document deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting project document:", error);
+      res.status(500).json({ message: "Failed to delete project document" });
+    }
+  });
+
   // Messages and conversations routes
   app.get('/api/conversations', verifyFirebaseToken, async (req: any, res) => {
     try {

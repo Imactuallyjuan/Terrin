@@ -9,6 +9,7 @@ import {
   projectCosts,
   projectMilestones,
   projectPhotos,
+  projectDocuments,
   type User,
   type UpsertUser,
   type Project,
@@ -29,6 +30,8 @@ import {
   type InsertProjectMilestone,
   type ProjectPhoto,
   type InsertProjectPhoto,
+  type ProjectDocument,
+  type InsertProjectDocument,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -92,6 +95,11 @@ export interface IStorage {
   createProjectPhoto(photo: InsertProjectPhoto): Promise<ProjectPhoto>;
   getProjectPhotos(projectId: number): Promise<ProjectPhoto[]>;
   deleteProjectPhoto(id: number): Promise<void>;
+  
+  // Document operations
+  createProjectDocument(document: InsertProjectDocument): Promise<ProjectDocument>;
+  getProjectDocuments(projectId: number): Promise<ProjectDocument[]>;
+  deleteProjectDocument(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -462,6 +470,30 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProjectPhoto(id: number): Promise<void> {
     await db.delete(projectPhotos).where(eq(projectPhotos.id, id));
+  }
+
+  // Document operations
+  async createProjectDocument(documentData: InsertProjectDocument): Promise<ProjectDocument> {
+    const [newDocument] = await db
+      .insert(projectDocuments)
+      .values({
+        ...documentData,
+        uploadedAt: new Date(),
+      })
+      .returning();
+    return newDocument;
+  }
+
+  async getProjectDocuments(projectId: number): Promise<ProjectDocument[]> {
+    return await db
+      .select()
+      .from(projectDocuments)
+      .where(eq(projectDocuments.projectId, projectId))
+      .orderBy(desc(projectDocuments.uploadedAt));
+  }
+
+  async deleteProjectDocument(id: number): Promise<void> {
+    await db.delete(projectDocuments).where(eq(projectDocuments.id, id));
   }
 }
 

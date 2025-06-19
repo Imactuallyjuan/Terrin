@@ -213,6 +213,20 @@ export const projectPhotos = pgTable("project_photos", {
   uploadedAt: timestamp("uploaded_at").defaultNow(),
 });
 
+// Document management for projects
+export const projectDocuments = pgTable("project_documents", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  fileName: text("file_name").notNull(),
+  filePath: text("file_path").notNull(),
+  fileType: varchar("file_type").notNull(), // pdf, doc, docx, xls, xlsx, txt, etc.
+  fileSize: integer("file_size").notNull(), // in bytes
+  category: varchar("category").default("general").notNull(), // contracts, permits, invoices, estimates, plans, receipts, warranties, general
+  description: text("description"),
+  uploadedAt: timestamp("uploaded_at").defaultNow(),
+});
+
 export type ProjectCost = typeof projectCosts.$inferSelect;
 export type InsertProjectCost = typeof projectCosts.$inferInsert;
 
@@ -221,3 +235,6 @@ export type InsertProjectMilestone = typeof projectMilestones.$inferInsert;
 
 export type ProjectPhoto = typeof projectPhotos.$inferSelect;
 export type InsertProjectPhoto = typeof projectPhotos.$inferInsert;
+
+export type ProjectDocument = typeof projectDocuments.$inferSelect;
+export type InsertProjectDocument = typeof projectDocuments.$inferInsert;

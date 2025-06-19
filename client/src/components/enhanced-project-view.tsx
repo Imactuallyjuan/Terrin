@@ -72,6 +72,17 @@ interface ProjectPhoto {
   uploadedAt: string;
 }
 
+interface ProjectDocument {
+  id: number;
+  fileName: string;
+  filePath: string;
+  fileType: string;
+  fileSize: number;
+  category: string;
+  description?: string;
+  uploadedAt: string;
+}
+
 interface EnhancedProjectViewProps {
   project: Project;
 }
