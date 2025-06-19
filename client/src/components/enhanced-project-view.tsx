@@ -137,6 +137,15 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     category: 'progress'
   });
 
+  const [newDocument, setNewDocument] = useState({
+    fileName: '',
+    filePath: '',
+    fileType: '',
+    fileSize: 0,
+    category: 'general',
+    description: ''
+  });
+
   // Data queries
   const { data: costs = [] } = useQuery<ProjectCost[]>({
     queryKey: [`/api/projects/${project.id}/costs`],
@@ -148,6 +157,10 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
 
   const { data: photos = [] } = useQuery<ProjectPhoto[]>({
     queryKey: [`/api/projects/${project.id}/photos`],
+  });
+
+  const { data: documents = [] } = useQuery<ProjectDocument[]>({
+    queryKey: [`/api/projects/${project.id}/documents`],
   });
 
   // Mutations
@@ -269,6 +282,40 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     }
   });
 
+  const addDocumentMutation = useMutation({
+    mutationFn: async (documentData: any) => {
+      return await apiRequest('POST', `/api/projects/${project.id}/documents`, documentData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/documents`] });
+      setNewDocument({
+        fileName: '',
+        filePath: '',
+        fileType: '',
+        fileSize: 0,
+        category: 'general',
+        description: ''
+      });
+      toast({
+        title: "Document Added",
+        description: "The document has been uploaded successfully.",
+      });
+    }
+  });
+
+  const deleteDocumentMutation = useMutation({
+    mutationFn: async (documentId: number) => {
+      return await apiRequest('DELETE', `/api/projects/documents/${documentId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/documents`] });
+      toast({
+        title: "Document Deleted",
+        description: "The document has been removed successfully.",
+      });
+    }
+  });
+
   // Handlers
   const handleAddCost = () => {
     if (!newCost.category || !newCost.description || !newCost.amount) {
@@ -353,6 +400,45 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
       return;
     }
     addPhotoMutation.mutate(newPhoto);
+  };
+
+  const handleDocumentUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      try {
+        // Convert file to base64 for storage
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64String = reader.result as string;
+          setNewDocument({
+            ...newDocument,
+            fileName: file.name,
+            filePath: base64String,
+            fileType: file.type || 'application/octet-stream',
+            fileSize: file.size
+          });
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        toast({
+          title: "Upload Error",
+          description: "Failed to process the selected document.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleAddDocument = () => {
+    if (!newDocument.fileName) {
+      toast({
+        title: "No File Selected",
+        description: "Please select a document to upload.",
+        variant: "destructive",
+      });
+      return;
+    }
+    addDocumentMutation.mutate(newDocument);
   };
 
   // Calculate total costs
@@ -901,23 +987,133 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
         </TabsContent>
 
         <TabsContent value="documents">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="mr-2 h-5 w-5" />
-                Project Documents
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Document management coming soon.</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Upload contracts, permits, and other project documents.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            {/* Upload Document Form */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Add New Document</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="document">Select Document</Label>
+                    <Input
+                      type="file"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png"
+                      onChange={handleDocumentUpload}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <Select value={newDocument.category} onValueChange={(value) => setNewDocument({...newDocument, category: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="contracts">Contracts</SelectItem>
+                        <SelectItem value="permits">Permits</SelectItem>
+                        <SelectItem value="invoices">Invoices</SelectItem>
+                        <SelectItem value="estimates">Estimates</SelectItem>
+                        <SelectItem value="plans">Plans</SelectItem>
+                        <SelectItem value="receipts">Receipts</SelectItem>
+                        <SelectItem value="warranties">Warranties</SelectItem>
+                        <SelectItem value="general">General</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Input
+                      value={newDocument.description}
+                      onChange={(e) => setNewDocument({...newDocument, description: e.target.value})}
+                      placeholder="Describe this document..."
+                    />
+                  </div>
+                </div>
+                <Button 
+                  onClick={handleAddDocument} 
+                  className="mt-4"
+                  disabled={addDocumentMutation.isPending}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload Document
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Documents List */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="mr-2 h-5 w-5" />
+                  Project Documents ({documents.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {documents.length === 0 ? (
+                  <div className="text-center py-8">
+                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No documents uploaded yet.</p>
+                    <p className="text-sm text-muted-foreground">Upload contracts, permits, invoices, and other project documents.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {documents.map((document: ProjectDocument) => (
+                      <div
+                        key={document.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-blue-100 rounded">
+                            <FileText className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium">{document.fileName}</h4>
+                            {document.description && (
+                              <p className="text-sm text-muted-foreground">{document.description}</p>
+                            )}
+                            <div className="flex items-center space-x-4 mt-1">
+                              <Badge variant="outline">{document.category}</Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {(document.fileSize / 1024).toFixed(1)} KB
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(document.uploadedAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const link = document.createElement('a');
+                              link.href = document.filePath;
+                              link.download = document.fileName;
+                              link.click();
+                            }}
+                          >
+                            <Download className="h-4 w-4 mr-1" />
+                            Download
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteDocumentMutation.mutate(document.id)}
+                            disabled={deleteDocumentMutation.isPending}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
 
