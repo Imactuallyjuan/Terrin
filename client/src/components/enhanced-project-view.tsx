@@ -17,7 +17,8 @@ import {
   FileText, 
   Plus, 
   Check, 
-  Clock, 
+  Clock,
+  Eye, 
   Target,
   Upload,
   Edit
@@ -116,6 +117,8 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     { title: 'Final Inspections', description: 'Final walkthrough and punch list', weight: 2 }
   ];
 
+  const [selectedPhoto, setSelectedPhoto] = useState<ProjectPhoto | null>(null);
+  
   const [newPhoto, setNewPhoto] = useState({
     fileName: '',
     filePath: '',
@@ -819,9 +822,29 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {photos.map((photo: ProjectPhoto) => (
-                      <div key={photo.id} className="border rounded-lg overflow-hidden">
-                        <div className="bg-gray-100 h-48 flex items-center justify-center">
-                          <Camera className="h-12 w-12 text-muted-foreground" />
+                      <div key={photo.id} className="border rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-shadow">
+                        <div className="bg-gray-100 h-48 relative overflow-hidden group">
+                          <img
+                            src={photo.filePath}
+                            alt={photo.caption || photo.fileName}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center');
+                              const fallback = document.createElement('div');
+                              fallback.className = 'text-center';
+                              fallback.innerHTML = '<div class="h-12 w-12 text-muted-foreground mx-auto mb-2"><svg class="w-full h-full" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="text-xs text-muted-foreground">Image not found</div>';
+                              e.currentTarget.parentElement?.appendChild(fallback);
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                            <button 
+                              className="opacity-0 group-hover:opacity-100 bg-white rounded-full p-2 transform scale-75 group-hover:scale-100 transition-all duration-300"
+                              onClick={() => setSelectedPhoto(photo)}
+                            >
+                              <Eye className="h-4 w-4 text-gray-700" />
+                            </button>
+                          </div>
                         </div>
                         <div className="p-3">
                           <div className="flex items-center justify-between mb-2">
@@ -874,6 +897,37 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Photo Expansion Modal */}
+      {selectedPhoto && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4" onClick={() => setSelectedPhoto(null)}>
+          <div className="relative max-w-4xl max-h-full">
+            <img
+              src={selectedPhoto.filePath}
+              alt={selectedPhoto.caption || selectedPhoto.fileName}
+              className="max-w-full max-h-full object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              className="absolute top-4 right-4 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors"
+              onClick={() => setSelectedPhoto(null)}
+            >
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            {selectedPhoto.caption && (
+              <div className="absolute bottom-4 left-4 right-4 bg-black bg-opacity-60 text-white p-3 rounded">
+                <p className="text-sm">{selectedPhoto.caption}</p>
+                <div className="flex items-center justify-between mt-2 text-xs opacity-75">
+                  <span>{selectedPhoto.category}</span>
+                  <span>{new Date(selectedPhoto.uploadedAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
