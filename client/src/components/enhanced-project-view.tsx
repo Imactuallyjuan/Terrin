@@ -21,7 +21,8 @@ import {
   Eye, 
   Target,
   Upload,
-  Edit
+  Edit,
+  Download
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -1058,9 +1059,9 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {documents.map((document: ProjectDocument) => (
+                    {documents.map((doc: ProjectDocument) => (
                       <div
-                        key={document.id}
+                        key={doc.id}
                         className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
                       >
                         <div className="flex items-center space-x-3">
@@ -1068,17 +1069,17 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                             <FileText className="h-5 w-5 text-blue-600" />
                           </div>
                           <div>
-                            <h4 className="font-medium">{document.fileName}</h4>
-                            {document.description && (
-                              <p className="text-sm text-muted-foreground">{document.description}</p>
+                            <h4 className="font-medium">{doc.fileName}</h4>
+                            {doc.description && (
+                              <p className="text-sm text-muted-foreground">{doc.description}</p>
                             )}
                             <div className="flex items-center space-x-4 mt-1">
-                              <Badge variant="outline">{document.category}</Badge>
+                              <Badge variant="outline">{doc.category}</Badge>
                               <span className="text-xs text-muted-foreground">
-                                {(document.fileSize / 1024).toFixed(1)} KB
+                                {(doc.fileSize / 1024).toFixed(1)} KB
                               </span>
                               <span className="text-xs text-muted-foreground">
-                                {new Date(document.uploadedAt).toLocaleDateString()}
+                                {new Date(doc.uploadedAt).toLocaleDateString()}
                               </span>
                             </div>
                           </div>
@@ -1089,8 +1090,8 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                             size="sm"
                             onClick={() => {
                               const link = document.createElement('a');
-                              link.href = document.filePath;
-                              link.download = document.fileName;
+                              link.href = doc.filePath;
+                              link.download = doc.fileName;
                               link.click();
                             }}
                           >
@@ -1100,7 +1101,7 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => deleteDocumentMutation.mutate(document.id)}
+                            onClick={() => deleteDocumentMutation.mutate(doc.id)}
                             disabled={deleteDocumentMutation.isPending}
                             className="text-red-500 hover:text-red-700"
                           >
