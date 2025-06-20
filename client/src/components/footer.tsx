@@ -26,7 +26,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/find-contractors">
+                <Link href="/find-professionals">
                   <span className="hover:text-orange-400 transition-colors cursor-pointer">Find Professionals</span>
                 </Link>
               </li>
@@ -42,22 +42,22 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-4">For Professionals</h4>
             <ul className="space-y-2 text-gray-300">
               <li>
-                <Link href="/join">
+                <Link href="/for-professionals">
                   <span className="hover:text-orange-400 transition-colors cursor-pointer">Join Terrin</span>
                 </Link>
               </li>
               <li>
-                <Link href="/jobs">
+                <Link href="/find-professionals">
                   <span className="hover:text-orange-400 transition-colors cursor-pointer">Find Jobs</span>
                 </Link>
               </li>
               <li>
-                <Link href="/profile">
+                <Link href="/professional-portal">
                   <span className="hover:text-orange-400 transition-colors cursor-pointer">Build Profile</span>
                 </Link>
               </li>
               <li>
-                <Link href="/success-stories">
+                <Link href="/gallery">
                   <span className="hover:text-orange-400 transition-colors cursor-pointer">Success Stories</span>
                 </Link>
               </li>
@@ -66,7 +66,7 @@ export default function Footer() {
         </div>
         
         <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-          <p>&copy; 2024 Terrin. All rights reserved.</p>
+          <p>&copy; 2025 Terrin. All rights reserved.</p>
         </div>
       </div>
     </footer>
