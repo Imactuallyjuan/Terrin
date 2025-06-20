@@ -237,6 +237,13 @@ Changelog:
   * Corrected API endpoint mapping to use proper conversation-based message routes
   * Added sample conversations and messages for testing functionality
   * Fixed landing page routing logic to properly handle authentication states for first-time vs returning users
+- June 20, 2025. Footer Updates & Gallery Preparation
+  * Updated copyright date from 2024 to 2025 in footer
+  * Fixed all footer navigation links to point to functional pages
+  * Prepared gallery infrastructure for future photo uploads by users
+  * Gallery currently displays empty state with proper messaging and UI structure
+  * All footer links now connect correctly: Post Project, Get Estimates, Find Professionals, Project Gallery
+  * Professional links updated: Join Terrin, Find Jobs (via Find Professionals), Build Profile (Professional Portal)
 ```
 
 ## User Preferences
