@@ -100,7 +100,8 @@ function Router() {
         )}
       </Route>
       
-      <Route component={NotFound} />
+      {/* Catch all - must be last */}
+      <Route path="*" component={NotFound} />
     </Switch>
   );
 }
