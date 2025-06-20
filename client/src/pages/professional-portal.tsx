@@ -173,8 +173,12 @@ export default function ProfessionalPortal() {
     }
 
     updateProfileMutation.mutate({
-      ...formData,
-      yearsExperience: parseInt(formData.yearsExperience) || 0
+      businessName: formData.businessName,
+      specialty: formData.specialties[0] || '', // Database expects single specialty
+      yearsExperience: parseInt(formData.yearsExperience) || 0,
+      serviceArea: formData.serviceArea,
+      description: formData.description,
+      licenseNumber: formData.licenseNumber
     });
   };
 

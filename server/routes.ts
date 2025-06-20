@@ -374,6 +374,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/contractors/:id', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const contractorId = parseInt(req.params.id);
+      const userId = req.user.uid;
+      const updates = req.body;
+
+      // Verify ownership or platform owner access
+      const existingContractor = await storage.getContractor(contractorId);
+      if (!existingContractor) {
+        return res.status(404).json({ message: "Contractor not found" });
+      }
+
+      const isPlatformOwner = userId === 'IE5CjY6AxYZAHjfFB6OLLCnn5dF2';
+      const isOwner = existingContractor.userId === userId;
+      
+      if (!isOwner && !isPlatformOwner) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const updatedContractor = await storage.updateContractor(contractorId, updates);
+      res.json(updatedContractor);
+    } catch (error) {
+      console.error("Error updating contractor:", error);
+      res.status(500).json({ message: "Failed to update contractor profile" });
+    }
+  });
+
   app.get('/api/professionals', async (req, res) => {
     try {
       const { specialty, limit = "10" } = req.query;
