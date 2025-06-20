@@ -88,11 +88,17 @@ function Router() {
       <Route path="/professionals/:id" component={ContractorProfile} />
       
       {/* Home/Landing Page */}
-      {loading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
-      ) : (
-        <Route path="/" component={Home} />
-      )}
+      <Route path="/">
+        {loading ? (
+          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : isAuthenticated ? (
+          <Home />
+        ) : (
+          <Landing />
+        )}
+      </Route>
       
       <Route component={NotFound} />
     </Switch>
