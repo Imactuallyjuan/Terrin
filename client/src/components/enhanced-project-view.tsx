@@ -925,19 +925,40 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                   </div>
                   <div>
                     <Label htmlFor="progressWeight">Progress Weight (%)</Label>
-                    <Select onValueChange={(value) => setNewMilestone({...newMilestone, progressWeight: parseInt(value)})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder={newMilestone.progressWeight.toString()} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="2">Minor Task (2%)</SelectItem>
-                        <SelectItem value="5">Small Phase (5%)</SelectItem>
-                        <SelectItem value="8">Medium Phase (8%)</SelectItem>
-                        <SelectItem value="10">Standard Phase (10%)</SelectItem>
-                        <SelectItem value="15">Major Phase (15%)</SelectItem>
-                        <SelectItem value="20">Critical Phase (20%)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center space-x-2">
+                      <Select onValueChange={(value) => {
+                        if (value === "custom") {
+                          // Keep current value for custom input
+                          return;
+                        }
+                        setNewMilestone({...newMilestone, progressWeight: parseInt(value)});
+                      }}>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select weight" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="5">5%</SelectItem>
+                          <SelectItem value="10">10%</SelectItem>
+                          <SelectItem value="15">15%</SelectItem>
+                          <SelectItem value="20">20%</SelectItem>
+                          <SelectItem value="25">25%</SelectItem>
+                          <SelectItem value="30">30%</SelectItem>
+                          <SelectItem value="35">35%</SelectItem>
+                          <SelectItem value="40">40%</SelectItem>
+                          <SelectItem value="custom">Custom</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={newMilestone.progressWeight}
+                        onChange={(e) => setNewMilestone({...newMilestone, progressWeight: parseInt(e.target.value) || 1})}
+                        className="w-20"
+                        placeholder="Custom"
+                      />
+                      <span className="text-sm text-muted-foreground">%</span>
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor="order">Order</Label>
@@ -1040,23 +1061,43 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                             />
                             <div className="flex items-center space-x-2">
                               <Label htmlFor={`weight-${milestone.id}`} className="text-sm">Weight:</Label>
-                              <Select 
-                                value={editMilestoneData.progressWeight.toString()} 
-                                onValueChange={(value) => setEditMilestoneData({...editMilestoneData, progressWeight: parseInt(value)})}
-                              >
-                                <SelectTrigger className="w-32">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="2">2%</SelectItem>
-                                  <SelectItem value="5">5%</SelectItem>
-                                  <SelectItem value="8">8%</SelectItem>
-                                  <SelectItem value="10">10%</SelectItem>
-                                  <SelectItem value="15">15%</SelectItem>
-                                  <SelectItem value="20">20%</SelectItem>
-                                  <SelectItem value="25">25%</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <div className="flex items-center space-x-2">
+                                <Select 
+                                  value={editMilestoneData.progressWeight.toString()} 
+                                  onValueChange={(value) => {
+                                    if (value === "custom") {
+                                      // Keep current value for custom input
+                                      return;
+                                    }
+                                    setEditMilestoneData({...editMilestoneData, progressWeight: parseInt(value)});
+                                  }}
+                                >
+                                  <SelectTrigger className="w-24">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="5">5%</SelectItem>
+                                    <SelectItem value="10">10%</SelectItem>
+                                    <SelectItem value="15">15%</SelectItem>
+                                    <SelectItem value="20">20%</SelectItem>
+                                    <SelectItem value="25">25%</SelectItem>
+                                    <SelectItem value="30">30%</SelectItem>
+                                    <SelectItem value="35">35%</SelectItem>
+                                    <SelectItem value="40">40%</SelectItem>
+                                    <SelectItem value="custom">Custom</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  max="100"
+                                  value={editMilestoneData.progressWeight}
+                                  onChange={(e) => setEditMilestoneData({...editMilestoneData, progressWeight: parseInt(e.target.value) || 1})}
+                                  className="w-16 text-sm"
+                                  placeholder="Custom"
+                                />
+                                <span className="text-xs text-muted-foreground">%</span>
+                              </div>
                             </div>
                             <div className="flex space-x-2">
                               <Button size="sm" onClick={saveEditedMilestone} disabled={updateMilestoneMutation.isPending}>
