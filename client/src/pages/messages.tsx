@@ -42,24 +42,42 @@ export default function Messages() {
   // Fetch conversations
   const { data: conversations = [], isLoading: loadingConversations } = useQuery<Conversation[]>({
     queryKey: ['/api/conversations'],
+    queryFn: async () => {
+      const token = await user?.getIdToken();
+      const response = await fetch('/api/conversations', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error('Failed to fetch conversations');
+      return response.json();
+    },
     enabled: !!user
   });
 
   // Fetch messages for selected conversation
   const { data: messages = [], isLoading: loadingMessages } = useQuery<Message[]>({
     queryKey: ['/api/conversations', selectedConversation, 'messages'],
+    queryFn: async () => {
+      const token = await user?.getIdToken();
+      const response = await fetch(`/api/conversations/${selectedConversation}/messages`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error('Failed to fetch messages');
+      return response.json();
+    },
     enabled: !!selectedConversation
   });
 
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { conversationId: number; content: string }) => {
-      const response = await fetch('/api/messages', {
+      const token = await user?.getIdToken();
+      const response = await fetch(`/api/conversations/${data.conversationId}/messages`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
-          conversationId: data.conversationId,
-          senderId: user?.uid,
           content: data.content
         })
       });
