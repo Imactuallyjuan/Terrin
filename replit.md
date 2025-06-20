@@ -229,6 +229,14 @@ Changelog:
   * Only platform owner (user ID: IE5CjY6AxYZAHjfFB6OLLCnn5dF2) can edit the Terrin profile in Professional Portal
   * Non-platform owners see "Platform Owner Profile" badge instead of edit button for Terrin profile
   * Added access control validation to prevent unauthorized editing attempts
+- June 19, 2025. Professional Portal Save Functionality & Messaging System Fixes
+  * Added missing PATCH endpoint for contractor profile updates in backend API
+  * Fixed data mapping between form specialties array and database specialty string field
+  * Added proper access control for platform owner and profile owner permissions
+  * Fixed messaging system authentication by adding Firebase tokens to all API calls
+  * Corrected API endpoint mapping to use proper conversation-based message routes
+  * Added sample conversations and messages for testing functionality
+  * Fixed landing page routing logic to properly handle authentication states for first-time vs returning users
 ```
 
 ## User Preferences

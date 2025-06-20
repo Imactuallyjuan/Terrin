@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import PostProjectFirebase from "@/components/PostProjectFirebase";
 import EstimateForm from "@/components/EstimateForm";
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user } = useFirebaseAuth();
   const queryClient = useQueryClient();
   const [showPostProject, setShowPostProject] = useState(false);
   const [showEstimator, setShowEstimator] = useState(false);
