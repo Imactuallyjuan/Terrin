@@ -244,6 +244,11 @@ Changelog:
   * Gallery currently displays empty state with proper messaging and UI structure
   * All footer links now connect correctly: Post Project, Get Estimates, Find Professionals, Project Gallery
   * Professional links updated: Join Terrin, Find Jobs (via Find Professionals), Build Profile (Professional Portal)
+- June 20, 2025. Sign Out Redirect & Routing Fixes
+  * Fixed 404 routing error by updating catch-all route pattern from `component={NotFound}` to `path="*" component={NotFound}`
+  * Added proper redirect functionality to sign out - users now automatically return to landing page after signing out
+  * Enhanced header component with useLocation hook for programmatic navigation after authentication state changes
+  * Improved user experience by ensuring consistent navigation flow between authenticated and unauthenticated states
 ```
 
 ## User Preferences

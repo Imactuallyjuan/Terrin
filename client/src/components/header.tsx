@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { signOut } from "firebase/auth";
 import { auth } from "../lib/firebase";
 import { useFirebaseAuth } from "../hooks/useFirebaseAuth";
@@ -8,6 +8,7 @@ import { useToast } from "../hooks/use-toast";
 export default function Header() {
   const { isAuthenticated, user, userRole } = useFirebaseAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const handleSignOut = async () => {
     try {
@@ -16,6 +17,8 @@ export default function Header() {
         title: "Signed out successfully",
         description: "You've been signed out of your account.",
       });
+      // Redirect to landing page after sign out
+      setLocation('/');
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
