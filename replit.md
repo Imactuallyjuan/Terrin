@@ -274,6 +274,14 @@ Changelog:
   * Added photo metadata system that loads photo information without full base64 images for performance
   * Gallery page displays photo placeholders for metadata-only responses with category badges and upload dates
   * Enhanced navigation with back-to-project button and photo count display in gallery header
+- June 21, 2025. Photo Management & Editing Capabilities in Gallery
+  * Added inline photo editing functionality - users can edit photo titles and descriptions directly in gallery
+  * Implemented photo deletion capability with confirmation and real-time UI updates
+  * Created PATCH API endpoint (/api/projects/photos/:id) for updating photo metadata
+  * Added photo update method to database storage with proper error handling and validation
+  * Enhanced gallery cards with edit/delete buttons that appear on hover for clean interface
+  * Editing mode shows input fields with save/cancel buttons for seamless photo management experience
+  * All photo operations include proper toast notifications and cache invalidation for immediate feedback
 ```
 
 ## User Preferences

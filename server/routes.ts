@@ -963,6 +963,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/projects/photos/:id', async (req: any, res) => {
+    try {
+      const photoId = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const updatedPhoto = await storage.updateProjectPhoto(photoId, updates);
+      if (!updatedPhoto) {
+        return res.status(404).json({ message: "Photo not found" });
+      }
+      
+      res.json(updatedPhoto);
+    } catch (error) {
+      console.error("Error updating project photo:", error);
+      res.status(500).json({ message: "Failed to update project photo" });
+    }
+  });
+
   app.delete('/api/projects/photos/:id', async (req: any, res) => {
     try {
       const photoId = parseInt(req.params.id);

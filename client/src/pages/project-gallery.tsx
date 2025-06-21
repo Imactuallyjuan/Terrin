@@ -1,9 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, Tag } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { ArrowLeft, Calendar, Tag, Trash2, Edit, Save, X } from "lucide-react";
 
 interface ProjectPhoto {
   id: number;
@@ -17,6 +22,10 @@ interface ProjectPhoto {
 export default function ProjectGallery() {
   const [match, params] = useRoute("/projects/:id/gallery");
   const projectId = params?.id;
+  const [editingPhoto, setEditingPhoto] = useState<number | null>(null);
+  const [editData, setEditData] = useState({ fileName: '', caption: '' });
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: photos = [], isLoading } = useQuery<ProjectPhoto[]>({
     queryKey: [`/api/projects/${projectId}/photos`, { limit: 10 }],
@@ -32,6 +41,69 @@ export default function ProjectGallery() {
     queryKey: [`/api/projects/${projectId}`],
     enabled: !!projectId,
   });
+
+  const deletePhotoMutation = useMutation({
+    mutationFn: async (photoId: number) => {
+      return await apiRequest('DELETE', `/api/projects/photos/${photoId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      toast({
+        title: "Photo Deleted",
+        description: "The photo has been removed successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete photo. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const updatePhotoMutation = useMutation({
+    mutationFn: async ({ photoId, updates }: { photoId: number; updates: any }) => {
+      return await apiRequest('PATCH', `/api/projects/photos/${photoId}`, updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      setEditingPhoto(null);
+      toast({
+        title: "Photo Updated",
+        description: "Photo details have been saved successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update photo. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const startEditing = (photo: ProjectPhoto) => {
+    setEditingPhoto(photo.id);
+    setEditData({
+      fileName: photo.fileName,
+      caption: photo.caption || ''
+    });
+  };
+
+  const saveEdit = () => {
+    if (editingPhoto) {
+      updatePhotoMutation.mutate({
+        photoId: editingPhoto,
+        updates: editData
+      });
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingPhoto(null);
+    setEditData({ fileName: '', caption: '' });
+  };
 
   if (isLoading) {
     return (
@@ -124,16 +196,85 @@ export default function ProjectGallery() {
                   </div>
                 </div>
                 <CardContent className="p-4">
-                  <div className="space-y-2">
-                    <h3 className="font-medium text-sm truncate">{photo.fileName}</h3>
-                    {photo.caption && (
-                      <p className="text-xs text-gray-600 line-clamp-2">{photo.caption}</p>
-                    )}
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      {new Date(photo.uploadedAt).toLocaleDateString()}
+                  {editingPhoto === photo.id ? (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs font-medium text-gray-700">Title</label>
+                        <Input
+                          value={editData.fileName}
+                          onChange={(e) => setEditData(prev => ({ ...prev, fileName: e.target.value }))}
+                          className="text-sm"
+                          placeholder="Photo title"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-gray-700">Description</label>
+                        <Textarea
+                          value={editData.caption}
+                          onChange={(e) => setEditData(prev => ({ ...prev, caption: e.target.value }))}
+                          className="text-sm resize-none"
+                          rows={2}
+                          placeholder="Photo description"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center text-xs text-gray-500">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          {new Date(photo.uploadedAt).toLocaleDateString()}
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            onClick={saveEdit}
+                            disabled={updatePhotoMutation.isPending}
+                            className="h-7 px-2"
+                          >
+                            <Save className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={cancelEdit}
+                            className="h-7 px-2"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between">
+                        <h3 className="font-medium text-sm truncate flex-1">{photo.fileName}</h3>
+                        <div className="flex gap-1 ml-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => startEditing(photo)}
+                            className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deletePhotoMutation.mutate(photo.id)}
+                            disabled={deletePhotoMutation.isPending}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                      {photo.caption && (
+                        <p className="text-xs text-gray-600 line-clamp-2">{photo.caption}</p>
+                      )}
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {new Date(photo.uploadedAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}

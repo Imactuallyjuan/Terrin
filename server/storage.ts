@@ -97,6 +97,7 @@ export interface IStorage {
   getProjectPhotos(projectId: number, limit?: number, offset?: number): Promise<ProjectPhoto[]>;
   getProjectPhotoMetadata(projectId: number): Promise<Omit<ProjectPhoto, 'filePath'>[]>;
   getProjectPhoto(photoId: number): Promise<ProjectPhoto | undefined>;
+  updateProjectPhoto(id: number, updates: Partial<InsertProjectPhoto>): Promise<ProjectPhoto | undefined>;
   deleteProjectPhoto(id: number): Promise<void>;
   
   // Document operations
@@ -522,6 +523,15 @@ export class DatabaseStorage implements IStorage {
       .where(eq(projectPhotos.id, photoId))
       .limit(1);
     return photo;
+  }
+
+  async updateProjectPhoto(id: number, updates: Partial<InsertProjectPhoto>): Promise<ProjectPhoto | undefined> {
+    const [updatedPhoto] = await db
+      .update(projectPhotos)
+      .set(updates)
+      .where(eq(projectPhotos.id, id))
+      .returning();
+    return updatedPhoto || undefined;
   }
 
   async deleteProjectPhoto(id: number): Promise<void> {
