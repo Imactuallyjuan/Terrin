@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { verifyFirebaseToken } from "./firebaseAuth";
 import { insertProjectSchema, insertContractorSchema } from "@shared/schema";
@@ -1137,5 +1138,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+
+  // WebSocket server for real-time messaging
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  // Store active connections by user ID
+  const activeConnections = new Map<string, WebSocket>();
+
+  wss.on('connection', (ws: WebSocket, req) => {
+    let userId: string | null = null;
+
+    ws.on('message', async (data) => {
+      try {
+        const message = JSON.parse(data.toString());
+        
+        if (message.type === 'auth') {
+          // Authenticate user and store connection
+          userId = message.userId;
+          if (userId) {
+            activeConnections.set(userId, ws);
+            ws.send(JSON.stringify({ type: 'auth_success', userId }));
+          }
+        } else if (message.type === 'new_message' && userId) {
+          // Broadcast message to conversation participants
+          const conversationId = message.conversationId;
+          const conversation = await storage.getConversation(conversationId);
+          
+          if (conversation) {
+            // Send to all participants except sender
+            const participants = conversation.participants || [];
+            participants.forEach(participantId => {
+              if (participantId !== userId && activeConnections.has(participantId)) {
+                const participantWs = activeConnections.get(participantId);
+                if (participantWs && participantWs.readyState === WebSocket.OPEN) {
+                  participantWs.send(JSON.stringify({
+                    type: 'new_message',
+                    conversationId,
+                    message: message.messageData
+                  }));
+                }
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('WebSocket message error:', error);
+      }
+    });
+
+    ws.on('close', () => {
+      if (userId) {
+        activeConnections.delete(userId);
+      }
+    });
+
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+      if (userId) {
+        activeConnections.delete(userId);
+      }
+    });
+  });
+
   return httpServer;
 }

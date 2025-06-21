@@ -8,9 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, MessageSquare, ArrowLeft, Clock } from "lucide-react";
+import { Send, MessageSquare, ArrowLeft, Clock, Wifi, WifiOff } from "lucide-react";
 import { Link } from "wouter";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import { queryClient } from "@/lib/queryClient";
 import { formatDistanceToNow } from "date-fns";
 
@@ -36,6 +37,7 @@ interface Message {
 
 export default function Messages() {
   const { user } = useFirebaseAuth();
+  const { isConnected, sendMessage } = useWebSocket();
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState("");
 
@@ -84,10 +86,15 @@ export default function Messages() {
       if (!response.ok) throw new Error('Failed to send message');
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (newMessageData) => {
       queryClient.invalidateQueries({ queryKey: ['/api/conversations', selectedConversation, 'messages'] });
       queryClient.invalidateQueries({ queryKey: ['/api/conversations'] });
       setNewMessage("");
+      
+      // Send WebSocket message for real-time delivery
+      if (selectedConversation) {
+        sendMessage(selectedConversation, newMessageData);
+      }
     }
   });
 
