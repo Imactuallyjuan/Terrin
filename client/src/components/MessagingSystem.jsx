@@ -41,10 +41,7 @@ export default function MessagingSystem({ projectId, projectTitle }) {
   // Create conversation mutation
   const createConversationMutation = useMutation({
     mutationFn: async (conversationData) => {
-      return await apiRequest('/api/conversations', {
-        method: 'POST',
-        body: JSON.stringify(conversationData)
-      });
+      return await apiRequest('POST', '/api/conversations', conversationData);
     },
     onSuccess: (newConversation) => {
       queryClient.invalidateQueries(['/api/conversations']);
@@ -66,10 +63,7 @@ export default function MessagingSystem({ projectId, projectTitle }) {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async ({ conversationId, content }) => {
-      return await apiRequest(`/api/conversations/${conversationId}/messages`, {
-        method: 'POST',
-        body: JSON.stringify({ content })
-      });
+      return await apiRequest('POST', `/api/conversations/${conversationId}/messages`, { content });
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['/api/conversations', selectedConversation?.id, 'messages']);
