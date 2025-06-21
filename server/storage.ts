@@ -481,9 +481,9 @@ export class DatabaseStorage implements IStorage {
         .returning();
       
       return newPhoto;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Database error creating project photo:', error);
-      throw new Error(`Failed to save photo: ${error.message}`);
+      throw new Error(`Failed to save photo: ${error?.message || 'Unknown database error'}`);
     }
   }
 
