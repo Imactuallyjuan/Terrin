@@ -81,8 +81,7 @@ export default function ProjectGallery() {
     onSuccess: (_, photoId) => {
       // Immediately update local state
       setAllPhotos(prev => prev.filter(photo => photo.id !== photoId));
-      // Also invalidate cache for project page
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      // Only invalidate cache for project page (not gallery page)
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
       toast({
         title: "Photo Deleted",
@@ -107,8 +106,8 @@ export default function ProjectGallery() {
       setAllPhotos(prev => prev.map(photo => 
         photo.id === photoId ? { ...photo, ...updates } : photo
       ));
-      // Also invalidate cache for project page
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      // Only invalidate cache for project page (not gallery page)
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
       setEditingPhoto(null);
       toast({
         title: "Photo Updated",
