@@ -95,6 +95,8 @@ export interface IStorage {
   // Photo operations
   createProjectPhoto(photo: InsertProjectPhoto): Promise<ProjectPhoto>;
   getProjectPhotos(projectId: number, limit?: number, offset?: number): Promise<ProjectPhoto[]>;
+  getProjectPhotoMetadata(projectId: number): Promise<Omit<ProjectPhoto, 'filePath'>[]>;
+  getProjectPhoto(photoId: number): Promise<ProjectPhoto | undefined>;
   deleteProjectPhoto(id: number): Promise<void>;
   
   // Document operations
@@ -487,7 +489,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getProjectPhotos(projectId: number, limit: number = 20, offset: number = 0): Promise<ProjectPhoto[]> {
+  async getProjectPhotos(projectId: number, limit: number = 3, offset: number = 0): Promise<ProjectPhoto[]> {
     return await db
       .select()
       .from(projectPhotos)
@@ -495,6 +497,31 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(projectPhotos.uploadedAt))
       .limit(limit)
       .offset(offset);
+  }
+
+  async getProjectPhotoMetadata(projectId: number): Promise<Omit<ProjectPhoto, 'filePath'>[]> {
+    return await db
+      .select({
+        id: projectPhotos.id,
+        projectId: projectPhotos.projectId,
+        userId: projectPhotos.userId,
+        fileName: projectPhotos.fileName,
+        caption: projectPhotos.caption,
+        category: projectPhotos.category,
+        uploadedAt: projectPhotos.uploadedAt,
+      })
+      .from(projectPhotos)
+      .where(eq(projectPhotos.projectId, projectId))
+      .orderBy(desc(projectPhotos.uploadedAt));
+  }
+
+  async getProjectPhoto(photoId: number): Promise<ProjectPhoto | undefined> {
+    const [photo] = await db
+      .select()
+      .from(projectPhotos)
+      .where(eq(projectPhotos.id, photoId))
+      .limit(1);
+    return photo;
   }
 
   async deleteProjectPhoto(id: number): Promise<void> {

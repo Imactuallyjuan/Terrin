@@ -179,8 +179,23 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
 
   const { data: photos = [], refetch: refetchPhotos } = useQuery<ProjectPhoto[]>({
     queryKey: [`/api/projects/${project.id}/photos`],
-    staleTime: 0, // Always refetch on mount
-    gcTime: 1000 * 60 * 5, // Cache for 5 minutes (gcTime is the new name for cacheTime)
+    queryFn: async () => {
+      // Try loading with reduced limit to avoid database response size issues
+      const response = await fetch(`/api/projects/${project.id}/photos?limit=3`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('firebase-token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch photos: ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+    staleTime: 0,
+    retry: 1, // Reduce retries to avoid overwhelming the database
   });
 
   const { data: documents = [] } = useQuery<ProjectDocument[]>({

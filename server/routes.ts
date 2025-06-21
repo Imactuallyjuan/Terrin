@@ -903,16 +903,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get photo metadata without full images
+  app.get('/api/projects/:id/photos/metadata', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const photos = await storage.getProjectPhotoMetadata(projectId);
+      res.json(photos);
+    } catch (error: any) {
+      console.error("Error fetching project photo metadata:", error);
+      res.status(500).json({ message: "Failed to fetch photo metadata" });
+    }
+  });
+
+  // Get single photo with full image data
+  app.get('/api/projects/:id/photos/:photoId', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const photoId = parseInt(req.params.photoId);
+      const photo = await storage.getProjectPhoto(photoId);
+      
+      if (!photo) {
+        return res.status(404).json({ message: "Photo not found" });
+      }
+      
+      res.json(photo);
+    } catch (error: any) {
+      console.error("Error fetching project photo:", error);
+      res.status(500).json({ message: "Failed to fetch project photo" });
+    }
+  });
+
   app.get('/api/projects/:id/photos', verifyFirebaseToken, async (req: any, res) => {
     try {
       const projectId = parseInt(req.params.id);
-      const limit = parseInt(req.query.limit as string) || 20;
+      const limit = Math.min(parseInt(req.query.limit as string) || 3, 3); // Limit to 3 photos max
       const offset = parseInt(req.query.offset as string) || 0;
       
       const photos = await storage.getProjectPhotos(projectId, limit, offset);
       res.json(photos);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching project photos:", error);
+      
+      // Handle specific database response size errors
+      if (error?.message?.includes('response is too large')) {
+        return res.status(413).json({ 
+          message: "Too many photos to load at once. Please contact support to optimize photo storage." 
+        });
+      }
+      
       res.status(500).json({ message: "Failed to fetch project photos" });
     }
   });
