@@ -94,7 +94,7 @@ export interface IStorage {
   
   // Photo operations
   createProjectPhoto(photo: InsertProjectPhoto): Promise<ProjectPhoto>;
-  getProjectPhotos(projectId: number): Promise<ProjectPhoto[]>;
+  getProjectPhotos(projectId: number, limit?: number, offset?: number): Promise<ProjectPhoto[]>;
   deleteProjectPhoto(id: number): Promise<void>;
   
   // Document operations
@@ -487,12 +487,14 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getProjectPhotos(projectId: number): Promise<ProjectPhoto[]> {
+  async getProjectPhotos(projectId: number, limit: number = 20, offset: number = 0): Promise<ProjectPhoto[]> {
     return await db
       .select()
       .from(projectPhotos)
       .where(eq(projectPhotos.projectId, projectId))
-      .orderBy(desc(projectPhotos.uploadedAt));
+      .orderBy(desc(projectPhotos.uploadedAt))
+      .limit(limit)
+      .offset(offset);
   }
 
   async deleteProjectPhoto(id: number): Promise<void> {

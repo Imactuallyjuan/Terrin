@@ -177,8 +177,10 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     queryKey: [`/api/projects/${project.id}/milestones`],
   });
 
-  const { data: photos = [] } = useQuery<ProjectPhoto[]>({
+  const { data: photos = [], refetch: refetchPhotos } = useQuery<ProjectPhoto[]>({
     queryKey: [`/api/projects/${project.id}/photos`],
+    staleTime: 0, // Always refetch on mount
+    gcTime: 1000 * 60 * 5, // Cache for 5 minutes (gcTime is the new name for cacheTime)
   });
 
   const { data: documents = [] } = useQuery<ProjectDocument[]>({
@@ -272,7 +274,11 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
       return await apiRequest('POST', `/api/projects/${project.id}/photos`, photoData);
     },
     onSuccess: () => {
+      // Invalidate and refetch photos immediately
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/photos`] });
+      queryClient.refetchQueries({ queryKey: [`/api/projects/${project.id}/photos`] });
+      refetchPhotos();
+      
       setNewPhoto({
         fileName: '',
         filePath: '',

@@ -906,7 +906,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/projects/:id/photos', verifyFirebaseToken, async (req: any, res) => {
     try {
       const projectId = parseInt(req.params.id);
-      const photos = await storage.getProjectPhotos(projectId);
+      const limit = parseInt(req.query.limit as string) || 20;
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      const photos = await storage.getProjectPhotos(projectId, limit, offset);
       res.json(photos);
     } catch (error) {
       console.error("Error fetching project photos:", error);
