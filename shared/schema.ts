@@ -96,6 +96,9 @@ export const contractors = pgTable("contractors", {
   licenseNumber: varchar("license_number"),
   yearsExperience: integer("years_experience").notNull(),
   serviceArea: text("service_area").notNull(),
+  phone: varchar("phone"),
+  email: varchar("email"),
+  website: varchar("website"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

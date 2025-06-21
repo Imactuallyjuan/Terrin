@@ -465,8 +465,26 @@ export default function ContractorProfile() {
                         <p className="font-medium">Hourly Rate</p>
                         <p className="text-gray-600">${professional.hourlyRate}/hour</p>
                       </div>
+                      {professional.phone && (
+                        <div>
+                          <p className="font-medium">Phone</p>
+                          <p className="text-gray-600">{professional.phone}</p>
+                        </div>
+                      )}
+                      {professional.email && (
+                        <div>
+                          <p className="font-medium">Email</p>
+                          <p className="text-gray-600">{professional.email}</p>
+                        </div>
+                      )}
+                      {professional.website && (
+                        <div>
+                          <p className="font-medium">Website</p>
+                          <p className="text-gray-600">{professional.website}</p>
+                        </div>
+                      )}
                       {professional.licenseNumber && (
-                        <div className="md:col-span-2">
+                        <div className="md:col-span-2-2">
                           <p className="font-medium">License Number</p>
                           <p className="text-gray-600">{professional.licenseNumber}</p>
                         </div>

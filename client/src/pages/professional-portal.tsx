@@ -142,9 +142,9 @@ export default function ProfessionalPortal() {
         yearsExperience: profile.yearsExperience?.toString() || '',
         serviceArea: profile.serviceArea || '',
         description: profile.description || '',
-        phone: '',
-        email: user?.email || '',
-        website: '',
+        phone: profile.phone || '',
+        email: profile.email || user?.email || '',
+        website: profile.website || '',
         licenseNumber: profile.licenseNumber || '',
         insurance: false,
         bondedAndInsured: false
@@ -327,23 +327,222 @@ export default function ProfessionalPortal() {
                           <div className="flex items-center text-sm text-slate-600">
                             <Globe className="mr-2 h-4 w-4" />
                             <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                              Visit Website
+                              {profile.website}
                             </a>
                           </div>
                         )}
                         
-                        <div className="pt-2 border-t">
-                          <div className="flex items-center space-x-4 text-sm">
-                            {profile?.insurance && (
-                              <div className="flex items-center text-green-600">
-                                <CheckCircle className="mr-1 h-3 w-3" />
-                                Insured
-                              </div>
-                            )}
-                            {profile?.bondedAndInsured && (
-                              <div className="flex items-center text-green-600">
-                                <CheckCircle className="mr-1 h-3 w-3" />
-                                Bonded
+                        {profile?.hourlyRate && (
+                          <div className="flex items-center text-sm text-slate-600">
+                            <DollarSign className="mr-2 h-4 w-4" />
+                            ${profile.hourlyRate}/hour
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Profile Form */}
+                  <div className="lg:col-span-2">
+                    {editingProfile ? (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Edit Professional Profile</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="businessName">Business Name *</Label>
+                              <Input
+                                value={formData.businessName}
+                                onChange={(e) => setFormData({...formData, businessName: e.target.value})}
+                                placeholder="Your business name"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="yearsExperience">Years of Experience</Label>
+                              <Input
+                                type="number"
+                                value={formData.yearsExperience}
+                                onChange={(e) => setFormData({...formData, yearsExperience: e.target.value})}
+                                placeholder="5"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label>Specialties * (Select all that apply)</Label>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                              {specialtyOptions.map((specialty) => (
+                                <label key={specialty} className="flex items-center space-x-2 text-sm">
+                                  <input
+                                    type="checkbox"
+                                    checked={formData.specialties.includes(specialty)}
+                                    onChange={() => handleSpecialtyChange(specialty)}
+                                    className="rounded"
+                                  />
+                                  <span>{specialty}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="serviceArea">Service Area</Label>
+                            <Input
+                              value={formData.serviceArea}
+                              onChange={(e) => setFormData({...formData, serviceArea: e.target.value})}
+                              placeholder="Cities and regions you serve"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="description">Business Description</Label>
+                            <Textarea
+                              value={formData.description}
+                              onChange={(e) => setFormData({...formData, description: e.target.value})}
+                              placeholder="Tell potential clients about your business, experience, and what sets you apart..."
+                              rows={4}
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="phone">Phone Number</Label>
+                              <Input
+                                value={formData.phone}
+                                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                placeholder="(555) 123-4567"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="email">Email</Label>
+                              <Input
+                                type="email"
+                                value={formData.email}
+                                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                placeholder="your@email.com"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="website">Website</Label>
+                              <Input
+                                value={formData.website}
+                                onChange={(e) => setFormData({...formData, website: e.target.value})}
+                                placeholder="https://yourwebsite.com"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="licenseNumber">License Number</Label>
+                              <Input
+                                value={formData.licenseNumber}
+                                onChange={(e) => setFormData({...formData, licenseNumber: e.target.value})}
+                                placeholder="License #123456"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex space-x-4">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setEditingProfile(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={handleSaveProfile}
+                              disabled={updateProfileMutation.isPending}
+                            >
+                              {updateProfileMutation.isPending ? 'Saving...' : 'Save Profile'}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Professional Profile</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="text-center py-8">
+                            <Building className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+                            <h3 className="text-lg font-medium text-slate-900 mb-2">
+                              {profile?.businessName || 'Professional Profile'}
+                            </h3>
+                            <p className="text-slate-600 mb-4">
+                              {profile?.description || 'Update your profile to showcase your expertise'}
+                            </p>
+                            <Button onClick={() => setEditingProfile(true)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit Profile
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="projects">
+            <Card>
+              <CardHeader>
+                <CardTitle>Available Projects</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600">Project discovery feature coming soon.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <Card>
+              <CardHeader>
+                <CardTitle>Analytics Dashboard</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600">Analytics feature coming soon.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </main>
+    </div>
+  );
+
+  function handleSpecialtyChange(specialty: string) {
+    setFormData(prev => ({
+      ...prev,
+      specialties: prev.specialties.includes(specialty)
+        ? prev.specialties.filter(s => s !== specialty)
+        : [...prev.specialties, specialty]
+    }));
+  }
+
+  function handleSaveProfile() {
+    const profileData = {
+      businessName: formData.businessName,
+      specialty: formData.specialties[0] || 'General Contractor',
+      description: formData.description,
+      hourlyRate: parseFloat(formData.hourlyRate) || 0,
+      location: formData.location,
+      yearsExperience: parseInt(formData.yearsExperience) || 0,
+      serviceArea: formData.serviceArea,
+      phone: formData.phone,
+      email: formData.email,
+      website: formData.website,
+      licenseNumber: formData.licenseNumber
+    };
+
+    updateProfileMutation.mutate(profileData);
+  }
+}
                               </div>
                             )}
                           </div>
