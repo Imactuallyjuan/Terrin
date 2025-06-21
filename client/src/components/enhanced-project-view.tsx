@@ -1556,16 +1556,14 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                   </div>
                 )}
                 
-                {/* Load More Photos Button */}
-                {hasMorePhotos && (
+                {/* View All Photos Button */}
+                {photos.length > 0 && (
                   <div className="text-center mt-4">
-                    <Button
-                      onClick={() => loadPhotos(photoOffset, true)}
-                      disabled={loadingPhotos}
-                      variant="outline"
-                    >
-                      {loadingPhotos ? "Loading..." : "Load More Photos"}
-                    </Button>
+                    <Link href={`/projects/${project.id}/gallery`}>
+                      <Button variant="outline">
+                        View All Photos ({photos.length > 4 ? `${photos.length} total` : 'Gallery'})
+                      </Button>
+                    </Link>
                   </div>
                 )}
               </CardContent>

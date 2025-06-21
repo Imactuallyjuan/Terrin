@@ -19,6 +19,7 @@ import FindProfessionals from "@/pages/find-professionals";
 import ForProfessionals from "@/pages/for-professionals";
 import Messages from "@/pages/messages";
 import Gallery from "@/pages/gallery";
+import ProjectGallery from "@/pages/project-gallery";
 import ContractorProfile from "@/pages/contractor-profile";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
@@ -85,6 +86,7 @@ function Router() {
       <Route path="/find-professionals" component={FindProfessionals} />
       <Route path="/for-professionals" component={ForProfessionals} />
       <Route path="/gallery" component={Gallery} />
+      <Route path="/projects/:id/gallery" component={ProjectGallery} />
       <Route path="/professionals/:id" component={ContractorProfile} />
       
       {/* Home/Landing Page */}

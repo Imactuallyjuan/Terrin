@@ -936,8 +936,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const projectId = parseInt(req.params.id);
       
-      // For now, load only 1 photo at a time to avoid 64MB database response limit
-      const limit = 1;
+      // Load 4 photos by default for preview, or all if requested
+      const limit = parseInt(req.query.limit as string) || 4;
       const offset = parseInt(req.query.offset as string) || 0;
       
       const photos = await storage.getProjectPhotos(projectId, limit, offset);
