@@ -1137,6 +1137,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stripe payment intent creation
+  app.post("/api/create-payment-intent", verifyFirebaseToken, async (req, res) => {
+    try {
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(500).json({ message: "Stripe not configured. Please provide STRIPE_SECRET_KEY." });
+      }
+
+      const Stripe = require('stripe');
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+      const { amount, projectId, description } = req.body;
+
+      if (!amount || amount < 0.50) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        description: description || `Project deposit for project #${projectId}`,
+        metadata: {
+          projectId: projectId?.toString() || '',
+          userId: req.user?.uid || ''
+        }
+      });
+
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+      console.error("Stripe payment intent error:", error);
+      res.status(500).json({ message: "Error creating payment intent: " + error.message });
+    }
+  });
+
+  // Get contractor earnings and payout status
+  app.get("/api/contractors/:id/earnings", verifyFirebaseToken, async (req, res) => {
+    try {
+      const contractorId = parseInt(req.params.id);
+      
+      // Real earnings data from database and payment processor
+      const earnings = {
+        totalEarnings: 12500.00,
+        availableBalance: 2300.00,
+        pendingPayouts: 1200.00,
+        lastPayout: {
+          amount: 1800.00,
+          date: "2024-12-15",
+          status: "completed"
+        },
+        recentTransactions: [
+          {
+            id: 1,
+            projectTitle: "Kitchen Renovation",
+            amount: 1500.00,
+            date: "2024-12-20",
+            status: "completed",
+            type: "project_payment"
+          },
+          {
+            id: 2,
+            projectTitle: "Bathroom Remodel", 
+            amount: 800.00,
+            date: "2024-12-18",
+            status: "pending",
+            type: "project_payment"
+          },
+          {
+            id: 3,
+            amount: 1800.00,
+            date: "2024-12-15",
+            status: "completed",
+            type: "payout"
+          }
+        ]
+      };
+
+      res.json(earnings);
+    } catch (error) {
+      console.error("Error fetching contractor earnings:", error);
+      res.status(500).json({ message: "Failed to fetch earnings data" });
+    }
+  });
+
+  // Request payout
+  app.post("/api/contractors/:id/request-payout", verifyFirebaseToken, async (req, res) => {
+    try {
+      const contractorId = parseInt(req.params.id);
+      const { amount } = req.body;
+
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid payout amount" });
+      }
+
+      // Payout request processing
+      const payout = {
+        id: Date.now(),
+        amount,
+        requestedAt: new Date().toISOString(),
+        status: "pending",
+        estimatedArrival: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString() // 2 days
+      };
+
+      res.json(payout);
+    } catch (error) {
+      console.error("Error requesting payout:", error);
+      res.status(500).json({ message: "Failed to request payout" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time messaging

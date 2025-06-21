@@ -21,6 +21,8 @@ import Messages from "@/pages/messages";
 import Gallery from "@/pages/gallery";
 import ProjectGallery from "@/pages/project-gallery";
 import ContractorProfile from "@/pages/contractor-profile";
+import Payment from "@/pages/payment";
+import ContractorDashboard from "@/pages/contractor-dashboard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
@@ -77,6 +79,20 @@ function Router() {
       <Route path="/messages">
         <ProtectedRoute requireAuth={true}>
           <Messages />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Payment Page - Requires Authentication */}
+      <Route path="/payment">
+        <ProtectedRoute requireAuth={true}>
+          <Payment />
+        </ProtectedRoute>
+      </Route>
+      
+      {/* Contractor Dashboard - Requires Authentication */}
+      <Route path="/contractor-dashboard">
+        <ProtectedRoute requireAuth={true} allowedRoles={['professional', 'both']}>
+          <ContractorDashboard />
         </ProtectedRoute>
       </Route>
       
