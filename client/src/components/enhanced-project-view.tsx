@@ -151,6 +151,14 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     category: 'progress'
   });
 
+  const [uploadingPhotos, setUploadingPhotos] = useState<Array<{
+    fileName: string;
+    filePath: string;
+    caption: string;
+    category: string;
+    progress: number;
+  }>>([]);
+
   const [newDocument, setNewDocument] = useState({
     fileName: '',
     filePath: '',
@@ -439,6 +447,137 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     setEditingMilestone(null);
     setEditMilestoneData({ title: '', description: '', progressWeight: 10 });
   };;
+
+  const handleMultiplePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+
+    // Validate all files before processing
+    const maxSize = 10 * 1024 * 1024; // 10MB per file
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    
+    // Calculate total size
+    const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+    const maxTotalSize = 50 * 1024 * 1024; // 50MB total limit
+    
+    if (totalSize > maxTotalSize) {
+      toast({
+        title: "Upload Too Large",
+        description: "Total upload size cannot exceed 50MB. Please select fewer or smaller images.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate individual files
+    const invalidFiles = files.filter(file => 
+      file.size > maxSize || !allowedTypes.includes(file.type)
+    );
+
+    if (invalidFiles.length > 0) {
+      const oversizedFiles = invalidFiles.filter(f => f.size > maxSize);
+      const invalidTypeFiles = invalidFiles.filter(f => !allowedTypes.includes(f.type));
+      
+      let errorMessage = "";
+      if (oversizedFiles.length > 0) {
+        errorMessage += `Files too large (>10MB): ${oversizedFiles.map(f => f.name).join(', ')}. `;
+      }
+      if (invalidTypeFiles.length > 0) {
+        errorMessage += `Invalid file types: ${invalidTypeFiles.map(f => f.name).join(', ')}.`;
+      }
+
+      toast({
+        title: "Invalid Files",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Process files
+    setUploadingPhotos(files.map(file => ({
+      fileName: file.name,
+      filePath: '',
+      caption: '',
+      category: newPhoto.category,
+      progress: 0
+    })));
+
+    toast({
+      title: "Processing Photos",
+      description: `Processing ${files.length} photos...`,
+    });
+
+    // Process files in batches to avoid overwhelming the browser
+    const batchSize = 3;
+    for (let i = 0; i < files.length; i += batchSize) {
+      const batch = files.slice(i, i + batchSize);
+      
+      await Promise.all(batch.map(async (file, batchIndex) => {
+        const overallIndex = i + batchIndex;
+        
+        return new Promise<void>((resolve, reject) => {
+          const reader = new FileReader();
+          
+          reader.onerror = () => {
+            setUploadingPhotos(prev => prev.filter((_, idx) => idx !== overallIndex));
+            reject(new Error(`Failed to read ${file.name}`));
+          };
+          
+          reader.onload = async () => {
+            try {
+              const base64String = reader.result as string;
+              
+              // Update progress
+              setUploadingPhotos(prev => prev.map((photo, idx) => 
+                idx === overallIndex ? { ...photo, filePath: base64String, progress: 50 } : photo
+              ));
+
+              // Upload to server
+              const photoData = {
+                fileName: file.name,
+                filePath: base64String,
+                caption: '',
+                category: newPhoto.category
+              };
+
+              await addPhotoMutation.mutateAsync(photoData);
+              
+              // Update progress to complete
+              setUploadingPhotos(prev => prev.map((photo, idx) => 
+                idx === overallIndex ? { ...photo, progress: 100 } : photo
+              ));
+              
+              resolve();
+            } catch (error) {
+              console.error(`Error processing ${file.name}:`, error);
+              setUploadingPhotos(prev => prev.filter((_, idx) => idx !== overallIndex));
+              reject(error);
+            }
+          };
+          
+          reader.readAsDataURL(file);
+        });
+      }));
+      
+      // Small delay between batches to prevent overwhelming
+      if (i + batchSize < files.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+
+    // Clear uploading state after all files are processed
+    setTimeout(() => {
+      setUploadingPhotos([]);
+      toast({
+        title: "Upload Complete",
+        description: `Successfully uploaded ${files.length} photos.`,
+      });
+    }, 1000);
+
+    // Reset file input
+    event.target.value = '';
+  };
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -1216,50 +1355,98 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
             {/* Upload Photo Form */}
             <Card>
               <CardHeader>
-                <CardTitle>Add New Photo</CardTitle>
+                <CardTitle>Add Photos</CardTitle>
+                <p className="text-sm text-muted-foreground">Upload single photos or multiple photos at once (up to 50MB total)</p>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="photo">Select Photo</Label>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoUpload}
-                    />
+                <div className="space-y-4">
+                  {/* Single Photo Upload */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="single-photo">Single Photo</Label>
+                      <Input
+                        id="single-photo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="category">Category</Label>
+                      <Select value={newPhoto.category} onValueChange={(value) => setNewPhoto({...newPhoto, category: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="before">Before</SelectItem>
+                          <SelectItem value="progress">Progress</SelectItem>
+                          <SelectItem value="after">After</SelectItem>
+                          <SelectItem value="materials">Materials</SelectItem>
+                          <SelectItem value="issues">Issues</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="caption">Caption (for single photo)</Label>
+                      <Input
+                        value={newPhoto.caption}
+                        onChange={(e) => setNewPhoto({...newPhoto, caption: e.target.value})}
+                        placeholder="Describe this photo..."
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="category">Category</Label>
-                    <Select value={newPhoto.category} onValueChange={(value) => setNewPhoto({...newPhoto, category: value})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="before">Before</SelectItem>
-                        <SelectItem value="progress">Progress</SelectItem>
-                        <SelectItem value="after">After</SelectItem>
-                        <SelectItem value="materials">Materials</SelectItem>
-                        <SelectItem value="issues">Issues</SelectItem>
-                      </SelectContent>
-                    </Select>
+
+                  <div className="flex space-x-2">
+                    <Button 
+                      onClick={handleAddPhoto} 
+                      disabled={addPhotoMutation.isPending || !newPhoto.filePath}
+                      variant="outline"
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload Single Photo
+                    </Button>
                   </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="caption">Caption</Label>
-                    <Input
-                      value={newPhoto.caption}
-                      onChange={(e) => setNewPhoto({...newPhoto, caption: e.target.value})}
-                      placeholder="Describe this photo..."
-                    />
+
+                  <div className="border-t pt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="multiple-photos">Multiple Photos (Bulk Upload)</Label>
+                      <p className="text-xs text-muted-foreground">Select multiple images to upload with the selected category</p>
+                      <Input
+                        id="multiple-photos"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleMultiplePhotoUpload}
+                        disabled={uploadingPhotos.length > 0}
+                      />
+                    </div>
+                    
+                    {uploadingPhotos.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <h4 className="text-sm font-medium">Uploading Photos...</h4>
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                          {uploadingPhotos.map((photo, index) => (
+                            <div key={index} className="flex items-center space-x-3 text-sm">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center space-x-2">
+                                  <span className="truncate">{photo.fileName}</span>
+                                  <Badge variant="outline" className="text-xs">{photo.category}</Badge>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                  <div 
+                                    className="bg-blue-600 h-1.5 rounded-full transition-all duration-300" 
+                                    style={{ width: `${photo.progress}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                              <span className="text-xs text-muted-foreground">{photo.progress}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <Button 
-                  onClick={handleAddPhoto} 
-                  className="mt-4"
-                  disabled={addPhotoMutation.isPending}
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload Photo
-                </Button>
               </CardContent>
             </Card>
 

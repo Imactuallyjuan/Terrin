@@ -249,6 +249,15 @@ Changelog:
   * Added proper redirect functionality to sign out - users now automatically return to landing page after signing out
   * Enhanced header component with useLocation hook for programmatic navigation after authentication state changes
   * Improved user experience by ensuring consistent navigation flow between authenticated and unauthenticated states
+- June 20, 2025. Photo Upload Crash Prevention & Multiple Upload Feature
+  * Fixed photo upload crashes by adding comprehensive error handling and file validation
+  * Added file size limits (10MB per image, 50MB total) and file type validation (JPEG, PNG, GIF, WebP)
+  * Implemented multiple photo upload functionality with batch processing and progress indicators
+  * Enhanced server-side validation with payload size checking and base64 format verification
+  * Added batch photo upload endpoint (/api/projects/:id/photos/batch) for efficient multiple file handling
+  * Created real-time progress tracking UI with individual file progress bars during bulk uploads
+  * Improved database operations with proper error handling and batch processing to prevent server overload
+  * Users can now upload up to 20 photos simultaneously with visual feedback and robust error recovery
 ```
 
 ## User Preferences

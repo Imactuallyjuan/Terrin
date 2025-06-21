@@ -815,6 +815,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Batch photo upload endpoint
+  app.post('/api/projects/:id/photos/batch', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userId = req.user.uid;
+      const { photos } = req.body;
+
+      if (!Array.isArray(photos) || photos.length === 0) {
+        return res.status(400).json({ message: "Photos array is required" });
+      }
+
+      if (photos.length > 20) {
+        return res.status(400).json({ message: "Maximum 20 photos can be uploaded at once" });
+      }
+
+      // Validate all photos before processing
+      const maxSize = 10 * 1024 * 1024; // 10MB per file
+      const maxTotalSize = 50 * 1024 * 1024; // 50MB total
+      let totalSize = 0;
+
+      for (const photo of photos) {
+        if (!photo.fileName || !photo.filePath) {
+          return res.status(400).json({ message: "Each photo must have fileName and filePath" });
+        }
+
+        if (!photo.filePath.startsWith('data:image/')) {
+          return res.status(400).json({ message: `Invalid image format for ${photo.fileName}` });
+        }
+
+        const estimatedSize = (photo.filePath.length * 3) / 4;
+        totalSize += estimatedSize;
+
+        if (estimatedSize > maxSize) {
+          return res.status(413).json({ message: `Photo ${photo.fileName} is too large (max 10MB)` });
+        }
+      }
+
+      if (totalSize > maxTotalSize) {
+        return res.status(413).json({ message: "Total upload size exceeds 50MB limit" });
+      }
+
+      // Process photos in batches to avoid database connection overload
+      const batchSize = 5;
+      const uploadedPhotos = [];
+      
+      for (let i = 0; i < photos.length; i += batchSize) {
+        const batch = photos.slice(i, i + batchSize);
+        
+        const batchResults = await Promise.all(
+          batch.map(async (photoData: any) => {
+            try {
+              return await storage.createProjectPhoto({
+                ...photoData,
+                projectId,
+                userId,
+              });
+            } catch (error) {
+              console.error(`Error uploading ${photoData.fileName}:`, error);
+              throw new Error(`Failed to upload ${photoData.fileName}`);
+            }
+          })
+        );
+        
+        uploadedPhotos.push(...batchResults);
+        
+        // Small delay between batches to prevent overwhelming the database
+        if (i + batchSize < photos.length) {
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+      }
+
+      res.json({
+        message: `Successfully uploaded ${uploadedPhotos.length} photos`,
+        photos: uploadedPhotos,
+        totalUploaded: uploadedPhotos.length
+      });
+
+    } catch (error: any) {
+      console.error("Error in batch photo upload:", error);
+      
+      if (error?.message?.includes('payload too large')) {
+        return res.status(413).json({ message: "Total upload size too large" });
+      }
+      
+      res.status(500).json({ message: error?.message || "Failed to upload photos" });
+    }
+  });
+
   app.get('/api/projects/:id/photos', verifyFirebaseToken, async (req: any, res) => {
     try {
       const projectId = parseInt(req.params.id);
