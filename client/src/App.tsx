@@ -86,8 +86,14 @@ function Router() {
       <Route path="/find-professionals" component={FindProfessionals} />
       <Route path="/for-professionals" component={ForProfessionals} />
       <Route path="/gallery" component={Gallery} />
-      <Route path="/projects/:id/gallery" component={ProjectGallery} />
       <Route path="/professionals/:id" component={ContractorProfile} />
+      
+      {/* Protected Project Gallery - Requires Authentication */}
+      <Route path="/projects/:id/gallery">
+        <ProtectedRoute requireAuth={true}>
+          <ProjectGallery />
+        </ProtectedRoute>
+      </Route>
       
       {/* Home/Landing Page */}
       <Route path="/">

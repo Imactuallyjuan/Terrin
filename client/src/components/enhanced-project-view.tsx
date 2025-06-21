@@ -183,15 +183,14 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
   const [hasMorePhotos, setHasMorePhotos] = useState(true);
   const [loadingPhotos, setLoadingPhotos] = useState(false);
 
-  // Load photos progressively to avoid database response size limits
+  // Load 4 photos for preview
   const loadPhotos = async (offset: number = 0, append: boolean = false) => {
     if (loadingPhotos) return;
     
     setLoadingPhotos(true);
     try {
-      const response = await fetch(`/api/projects/${project.id}/photos?offset=${offset}&limit=1`, {
+      const response = await fetch(`/api/projects/${project.id}/photos?offset=${offset}&limit=4`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('firebase-token')}`,
           'Content-Type': 'application/json'
         }
       });
@@ -203,7 +202,7 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
         } else {
           setAllPhotos(prev => append ? [...prev, ...newPhotos] : newPhotos);
           if (append) {
-            setPhotoOffset(offset + 1);
+            setPhotoOffset(offset + 4);
           }
         }
       }

@@ -19,9 +19,9 @@ export default function ProjectGallery() {
   const projectId = params?.id;
 
   const { data: photos = [], isLoading } = useQuery<ProjectPhoto[]>({
-    queryKey: [`/api/projects/${projectId}/photos`, { limit: 100 }],
+    queryKey: [`/api/projects/${projectId}/photos`, { limit: 10 }],
     queryFn: async () => {
-      const response = await fetch(`/api/projects/${projectId}/photos?limit=100`);
+      const response = await fetch(`/api/projects/${projectId}/photos?limit=10`);
       const data = await response.json();
       return Array.isArray(data) ? data : [];
     },
@@ -56,10 +56,10 @@ export default function ProjectGallery() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link href={`/projects/${projectId}`}>
+            <Link href={`/projects`}>
               <Button variant="outline" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Project
+                Back to Projects
               </Button>
             </Link>
             <div>
