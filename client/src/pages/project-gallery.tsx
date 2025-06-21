@@ -24,18 +24,50 @@ export default function ProjectGallery() {
   const projectId = params?.id;
   const [editingPhoto, setEditingPhoto] = useState<number | null>(null);
   const [editData, setEditData] = useState({ fileName: '', caption: '' });
+  const [allPhotos, setAllPhotos] = useState<ProjectPhoto[]>([]);
+  const [hasMorePhotos, setHasMorePhotos] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [offset, setOffset] = useState(0);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: photos = [], isLoading } = useQuery<ProjectPhoto[]>({
-    queryKey: [`/api/projects/${projectId}/photos`, { limit: 10 }],
+  // Load initial photos
+  const { isLoading: initialLoading } = useQuery<ProjectPhoto[]>({
+    queryKey: [`/api/projects/${projectId}/photos`, { limit: 10, offset: 0 }],
     queryFn: async () => {
-      const response = await fetch(`/api/projects/${projectId}/photos?limit=10`);
+      const response = await fetch(`/api/projects/${projectId}/photos?limit=10&offset=0`);
       const data = await response.json();
-      return Array.isArray(data) ? data : [];
+      const photos = Array.isArray(data) ? data : [];
+      setAllPhotos(photos);
+      setHasMorePhotos(photos.length === 10);
+      setOffset(10);
+      return photos;
     },
     enabled: !!projectId,
   });
+
+  const loadMorePhotos = async () => {
+    if (loadingMore || !hasMorePhotos) return;
+    
+    setLoadingMore(true);
+    try {
+      const response = await fetch(`/api/projects/${projectId}/photos?limit=10&offset=${offset}`);
+      const data = await response.json();
+      const newPhotos = Array.isArray(data) ? data : [];
+      
+      if (newPhotos.length > 0) {
+        setAllPhotos(prev => [...prev, ...newPhotos]);
+        setOffset(prev => prev + newPhotos.length);
+        setHasMorePhotos(newPhotos.length === 10);
+      } else {
+        setHasMorePhotos(false);
+      }
+    } catch (error) {
+      console.error('Error loading more photos:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const { data: project } = useQuery<{ title: string }>({
     queryKey: [`/api/projects/${projectId}`],
@@ -46,8 +78,12 @@ export default function ProjectGallery() {
     mutationFn: async (photoId: number) => {
       return await apiRequest('DELETE', `/api/projects/photos/${photoId}`);
     },
-    onSuccess: () => {
+    onSuccess: (_, photoId) => {
+      // Immediately update local state
+      setAllPhotos(prev => prev.filter(photo => photo.id !== photoId));
+      // Also invalidate cache for project page
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}`] });
       toast({
         title: "Photo Deleted",
         description: "The photo has been removed successfully.",
@@ -66,7 +102,12 @@ export default function ProjectGallery() {
     mutationFn: async ({ photoId, updates }: { photoId: number; updates: any }) => {
       return await apiRequest('PATCH', `/api/projects/photos/${photoId}`, updates);
     },
-    onSuccess: () => {
+    onSuccess: (updatedPhoto, { photoId, updates }) => {
+      // Immediately update local state
+      setAllPhotos(prev => prev.map(photo => 
+        photo.id === photoId ? { ...photo, ...updates } : photo
+      ));
+      // Also invalidate cache for project page
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/photos`] });
       setEditingPhoto(null);
       toast({
@@ -105,7 +146,7 @@ export default function ProjectGallery() {
     setEditData({ fileName: '', caption: '' });
   };
 
-  if (isLoading) {
+  if (initialLoading) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
@@ -143,13 +184,13 @@ export default function ProjectGallery() {
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-500">
-              {photos.length} {photos.length === 1 ? 'photo' : 'photos'}
+              {allPhotos.length} {allPhotos.length === 1 ? 'photo' : 'photos'}
             </p>
           </div>
         </div>
 
         {/* Photo Grid */}
-        {photos.length === 0 ? (
+        {allPhotos.length === 0 ? (
           <Card className="text-center py-12">
             <CardContent>
               <p className="text-gray-500 text-lg mb-4">No photos uploaded yet</p>
@@ -159,8 +200,9 @@ export default function ProjectGallery() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {photos.map((photo: ProjectPhoto) => (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {allPhotos.map((photo: ProjectPhoto) => (
               <Card key={photo.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
                 <div className="aspect-square bg-gray-100 relative overflow-hidden">
                   {photo.filePath ? (
@@ -278,6 +320,21 @@ export default function ProjectGallery() {
                 </CardContent>
               </Card>
             ))}
+            </div>
+            
+            {/* Load More Photos Button */}
+            {hasMorePhotos && (
+              <div className="text-center">
+                <Button
+                  onClick={loadMorePhotos}
+                  disabled={loadingMore}
+                  variant="outline"
+                  className="px-8"
+                >
+                  {loadingMore ? "Loading..." : "Load More Photos"}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
