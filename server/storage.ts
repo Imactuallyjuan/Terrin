@@ -462,11 +462,29 @@ export class DatabaseStorage implements IStorage {
 
   // Photo operations
   async createProjectPhoto(photo: InsertProjectPhoto): Promise<ProjectPhoto> {
-    const [newPhoto] = await db
-      .insert(projectPhotos)
-      .values(photo)
-      .returning();
-    return newPhoto;
+    try {
+      // Validate photo data before insertion
+      if (!photo.fileName || !photo.filePath) {
+        throw new Error('File name and file path are required');
+      }
+
+      if (!photo.projectId || !photo.userId) {
+        throw new Error('Project ID and User ID are required');
+      }
+
+      const [newPhoto] = await db
+        .insert(projectPhotos)
+        .values({
+          ...photo,
+          uploadedAt: new Date(), // Ensure consistent timestamp
+        })
+        .returning();
+      
+      return newPhoto;
+    } catch (error) {
+      console.error('Database error creating project photo:', error);
+      throw new Error(`Failed to save photo: ${error.message}`);
+    }
   }
 
   async getProjectPhotos(projectId: number): Promise<ProjectPhoto[]> {

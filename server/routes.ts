@@ -772,6 +772,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const projectId = parseInt(req.params.id);
       const userId = req.user.uid;
       
+      // Validate required fields
+      if (!req.body.fileName || !req.body.filePath) {
+        return res.status(400).json({ message: "File name and file path are required" });
+      }
+
+      // Check if base64 string is valid
+      const base64Data = req.body.filePath;
+      if (!base64Data.startsWith('data:image/')) {
+        return res.status(400).json({ message: "Invalid image format" });
+      }
+
+      // Estimate file size from base64 (approximate)
+      const base64Length = base64Data.length;
+      const estimatedSize = (base64Length * 3) / 4; // Base64 is ~33% larger than original
+      const maxSize = 10 * 1024 * 1024; // 10MB limit
+
+      if (estimatedSize > maxSize) {
+        return res.status(413).json({ message: "Image file too large. Maximum size is 10MB." });
+      }
+      
       const photo = await storage.createProjectPhoto({
         ...req.body,
         projectId,
@@ -779,8 +799,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       res.json(photo);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating project photo:", error);
+      
+      // Handle specific error types
+      if (error?.message?.includes('payload too large')) {
+        return res.status(413).json({ message: "Image file too large" });
+      }
+      
+      if (error?.message?.includes('invalid input syntax')) {
+        return res.status(400).json({ message: "Invalid image data format" });
+      }
+      
       res.status(500).json({ message: "Failed to create project photo" });
     }
   });

@@ -275,6 +275,14 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
         title: "Photo Added",
         description: "The photo has been uploaded successfully.",
       });
+    },
+    onError: (error: any) => {
+      console.error('Photo upload error:', error);
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload photo. Please try again.",
+        variant: "destructive",
+      });
     }
   });
 
@@ -435,19 +443,61 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Check file size (limit to 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        toast({
+          title: "File Too Large",
+          description: "Please select an image smaller than 10MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please select a valid image file (JPEG, PNG, GIF, or WebP).",
+          variant: "destructive",
+        });
+        return;
+      }
+
       try {
         // Convert file to base64 for storage
         const reader = new FileReader();
-        reader.onload = () => {
-          const base64String = reader.result as string;
-          setNewPhoto({
-            ...newPhoto,
-            fileName: file.name,
-            filePath: base64String
+        
+        reader.onerror = () => {
+          toast({
+            title: "Upload Error",
+            description: "Failed to read the selected image file.",
+            variant: "destructive",
           });
         };
+        
+        reader.onload = () => {
+          try {
+            const base64String = reader.result as string;
+            setNewPhoto({
+              ...newPhoto,
+              fileName: file.name,
+              filePath: base64String
+            });
+          } catch (error) {
+            console.error('Error processing file:', error);
+            toast({
+              title: "Processing Error",
+              description: "Failed to process the image. Please try a different file.",
+              variant: "destructive",
+            });
+          }
+        };
+        
         reader.readAsDataURL(file);
       } catch (error) {
+        console.error('Error handling photo upload:', error);
         toast({
           title: "Upload Error",
           description: "Failed to process the selected image.",
