@@ -1555,6 +1555,19 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                     ))}
                   </div>
                 )}
+                
+                {/* Load More Photos Button */}
+                {hasMorePhotos && (
+                  <div className="text-center mt-4">
+                    <Button
+                      onClick={() => loadPhotos(photoOffset, true)}
+                      disabled={loadingPhotos}
+                      variant="outline"
+                    >
+                      {loadingPhotos ? "Loading..." : "Load More Photos"}
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
