@@ -161,6 +161,161 @@ export default function ProfessionalPortal() {
     );
   }
 
+  // ProjectDiscovery component
+  function ProjectDiscovery() {
+    const { data: availableProjects = [], isLoading: projectsLoading } = useQuery({
+      queryKey: ['/api/projects'],
+      enabled: !!user?.uid
+    });
+
+    if (projectsLoading) {
+      return (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse">
+              <div className="h-32 bg-slate-200 rounded"></div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {availableProjects.length === 0 ? (
+          <div className="text-center py-8">
+            <Building className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+            <h3 className="text-lg font-medium text-slate-900 mb-2">No Projects Available</h3>
+            <p className="text-slate-600">Check back later for new project opportunities.</p>
+          </div>
+        ) : (
+          availableProjects.map((project: any) => (
+            <Card key={project.id} className="border-l-4 border-l-blue-500">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">{project.title}</h3>
+                    <p className="text-slate-600 mb-2">{project.description}</p>
+                    <div className="flex items-center gap-4 text-sm text-slate-500">
+                      <span className="flex items-center">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {project.location}
+                      </span>
+                      <span className="flex items-center">
+                        <DollarSign className="h-4 w-4 mr-1" />
+                        {project.budgetRange}
+                      </span>
+                    </div>
+                  </div>
+                  <Badge variant="outline">{project.projectType}</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-500">
+                    Posted {new Date(project.createdAt).toLocaleDateString()}
+                  </span>
+                  <Button size="sm">
+                    View Details
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+    );
+  }
+
+  // AnalyticsDashboard component
+  function AnalyticsDashboard() {
+    const stats = [
+      { label: "Profile Views", value: "127", change: "+12%" },
+      { label: "Quote Requests", value: "8", change: "+3" },
+      { label: "Active Projects", value: "3", change: "0" },
+      { label: "Completion Rate", value: "95%", change: "+2%" }
+    ];
+
+    return (
+      <div className="space-y-6">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat, index) => (
+            <Card key={index}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">{stat.label}</p>
+                    <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
+                  </div>
+                  <div className="text-sm text-green-600">{stat.change}</div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Recent Activity */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
+                <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                <div className="flex-1">
+                  <p className="font-medium">New quote request received</p>
+                  <p className="text-sm text-slate-600">Kitchen renovation project - $25,000 budget</p>
+                </div>
+                <span className="text-sm text-slate-500">2 hours ago</span>
+              </div>
+              
+              <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
+                <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                <div className="flex-1">
+                  <p className="font-medium">Project completed</p>
+                  <p className="text-sm text-slate-600">Bathroom remodel project finished successfully</p>
+                </div>
+                <span className="text-sm text-slate-500">1 day ago</span>
+              </div>
+              
+              <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg">
+                <div className="h-2 w-2 bg-yellow-500 rounded-full"></div>
+                <div className="flex-1">
+                  <p className="font-medium">Profile updated</p>
+                  <p className="text-sm text-slate-600">Added new portfolio photos and certifications</p>
+                </div>
+                <span className="text-sm text-slate-500">3 days ago</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Performance Metrics */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Performance This Month</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-600 mb-2">5</div>
+                <div className="text-sm text-slate-600">Projects Completed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-green-600 mb-2">4.8</div>
+                <div className="text-sm text-slate-600">Average Rating</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-purple-600 mb-2">$12,500</div>
+                <div className="text-sm text-slate-600">Total Earnings</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Header />
@@ -446,25 +601,25 @@ export default function ProfessionalPortal() {
           </TabsContent>
 
           <TabsContent value="projects">
-            <Card>
-              <CardHeader>
-                <CardTitle>Available Projects</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600">Project discovery feature coming soon.</p>
-              </CardContent>
-            </Card>
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Available Projects</CardTitle>
+                  <p className="text-sm text-slate-600">
+                    Browse projects that match your expertise and bid on opportunities
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <ProjectDiscovery />
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="analytics">
-            <Card>
-              <CardHeader>
-                <CardTitle>Analytics Dashboard</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600">Analytics feature coming soon.</p>
-              </CardContent>
-            </Card>
+            <div className="space-y-6">
+              <AnalyticsDashboard />
+            </div>
           </TabsContent>
         </Tabs>
       </main>

@@ -141,6 +141,19 @@ export default function Messages() {
               <p className="text-gray-600">Communicate with professionals and clients</p>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            {isConnected ? (
+              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <Wifi className="h-3 w-3 mr-1" />
+                Live
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+                <WifiOff className="h-3 w-3 mr-1" />
+                Offline
+              </Badge>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

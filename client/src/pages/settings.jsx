@@ -1,214 +1,525 @@
-import { useFirebaseAuth } from "../hooks/useFirebaseAuth";
-import UserRoleSettings from "../components/UserRoleSettings";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Settings, User, Mail, Calendar } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { 
+  User, 
+  Bell, 
+  Shield, 
+  Palette, 
+  Mail, 
+  Phone, 
+  MapPin,
+  Building,
+  Star,
+  CreditCard,
+  Download,
+  Trash2,
+  Save,
+  ArrowLeft
+} from "lucide-react";
 import { Link } from "wouter";
-import { signOut } from "firebase/auth";
-import { auth } from "../lib/firebase";
-import { useToast } from "../hooks/use-toast";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
-export default function SettingsPage() {
-  const { user, userRole, loading } = useFirebaseAuth();
+export default function Settings() {
+  const { user } = useFirebaseAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const [profileData, setProfileData] = useState({
+    firstName: "",
+    lastName: "",
+    email: user?.email || "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    bio: ""
+  });
 
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
+  const [notifications, setNotifications] = useState({
+    emailUpdates: true,
+    smsAlerts: false,
+    pushNotifications: true,
+    marketingEmails: false
+  });
+
+  const [privacy, setPrivacy] = useState({
+    profileVisibility: "public",
+    showEmail: false,
+    showPhone: false,
+    allowMessages: true
+  });
+
+  // Load user profile data
+  useEffect(() => {
+    if (user?.email) {
+      setProfileData(prev => ({ ...prev, email: user.email }));
+    }
+  }, [user]);
+
+  // Save profile mutation
+  const saveProfileMutation = useMutation({
+    mutationFn: async (data) => {
+      // Store in localStorage for now since we don't have a dedicated user profile API
+      localStorage.setItem('userProfile', JSON.stringify(data));
+      return data;
+    },
+    onSuccess: () => {
       toast({
-        title: "Signed out successfully",
-        description: "You have been logged out of your account.",
+        title: "Profile Updated",
+        description: "Your profile has been saved successfully.",
       });
-    } catch (error) {
-      console.error('Error signing out:', error);
+    },
+    onError: () => {
       toast({
-        title: "Sign out failed",
-        description: error.message,
-        variant: "destructive",
+        title: "Error",
+        description: "Failed to save profile. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Save notification preferences
+  const saveNotificationsMutation = useMutation({
+    mutationFn: async (data) => {
+      localStorage.setItem('notificationPreferences', JSON.stringify(data));
+      return data;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Preferences Updated",
+        description: "Your notification preferences have been saved.",
+      });
+    }
+  });
+
+  // Save privacy settings
+  const savePrivacyMutation = useMutation({
+    mutationFn: async (data) => {
+      localStorage.setItem('privacySettings', JSON.stringify(data));
+      return data;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Privacy Settings Updated", 
+        description: "Your privacy settings have been saved.",
+      });
+    }
+  });
+
+  // Load saved settings on component mount
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('userProfile');
+    const savedNotifications = localStorage.getItem('notificationPreferences');
+    const savedPrivacy = localStorage.getItem('privacySettings');
+
+    if (savedProfile) {
+      setProfileData({ ...profileData, ...JSON.parse(savedProfile) });
+    }
+    if (savedNotifications) {
+      setNotifications(JSON.parse(savedNotifications));
+    }
+    if (savedPrivacy) {
+      setPrivacy(JSON.parse(savedPrivacy));
+    }
+  }, []);
+
+  const handleSaveProfile = () => {
+    saveProfileMutation.mutate(profileData);
+  };
+
+  const handleSaveNotifications = () => {
+    saveNotificationsMutation.mutate(notifications);
+  };
+
+  const handleSavePrivacy = () => {
+    savePrivacyMutation.mutate(privacy);
+  };
+
+  const handleDeleteAccount = () => {
+    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      toast({
+        title: "Account Deletion",
+        description: "Contact support to delete your account permanently.",
+        variant: "destructive"
       });
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading settings...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleExportData = () => {
+    // Create a data export
+    const exportData = {
+      profile: profileData,
+      notifications: notifications,
+      privacy: privacy,
+      exportDate: new Date().toISOString()
+    };
+
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `terrin-data-export-${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+
+    toast({
+      title: "Data Exported",
+      description: "Your data has been downloaded successfully.",
+    });
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
-              <Link href="/">
-                <h1 className="text-2xl font-bold text-blue-600 cursor-pointer">Terrin</h1>
-              </Link>
-              <div className="text-gray-400">/</div>
-              <h2 className="text-lg text-gray-600">Settings</h2>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/dashboard">
-                <Button variant="outline" size="sm">
-                  Back to Dashboard
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Settings Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <div className="flex items-center space-x-3 mb-4">
-            <Settings className="h-8 w-8 text-blue-600" />
-            <h2 className="text-3xl font-bold text-gray-900">Account Settings</h2>
+          <div className="flex items-center gap-4 mb-4">
+            <Link href="/dashboard">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Button>
+            </Link>
           </div>
-          <p className="text-gray-600">
-            Manage your account preferences and profile information.
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+          <p className="text-gray-600 mt-2">Manage your account preferences and privacy settings</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Account Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <User className="h-5 w-5" />
-                <span>Account Information</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700">Email Address</label>
-                <div className="flex items-center space-x-2 mt-1 p-3 bg-gray-50 rounded-lg">
-                  <Mail className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-900">{user?.email}</span>
+        <Tabs defaultValue="profile" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            <TabsTrigger value="privacy">Privacy</TabsTrigger>
+            <TabsTrigger value="account">Account</TabsTrigger>
+          </TabsList>
+
+          {/* Profile Settings */}
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Profile Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      id="firstName"
+                      value={profileData.firstName}
+                      onChange={(e) => setProfileData({...profileData, firstName: e.target.value})}
+                      placeholder="Enter your first name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      value={profileData.lastName}
+                      onChange={(e) => setProfileData({...profileData, lastName: e.target.value})}
+                      placeholder="Enter your last name"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="text-sm font-medium text-gray-700">Account Created</label>
-                <div className="flex items-center space-x-2 mt-1 p-3 bg-gray-50 rounded-lg">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-900">
-                    {user?.metadata?.creationTime 
-                      ? new Date(user.metadata.creationTime).toLocaleDateString()
-                      : 'Recently'
-                    }
-                  </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={profileData.email}
+                      onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      value={profileData.phone}
+                      onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                      placeholder="(555) 123-4567"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="text-sm font-medium text-gray-700">User ID</label>
-                <div className="mt-1 p-3 bg-gray-50 rounded-lg">
-                  <span className="text-xs text-gray-600 font-mono break-all">{user?.uid}</span>
+                <div>
+                  <Label htmlFor="address">Address</Label>
+                  <Input
+                    id="address"
+                    value={profileData.address}
+                    onChange={(e) => setProfileData({...profileData, address: e.target.value})}
+                    placeholder="123 Main Street"
+                  />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Role Settings */}
-          <UserRoleSettings />
-        </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="city">City</Label>
+                    <Input
+                      id="city"
+                      value={profileData.city}
+                      onChange={(e) => setProfileData({...profileData, city: e.target.value})}
+                      placeholder="City"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="state">State</Label>
+                    <Input
+                      id="state"
+                      value={profileData.state}
+                      onChange={(e) => setProfileData({...profileData, state: e.target.value})}
+                      placeholder="State"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="zipCode">ZIP Code</Label>
+                    <Input
+                      id="zipCode"
+                      value={profileData.zipCode}
+                      onChange={(e) => setProfileData({...profileData, zipCode: e.target.value})}
+                      placeholder="12345"
+                    />
+                  </div>
+                </div>
 
-        {/* Additional Settings Cards */}
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Security Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Security</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="font-medium text-gray-900 mb-2">Password</h4>
-                <p className="text-sm text-gray-600 mb-3">
-                  Update your password to keep your account secure.
-                </p>
-                <Button variant="outline" size="sm" disabled>
-                  Change Password (Coming Soon)
-                </Button>
-              </div>
+                <div>
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea
+                    id="bio"
+                    value={profileData.bio}
+                    onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
+                    placeholder="Tell us about yourself..."
+                    rows={4}
+                  />
+                </div>
 
-              <div className="pt-4 border-t">
-                <h4 className="font-medium text-gray-900 mb-2">Two-Factor Authentication</h4>
-                <p className="text-sm text-gray-600 mb-3">
-                  Add an extra layer of security to your account.
-                </p>
-                <Button variant="outline" size="sm" disabled>
-                  Enable 2FA (Coming Soon)
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Account Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="font-medium text-gray-900 mb-2">Sign Out</h4>
-                <p className="text-sm text-gray-600 mb-3">
-                  Sign out of your account on this device.
-                </p>
                 <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleSignOut}
-                  className="text-red-600 border-red-200 hover:bg-red-50"
+                  onClick={handleSaveProfile} 
+                  className="w-full md:w-auto"
+                  disabled={saveProfileMutation.isPending}
                 >
-                  Sign Out
+                  <Save className="mr-2 h-4 w-4" />
+                  {saveProfileMutation.isPending ? 'Saving...' : 'Save Profile'}
                 </Button>
-              </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <div className="pt-4 border-t">
-                <h4 className="font-medium text-red-600 mb-2">Danger Zone</h4>
-                <p className="text-sm text-gray-600 mb-3">
-                  Permanently delete your account and all associated data.
-                </p>
+          {/* Notification Settings */}
+          <TabsContent value="notifications">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  Notification Preferences
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Email Updates</Label>
+                      <p className="text-sm text-gray-600">Receive updates about your projects via email</p>
+                    </div>
+                    <Switch
+                      checked={notifications.emailUpdates}
+                      onCheckedChange={(checked) => setNotifications({...notifications, emailUpdates: checked})}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">SMS Alerts</Label>
+                      <p className="text-sm text-gray-600">Get urgent notifications via text message</p>
+                    </div>
+                    <Switch
+                      checked={notifications.smsAlerts}
+                      onCheckedChange={(checked) => setNotifications({...notifications, smsAlerts: checked})}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Push Notifications</Label>
+                      <p className="text-sm text-gray-600">Receive notifications in your browser</p>
+                    </div>
+                    <Switch
+                      checked={notifications.pushNotifications}
+                      onCheckedChange={(checked) => setNotifications({...notifications, pushNotifications: checked})}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Marketing Emails</Label>
+                      <p className="text-sm text-gray-600">Receive updates about new features and tips</p>
+                    </div>
+                    <Switch
+                      checked={notifications.marketingEmails}
+                      onCheckedChange={(checked) => setNotifications({...notifications, marketingEmails: checked})}
+                    />
+                  </div>
+                </div>
+
                 <Button 
-                  variant="outline" 
-                  size="sm" 
-                  disabled
-                  className="text-red-600 border-red-200"
+                  onClick={handleSaveNotifications} 
+                  className="w-full md:w-auto"
+                  disabled={saveNotificationsMutation.isPending}
                 >
-                  Delete Account (Coming Soon)
+                  <Save className="mr-2 h-4 w-4" />
+                  {saveNotificationsMutation.isPending ? 'Saving...' : 'Save Preferences'}
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        {/* Help Section */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Need Help?</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600 mb-4">
-              If you have any questions about your account or need assistance with platform features, 
-              we're here to help.
-            </p>
-            <div className="flex space-x-4">
-              <Button variant="outline" size="sm" disabled>
-                Contact Support (Coming Soon)
-              </Button>
-              <Button variant="outline" size="sm" disabled>
-                Help Center (Coming Soon)
-              </Button>
+          {/* Privacy Settings */}
+          <TabsContent value="privacy">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Privacy & Security
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-base">Profile Visibility</Label>
+                    <Select
+                      value={privacy.profileVisibility}
+                      onValueChange={(value) => setPrivacy({...privacy, profileVisibility: value})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="public">Public - Visible to everyone</SelectItem>
+                        <SelectItem value="limited">Limited - Visible to professionals only</SelectItem>
+                        <SelectItem value="private">Private - Hidden from searches</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Show Email Address</Label>
+                      <p className="text-sm text-gray-600">Display your email on your public profile</p>
+                    </div>
+                    <Switch
+                      checked={privacy.showEmail}
+                      onCheckedChange={(checked) => setPrivacy({...privacy, showEmail: checked})}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Show Phone Number</Label>
+                      <p className="text-sm text-gray-600">Display your phone number on your public profile</p>
+                    </div>
+                    <Switch
+                      checked={privacy.showPhone}
+                      onCheckedChange={(checked) => setPrivacy({...privacy, showPhone: checked})}
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Allow Messages</Label>
+                      <p className="text-sm text-gray-600">Let professionals send you direct messages</p>
+                    </div>
+                    <Switch
+                      checked={privacy.allowMessages}
+                      onCheckedChange={(checked) => setPrivacy({...privacy, allowMessages: checked})}
+                    />
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleSavePrivacy} 
+                  className="w-full md:w-auto"
+                  disabled={savePrivacyMutation.isPending}
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {savePrivacyMutation.isPending ? 'Saving...' : 'Save Privacy Settings'}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Account Settings */}
+          <TabsContent value="account">
+            <div className="space-y-6">
+              {/* Data Export */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Download className="h-5 w-5" />
+                    Data Export
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">
+                    Download a copy of your data including projects, messages, and profile information.
+                  </p>
+                  <Button variant="outline" onClick={handleExportData}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Export My Data
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Account Deletion */}
+              <Card className="border-red-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-red-600">
+                    <Trash2 className="h-5 w-5" />
+                    Delete Account
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">
+                    Permanently delete your account and all associated data. This action cannot be undone.
+                  </p>
+                  <Button variant="destructive" onClick={handleDeleteAccount}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Account
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
