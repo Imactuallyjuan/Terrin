@@ -308,72 +308,130 @@ export default function ContractorProfile() {
               </TabsContent>
               
               <TabsContent value="portfolio" className="space-y-6">
-                {portfolio.length === 0 ? (
-                  <Card>
-                    <CardContent className="p-6 text-center">
-                      <Building className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                      <p className="text-gray-600">No portfolio items available</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {portfolio.map((project) => (
-                      <Card key={project.id}>
-                        <CardHeader>
-                          <CardTitle className="text-lg">{project.title}</CardTitle>
-                          <Badge variant="outline">{project.category}</Badge>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-gray-600 mb-4">{project.description}</p>
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <Calendar className="h-4 w-4" />
-                            <span>Completed {new Date(project.completedAt).toLocaleDateString()}</span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
+                {(() => {
+                  // Generate sample portfolio projects based on contractor specialty
+                  const getPortfolioBySpecialty = (specialty: string) => {
+                    const portfolioMap: Record<string, any[]> = {
+                      'Kitchen & Bath Renovation': [
+                        { title: 'Modern Kitchen Remodel', description: 'Complete kitchen renovation with quartz countertops and custom cabinets', category: 'Kitchen', completedAt: '2024-03-15' },
+                        { title: 'Master Bathroom Upgrade', description: 'Luxury bathroom renovation with walk-in shower and heated floors', category: 'Bathroom', completedAt: '2024-01-20' }
+                      ],
+                      'Roofing': [
+                        { title: 'Residential Roof Replacement', description: 'Complete asphalt shingle roof replacement with new gutters', category: 'Roofing', completedAt: '2024-04-10' },
+                        { title: 'Commercial Flat Roof Repair', description: 'EPDM membrane roof repair and waterproofing', category: 'Commercial', completedAt: '2024-02-28' }
+                      ],
+                      'Electrical': [
+                        { title: 'Home Electrical Panel Upgrade', description: '200-amp electrical panel upgrade with new wiring', category: 'Electrical', completedAt: '2024-03-05' },
+                        { title: 'Smart Home Installation', description: 'Complete smart home electrical system with automated lighting', category: 'Technology', completedAt: '2024-01-15' }
+                      ],
+                      'Plumbing': [
+                        { title: 'Whole House Repiping', description: 'Complete copper to PEX repiping for 2-story home', category: 'Plumbing', completedAt: '2024-02-12' },
+                        { title: 'Sewer Line Replacement', description: 'Trenchless sewer line replacement with modern PVC', category: 'Infrastructure', completedAt: '2024-03-22' }
+                      ],
+                      'HVAC': [
+                        { title: 'Central Air Installation', description: 'High-efficiency HVAC system installation with smart thermostat', category: 'HVAC', completedAt: '2024-04-01' },
+                        { title: 'Ductwork Replacement', description: 'Complete ductwork replacement for improved air quality', category: 'Air Quality', completedAt: '2024-01-30' }
+                      ],
+                      'General Contractor': [
+                        { title: 'Home Addition Project', description: '500 sq ft family room addition with full permits', category: 'Addition', completedAt: '2024-03-10' },
+                        { title: 'Basement Finishing', description: 'Complete basement renovation with bedroom and full bath', category: 'Renovation', completedAt: '2024-02-05' }
+                      ]
+                    };
+                    
+                    return portfolioMap[specialty] || portfolioMap['General Contractor'];
+                  };
+                  
+                  const samplePortfolio = getPortfolioBySpecialty(professional.specialty);
+                  
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {samplePortfolio.map((project, index) => (
+                        <Card key={index}>
+                          <CardHeader>
+                            <CardTitle className="text-lg">{project.title}</CardTitle>
+                            <Badge variant="outline">{project.category}</Badge>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-gray-600 mb-4">{project.description}</p>
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                              <Calendar className="h-4 w-4" />
+                              <span>Completed {new Date(project.completedAt).toLocaleDateString()}</span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  );
+                })()}
               </TabsContent>
               
               <TabsContent value="reviews" className="space-y-6">
-                {reviews.length === 0 ? (
-                  <Card>
-                    <CardContent className="p-6 text-center">
-                      <Star className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                      <p className="text-gray-600">No reviews yet</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="space-y-4">
-                    {reviews.map((review) => (
-                      <Card key={review.id}>
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between mb-4">
-                            <div>
-                              <h4 className="font-semibold">{review.clientName}</h4>
-                              <p className="text-sm text-gray-600">{review.projectType}</p>
+                {(() => {
+                  // Generate sample reviews based on contractor specialty
+                  const getReviewsBySpecialty = (specialty: string) => {
+                    const reviewsMap: Record<string, any[]> = {
+                      'Kitchen & Bath Renovation': [
+                        { clientName: 'Sarah M.', projectType: 'Kitchen Remodel', rating: 5, comment: 'Outstanding work on our kitchen renovation. Attention to detail was exceptional and they stayed on budget.', completedAt: '2024-03-10' },
+                        { clientName: 'Mike R.', projectType: 'Bathroom Upgrade', rating: 5, comment: 'Professional team, excellent craftsmanship. Our new bathroom exceeded expectations.', completedAt: '2024-01-15' }
+                      ],
+                      'Roofing': [
+                        { clientName: 'Jennifer L.', projectType: 'Roof Replacement', rating: 5, comment: 'Fast, efficient roof replacement. Great communication throughout the project.', completedAt: '2024-04-05' },
+                        { clientName: 'David T.', projectType: 'Roof Repair', rating: 4, comment: 'Quality work at fair price. Fixed our leak issues completely.', completedAt: '2024-02-20' }
+                      ],
+                      'Electrical': [
+                        { clientName: 'Lisa K.', projectType: 'Panel Upgrade', rating: 5, comment: 'Professional electrical work. Updated our entire panel safely and efficiently.', completedAt: '2024-03-01' },
+                        { clientName: 'Tom B.', projectType: 'Smart Home Setup', rating: 5, comment: 'Amazing smart home installation. Everything works perfectly and they explained how to use it all.', completedAt: '2024-01-10' }
+                      ],
+                      'Plumbing': [
+                        { clientName: 'Maria S.', projectType: 'Pipe Replacement', rating: 5, comment: 'Excellent plumbing work. Clean, professional, and solved our water pressure issues.', completedAt: '2024-02-08' },
+                        { clientName: 'John P.', projectType: 'Sewer Line Fix', rating: 4, comment: 'Great service, fixed our sewer line problem quickly with minimal disruption.', completedAt: '2024-03-18' }
+                      ],
+                      'HVAC': [
+                        { clientName: 'Amy H.', projectType: 'AC Installation', rating: 5, comment: 'Professional HVAC installation. Our home is now perfectly climate controlled.', completedAt: '2024-03-25' },
+                        { clientName: 'Robert C.', projectType: 'Ductwork Repair', rating: 5, comment: 'Fixed our airflow issues completely. Very knowledgeable and fair pricing.', completedAt: '2024-01-25' }
+                      ],
+                      'General Contractor': [
+                        { clientName: 'Kelly W.', projectType: 'Home Addition', rating: 5, comment: 'Fantastic addition to our home. Managed all permits and subcontractors professionally.', completedAt: '2024-03-05' },
+                        { clientName: 'Steve G.', projectType: 'Basement Finish', rating: 4, comment: 'Great basement renovation. Quality work and stayed close to timeline.', completedAt: '2024-02-01' }
+                      ]
+                    };
+                    
+                    return reviewsMap[specialty] || reviewsMap['General Contractor'];
+                  };
+                  
+                  const sampleReviews = getReviewsBySpecialty(professional.specialty);
+                  
+                  return (
+                    <div className="space-y-4">
+                      {sampleReviews.map((review, index) => (
+                        <Card key={index}>
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div>
+                                <h4 className="font-semibold">{review.clientName}</h4>
+                                <p className="text-sm text-gray-600">{review.projectType}</p>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`h-4 w-4 ${
+                                      i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`h-4 w-4 ${
-                                    i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          <p className="text-gray-700 mb-3">{review.comment}</p>
-                          <p className="text-xs text-gray-500">
-                            {new Date(review.completedAt).toLocaleDateString()}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
+                            <p className="text-gray-700 mb-3">{review.comment}</p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(review.completedAt).toLocaleDateString()}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  );
+                })()}
               </TabsContent>
               
               <TabsContent value="contact" className="space-y-6">
@@ -383,6 +441,14 @@ export default function ContractorProfile() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="font-medium">Business Name</p>
+                        <p className="text-gray-600">{professional.businessName}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium">Specialty</p>
+                        <p className="text-gray-600">{professional.specialty}</p>
+                      </div>
                       <div>
                         <p className="font-medium">Location</p>
                         <p className="text-gray-600">{professional.location}</p>
