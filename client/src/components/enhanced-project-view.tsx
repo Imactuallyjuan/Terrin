@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -177,26 +177,49 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     queryKey: [`/api/projects/${project.id}/milestones`],
   });
 
-  const { data: photos = [], refetch: refetchPhotos } = useQuery<ProjectPhoto[]>({
-    queryKey: [`/api/projects/${project.id}/photos`],
-    queryFn: async () => {
-      // Try loading with reduced limit to avoid database response size issues
-      const response = await fetch(`/api/projects/${project.id}/photos?limit=3`, {
+  const [photoOffset, setPhotoOffset] = useState(0);
+  const [allPhotos, setAllPhotos] = useState<ProjectPhoto[]>([]);
+  const [hasMorePhotos, setHasMorePhotos] = useState(true);
+  const [loadingPhotos, setLoadingPhotos] = useState(false);
+
+  // Load photos progressively to avoid database response size limits
+  const loadPhotos = async (offset: number = 0, append: boolean = false) => {
+    if (loadingPhotos) return;
+    
+    setLoadingPhotos(true);
+    try {
+      const response = await fetch(`/api/projects/${project.id}/photos?offset=${offset}&limit=1`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('firebase-token')}`,
           'Content-Type': 'application/json'
         }
       });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch photos: ${response.statusText}`);
+
+      if (response.ok) {
+        const newPhotos = await response.json();
+        if (newPhotos.length === 0) {
+          setHasMorePhotos(false);
+        } else {
+          setAllPhotos(prev => append ? [...prev, ...newPhotos] : newPhotos);
+          if (append) {
+            setPhotoOffset(offset + 1);
+          }
+        }
       }
-      
-      return response.json();
-    },
-    staleTime: 0,
-    retry: 1, // Reduce retries to avoid overwhelming the database
-  });
+    } catch (error) {
+      console.error('Error loading photos:', error);
+    } finally {
+      setLoadingPhotos(false);
+    }
+  };
+
+  // Initial photo load
+  useEffect(() => {
+    loadPhotos(0, false);
+  }, [project.id]);
+
+  // Use allPhotos for rendering
+  const photos = allPhotos;
 
   const { data: documents = [] } = useQuery<ProjectDocument[]>({
     queryKey: [`/api/projects/${project.id}/documents`],
@@ -289,10 +312,10 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
       return await apiRequest('POST', `/api/projects/${project.id}/photos`, photoData);
     },
     onSuccess: () => {
-      // Invalidate and refetch photos immediately
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/photos`] });
-      queryClient.refetchQueries({ queryKey: [`/api/projects/${project.id}/photos`] });
-      refetchPhotos();
+      // Refresh photo list after successful upload
+      loadPhotos(0, false);
+      setPhotoOffset(0);
+      setHasMorePhotos(true);
       
       setNewPhoto({
         fileName: '',

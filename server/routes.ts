@@ -935,7 +935,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/projects/:id/photos', verifyFirebaseToken, async (req: any, res) => {
     try {
       const projectId = parseInt(req.params.id);
-      const limit = Math.min(parseInt(req.query.limit as string) || 3, 3); // Limit to 3 photos max
+      
+      // For now, load only 1 photo at a time to avoid 64MB database response limit
+      const limit = 1;
       const offset = parseInt(req.query.offset as string) || 0;
       
       const photos = await storage.getProjectPhotos(projectId, limit, offset);
@@ -946,7 +948,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle specific database response size errors
       if (error?.message?.includes('response is too large')) {
         return res.status(413).json({ 
-          message: "Too many photos to load at once. Please contact support to optimize photo storage." 
+          message: "Database response too large. Loading photos one at a time." 
         });
       }
       
