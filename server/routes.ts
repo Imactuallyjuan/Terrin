@@ -936,10 +936,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const projectId = parseInt(req.params.id);
       
-      // Load 4 photos by default for preview, or all if requested
+      // For gallery page requests (limit > 10), return metadata only to avoid 64MB limit
       const limit = parseInt(req.query.limit as string) || 4;
       const offset = parseInt(req.query.offset as string) || 0;
       
+      if (limit > 10) {
+        // Return metadata only for large requests
+        const photos = await storage.getProjectPhotoMetadata(projectId);
+        return res.json(photos);
+      }
+      
+      // For small requests, return full photo data
       const photos = await storage.getProjectPhotos(projectId, limit, offset);
       res.json(photos);
     } catch (error: any) {

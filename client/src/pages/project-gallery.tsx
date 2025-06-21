@@ -8,7 +8,7 @@ import { ArrowLeft, Calendar, Tag } from "lucide-react";
 interface ProjectPhoto {
   id: number;
   fileName: string;
-  filePath: string;
+  filePath?: string;
   caption?: string;
   category: string;
   uploadedAt: string;
@@ -22,7 +22,8 @@ export default function ProjectGallery() {
     queryKey: [`/api/projects/${projectId}/photos`, { limit: 100 }],
     queryFn: async () => {
       const response = await fetch(`/api/projects/${projectId}/photos?limit=100`);
-      return response.json();
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
     },
     enabled: !!projectId,
   });
@@ -90,18 +91,31 @@ export default function ProjectGallery() {
             {photos.map((photo: ProjectPhoto) => (
               <Card key={photo.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
                 <div className="aspect-square bg-gray-100 relative overflow-hidden">
-                  <img
-                    src={photo.filePath}
-                    alt={photo.caption || photo.fileName}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      const fallback = document.createElement('div');
-                      fallback.className = 'flex items-center justify-center h-full text-center';
-                      fallback.innerHTML = '<div><div class="h-12 w-12 text-gray-400 mx-auto mb-2"><svg class="w-full h-full" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="text-xs text-gray-400">Image not found</div></div>';
-                      e.currentTarget.parentElement?.appendChild(fallback);
-                    }}
-                  />
+                  {photo.filePath ? (
+                    <img
+                      src={photo.filePath}
+                      alt={photo.caption || photo.fileName}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const fallback = document.createElement('div');
+                        fallback.className = 'flex items-center justify-center h-full text-center';
+                        fallback.innerHTML = '<div><div class="h-12 w-12 text-gray-400 mx-auto mb-2"><svg class="w-full h-full" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="text-xs text-gray-400">Image not found</div></div>';
+                        e.currentTarget.parentElement?.appendChild(fallback);
+                      }}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-center bg-gray-50">
+                      <div>
+                        <div className="h-12 w-12 text-gray-400 mx-auto mb-2">
+                          <svg className="w-full h-full" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                          </svg>
+                        </div>
+                        <div className="text-xs text-gray-400">Photo Available</div>
+                      </div>
+                    </div>
+                  )}
                   <div className="absolute top-2 right-2">
                     <Badge variant="secondary" className="text-xs">
                       <Tag className="h-3 w-3 mr-1" />
