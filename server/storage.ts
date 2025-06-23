@@ -272,21 +272,46 @@ export class DatabaseStorage implements IStorage {
     console.log(`🗄️ SQL Query: SELECT * FROM contractors WHERE user_id = '${userId}'`);
     
     try {
-      const result = await db
-        .select()
-        .from(contractors)
-        .where(eq(contractors.userId, userId))
-        .orderBy(desc(contractors.createdAt));
+      // Use raw SQL to bypass any parameter parsing issues
+      const result = await db.execute(sql`
+        SELECT * FROM contractors 
+        WHERE user_id = ${userId}
+        ORDER BY created_at DESC
+      `);
       
-      console.log(`🗄️ SQL Result: Found ${result.length} contractors for user ${userId}`);
-      if (result.length > 0) {
-        console.log(`📊 Contractor IDs:`, result.map(c => c.id));
+      console.log(`🗄️ SQL Result: Found ${result.rows.length} contractors for user ${userId}`);
+      if (result.rows.length > 0) {
+        console.log(`📊 First contractor raw data:`, result.rows[0]);
       }
       
-      return result;
+      // Map raw result to proper contractor objects
+      const contractors = result.rows.map((row: any) => ({
+        id: row.id,
+        userId: row.user_id,
+        businessName: row.business_name,
+        specialty: row.specialty,
+        description: row.description,
+        hourlyRate: row.hourly_rate,
+        location: row.location,
+        rating: row.rating,
+        reviewCount: row.review_count,
+        verified: row.verified,
+        licenseNumber: row.license_number,
+        yearsExperience: row.years_experience,
+        serviceArea: row.service_area,
+        phone: row.phone,
+        email: row.email,
+        website: row.website,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+      
+      return contractors;
     } catch (error) {
       console.error(`❌ Database error in getUserContractors:`, error);
       console.error(`❌ Error details:`, (error as any).message);
+      console.error(`❌ Error code:`, (error as any).code);
+      console.error(`❌ Query parameters - userId: "${userId}", type: ${typeof userId}`);
       throw error;
     }
   }
