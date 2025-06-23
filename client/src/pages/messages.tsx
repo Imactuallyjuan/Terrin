@@ -55,6 +55,17 @@ export default function Messages() {
     enabled: !!user
   });
 
+  // Auto-select the newest conversation if none is selected
+  useEffect(() => {
+    if (conversations.length > 0 && !selectedConversation) {
+      // Sort by createdAt and select the newest one
+      const sortedConversations = conversations.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      setSelectedConversation(sortedConversations[0].id);
+    }
+  }, [conversations, selectedConversation]);
+
   // Fetch messages for selected conversation
   const { data: messages = [], isLoading: loadingMessages } = useQuery<Message[]>({
     queryKey: ['/api/conversations', selectedConversation, 'messages'],
@@ -195,7 +206,8 @@ export default function Messages() {
                                 </AvatarFallback>
                               </Avatar>
                               <h3 className="font-medium text-sm">
-                                {conversation.projectTitle || `Project ${conversation.projectId}`}
+                                {conversation.projectTitle || 
+                                 (conversation.projectId ? `Project ${conversation.projectId}` : 'Discussion')}
                               </h3>
                             </div>
                             {conversation.lastMessage && (
@@ -233,7 +245,9 @@ export default function Messages() {
                   <div className="flex items-center gap-2">
                     <MessageSquare className="h-5 w-5" />
                     {conversations.find((c: Conversation) => c.id === selectedConversation)?.projectTitle || 
-                     `Project ${conversations.find((c: Conversation) => c.id === selectedConversation)?.projectId}`}
+                     (conversations.find((c: Conversation) => c.id === selectedConversation)?.projectId 
+                       ? `Project ${conversations.find((c: Conversation) => c.id === selectedConversation)?.projectId}`
+                       : 'Discussion')}
                   </div>
                 ) : (
                   "Select a conversation"
