@@ -113,19 +113,19 @@ export default function ContractorProfile() {
       // Save professional profile to database
       const profileData = {
         businessName: data.businessName,
-        specialty: data.specialties,
+        specialty: data.specialties, // This maps to specialty field
         description: data.description,
-        yearsExperience: parseInt(data.experience),
+        hourlyRate: "50.00", // Default hourly rate since it's required
+        yearsExperience: parseInt(data.experience) || 1,
         location: data.location,
         serviceArea: data.location,
-        phone: data.phone,
+        phone: data.phone || "",
         email: user.email,
-        website: data.website || null,
-        licenseNumber: data.licenseNumber || null,
-        profilePhotoUrl: photoUrl,
-        rating: 5.0,
-        reviewCount: 0,
-        isActive: true
+        website: data.website || "",
+        licenseNumber: data.licenseNumber || "",
+        verified: false,
+        rating: "5.0",
+        reviewCount: 0
       };
 
       const response = await fetch('/api/professionals', {

@@ -371,17 +371,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/professionals', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
+      console.log(`🔧 Creating professional profile for user: ${userId}`);
+      console.log(`🔧 Request body:`, JSON.stringify(req.body, null, 2));
+      
       const professionalData = insertContractorSchema.parse(req.body);
+      console.log(`✅ Schema validation passed`);
       
       const professional = await storage.createContractor({
         ...professionalData,
         userId,
       });
 
+      console.log(`✅ Professional profile created with ID: ${professional.id}`);
+      
+      // Disable caching for immediate refresh
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.json(professional);
     } catch (error) {
-      console.error("Error creating professional profile:", error);
+      console.error("❌ Error creating professional profile:", error);
       if (error instanceof z.ZodError) {
+        console.error("❌ Schema validation errors:", error.errors);
         res.status(400).json({ message: "Invalid professional data", errors: error.errors });
       } else {
         res.status(500).json({ message: "Failed to create professional profile" });
