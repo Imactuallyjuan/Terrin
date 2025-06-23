@@ -58,23 +58,38 @@ export default function Messages() {
 
   // Auto-select conversation based on URL parameter or newest conversation
   useEffect(() => {
-    if (conversations.length > 0 && !selectedConversation) {
-      // Check if there's a conversation ID in the URL
+    console.log('Messages effect running:', { 
+      conversationsLength: conversations.length, 
+      selectedConversation, 
+      searchParams 
+    });
+    
+    if (conversations.length > 0) {
+      // Check if there's a conversation ID in the URL - this takes priority
       const urlParams = new URLSearchParams(searchParams);
       const conversationIdFromUrl = urlParams.get('conversation');
+      
+      console.log('URL conversation param:', conversationIdFromUrl);
+      console.log('Available conversations:', conversations.map(c => c.id));
       
       if (conversationIdFromUrl) {
         const conversationId = parseInt(conversationIdFromUrl);
         const foundConversation = conversations.find(c => c.id === conversationId);
-        if (foundConversation) {
+        console.log('Looking for conversation ID:', conversationId, 'found:', !!foundConversation);
+        
+        if (foundConversation && selectedConversation !== conversationId) {
+          console.log('Selecting conversation from URL:', conversationId);
           setSelectedConversation(conversationId);
           return;
         }
       }
       
-      // Otherwise, select the newest conversation
-      const sortedConversations = conversations.sort((a, b) => b.id - a.id);
-      setSelectedConversation(sortedConversations[0].id);
+      // Otherwise, select the newest conversation if none is selected
+      if (!selectedConversation) {
+        const sortedConversations = conversations.sort((a, b) => b.id - a.id);
+        console.log('Selecting newest conversation:', sortedConversations[0].id);
+        setSelectedConversation(sortedConversations[0].id);
+      }
     }
   }, [conversations, selectedConversation, searchParams]);
 

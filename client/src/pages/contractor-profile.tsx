@@ -138,16 +138,20 @@ export default function ContractorProfile() {
       };
       
       const conversation = await apiRequest('POST', '/api/conversations', conversationData);
+      console.log('Created conversation:', conversation);
       return conversation;
     },
     onSuccess: (conversation) => {
+      console.log('onSuccess conversation:', conversation);
       if (professional) {
         toast({
           title: "Contact Initiated",
           description: `You can now message ${professional.businessName}`,
         });
         // Redirect to messages page with the specific conversation ID
-        setLocation(`/messages?conversation=${conversation.id}`);
+        const url = `/messages?conversation=${conversation.id}`;
+        console.log('Redirecting to:', url);
+        setLocation(url);
       }
     },
     onError: (error) => {
