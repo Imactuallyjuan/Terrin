@@ -110,20 +110,40 @@ export default function ContractorProfile() {
         }
       }
 
-      // Save professional profile to Firestore
-      await setDoc(doc(db, 'professionals', user.uid), {
-        ...data,
-        userId: user.uid,
+      // Save professional profile to database
+      const profileData = {
+        businessName: data.businessName,
+        specialty: data.specialties,
+        description: data.description,
+        yearsExperience: parseInt(data.experience),
+        location: data.location,
+        serviceArea: data.location,
+        phone: data.phone,
         email: user.email,
+        website: data.website || null,
+        licenseNumber: data.licenseNumber || null,
         profilePhotoUrl: photoUrl,
         rating: 5.0,
         reviewCount: 0,
-        verified: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        isActive: true
+      };
+
+      const response = await fetch('/api/professionals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await user.getIdToken()}`
+        },
+        body: JSON.stringify(profileData)
       });
 
-      // Update user role to professional
+      if (!response.ok) {
+        throw new Error('Failed to create professional profile');
+      }
+
+      const createdProfile = await response.json();
+
+      // Update user role to professional in Firestore
       await setDoc(doc(db, 'users', user.uid), {
         email: user.email,
         role: 'professional',
@@ -137,6 +157,11 @@ export default function ContractorProfile() {
       });
 
       form.reset();
+      
+      // Redirect to professional portal
+      setTimeout(() => {
+        window.location.href = '/professional-portal';
+      }, 2000);
     } catch (error) {
       console.error('Error creating professional profile:', error);
       toast({

@@ -486,6 +486,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current user's contractor profile
+  app.get('/api/contractors/me', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const userId = req.user.uid;
+      console.log(`🔍 Fetching current user's contractor profile - User ID: ${userId}`);
+      
+      const contractors = await storage.getUserContractors(userId);
+      const userProfile = contractors.length > 0 ? contractors[0] : null;
+      
+      console.log(`📊 User contractor profile result - User: ${userId}, Found: ${!!userProfile}`);
+      
+      res.json(userProfile);
+    } catch (error) {
+      console.error("Error fetching current user contractor profile:", error);
+      res.status(500).json({ message: "Failed to fetch contractor profile" });
+    }
+  });
+
   app.get('/api/professionals/:id', async (req, res) => {
     try {
       const professionalId = parseInt(req.params.id);
