@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useRoute } from "wouter";
+import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +31,8 @@ import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Contractor } from "@/../../shared/schema";
 
 interface Review {
@@ -65,6 +66,8 @@ const quoteSchema = z.object({
 export default function ContractorProfile() {
   const [match, params] = useRoute("/professionals/:id");
   const { user } = useFirebaseAuth();
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [showQuoteDialog, setShowQuoteDialog] = useState(false);
   
   const professionalId = params?.id ? parseInt(params.id) : null;
@@ -118,6 +121,41 @@ export default function ContractorProfile() {
     onSuccess: () => {
       setShowQuoteDialog(false);
       form.reset();
+    }
+  });
+
+  // Create conversation/message mutation
+  const messageMutation = useMutation({
+    mutationFn: async () => {
+      if (!professional || !user) {
+        throw new Error('Missing professional or user information');
+      }
+      
+      const conversationData = {
+        participants: [user.uid, professional.userId],
+        title: `Discussion with ${professional.businessName}`,
+        projectId: null
+      };
+      
+      const conversation = await apiRequest('POST', '/api/conversations', conversationData);
+      return conversation;
+    },
+    onSuccess: (conversation) => {
+      if (professional) {
+        toast({
+          title: "Contact Initiated",
+          description: `You can now message ${professional.businessName}`,
+        });
+        // Redirect to messages page with the new conversation
+        setLocation('/messages');
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to Initiate Contact",
+        description: error.message,
+        variant: "destructive"
+      });
       // Show success message
     }
   });
@@ -564,9 +602,14 @@ export default function ContractorProfile() {
                   </DialogContent>
                 </Dialog>
                 
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => messageMutation.mutate()}
+                  disabled={messageMutation.isPending || !user}
+                >
                   <MessageSquare className="h-4 w-4 mr-2" />
-                  Send Message
+                  {messageMutation.isPending ? "Initiating Contact..." : "Send Message"}
                 </Button>
                 
               </CardContent>

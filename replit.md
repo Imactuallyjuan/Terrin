@@ -315,6 +315,8 @@ Changelog:
   * Added individual professional profile API endpoint (/api/professionals/:id) for detailed profile viewing
   * Fixed contractor profile page data fetching - professional information now displays correctly
   * Resolved React Query URL construction issues preventing profile details from loading
+  * Implemented functional messaging system on contractor profiles - "Send Message" button now creates conversations
+  * Added conversation creation and redirection to Messages page for direct professional communication
 ```
 
 ## User Preferences
