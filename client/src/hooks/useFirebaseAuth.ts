@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
+import { queryClient } from '../lib/queryClient';
 
 interface UserData {
   role: 'homeowner' | 'contractor' | 'both' | 'visitor';
@@ -50,6 +51,9 @@ export function useFirebaseAuth() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      // Clear all cached data when authentication state changes
+      queryClient.clear();
+      
       if (firebaseUser) {
         setUser(firebaseUser);
         // Set loading to false immediately for auth, fetch role in background

@@ -18,11 +18,13 @@ export default function Home() {
   const [currentEstimate, setCurrentEstimate] = useState(null);
   
   const { data: projects = [], isLoading: projectsLoading } = useQuery({
-    queryKey: ["/api/projects"],
+    queryKey: ["/api/projects", user?.uid],
+    enabled: !!user?.uid,
   });
 
   const { data: estimates = [], isLoading: estimatesLoading } = useQuery({
-    queryKey: ["/api/estimates"],
+    queryKey: ["/api/estimates", user?.uid],
+    enabled: !!user?.uid,
   });
 
   // Handle estimate generation events

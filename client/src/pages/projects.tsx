@@ -17,7 +17,8 @@ export default function Projects() {
   const [selectedProject, setSelectedProject] = useState<any>(null);
   
   const { data: projects = [], isLoading } = useQuery({
-    queryKey: ["/api/projects"],
+    queryKey: ["/api/projects", user?.uid],
+    enabled: !!user?.uid,
   });
 
   const deleteProjectMutation = useMutation({

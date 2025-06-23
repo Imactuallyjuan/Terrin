@@ -14,7 +14,8 @@ export default function Estimates() {
   const queryClient = useQueryClient();
   
   const { data: estimates = [], isLoading } = useQuery({
-    queryKey: ["/api/estimates"],
+    queryKey: ["/api/estimates", user?.uid],
+    enabled: !!user?.uid,
   });
 
   const deleteEstimateMutation = useMutation({
