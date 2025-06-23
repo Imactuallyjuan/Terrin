@@ -137,7 +137,8 @@ export default function ContractorProfile() {
         projectId: null
       };
       
-      const conversation = await apiRequest('POST', '/api/conversations', conversationData);
+      const response = await apiRequest('POST', '/api/conversations', conversationData);
+      const conversation = await response.json();
       console.log('Created conversation:', conversation);
       return conversation;
     },
