@@ -107,7 +107,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const projects = await storage.getUserProjects(userId);
       console.log(`📊 Projects result - Count: ${projects.length}, User: ${userId}`);
+      console.log(`📊 Project IDs returned: [${projects.map(p => p.id).join(', ')}]`);
       
+      // Disable caching for debugging
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
       res.json(projects);
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -250,7 +253,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const estimates = await storage.getUserEstimates(userId);
       console.log(`📊 Estimates result - Count: ${estimates.length}, User: ${userId}`);
+      console.log(`📊 Estimate IDs returned: [${estimates.map(e => e.id).join(', ')}]`);
       
+      // Disable caching for debugging
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
       res.json(estimates);
     } catch (error) {
       console.error("Error fetching estimates:", error);
