@@ -222,10 +222,15 @@ export class DatabaseStorage implements IStorage {
 
   // Contractor operations
   async createContractor(professional: InsertContractor): Promise<Contractor> {
+    console.log(`🔧 Creating contractor profile for user: ${professional.userId}`);
+    console.log(`🔧 Profile data:`, JSON.stringify(professional, null, 2));
+    
     const [newContractor] = await db
       .insert(contractors)
       .values(professional)
       .returning();
+    
+    console.log(`✅ Created contractor profile with ID: ${newContractor.id} for user: ${newContractor.userId}`);
     return newContractor;
   }
 
@@ -256,11 +261,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserContractors(userId: string): Promise<Contractor[]> {
-    return await db
+    console.log(`🔍 Querying contractors for user: ${userId}`);
+    console.log(`🗄️ SQL Query: SELECT * FROM contractors WHERE user_id = '${userId}'`);
+    
+    const result = await db
       .select()
       .from(contractors)
       .where(eq(contractors.userId, userId))
       .orderBy(desc(contractors.createdAt));
+    
+    console.log(`🗄️ SQL Result: Found ${result.length} contractors for user ${userId}`);
+    if (result.length > 0) {
+      console.log(`📊 Contractor IDs:`, result.map(c => c.id));
+    }
+    
+    return result;
   }
 
   async updateContractor(id: number, updates: Partial<InsertContractor>): Promise<Contractor | undefined> {

@@ -496,7 +496,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userProfile = contractors.length > 0 ? contractors[0] : null;
       
       console.log(`📊 User contractor profile result - User: ${userId}, Found: ${!!userProfile}`);
+      if (userProfile) {
+        console.log(`📊 Profile details:`, { id: userProfile.id, businessName: userProfile.businessName });
+      }
       
+      // Disable caching to ensure fresh data
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.json(userProfile);
     } catch (error) {
       console.error("Error fetching current user contractor profile:", error);
