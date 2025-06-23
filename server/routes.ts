@@ -1089,10 +1089,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Quote requests
-  app.post('/api/quote-requests', verifyFirebaseToken, async (req: any, res) => {
+  app.post('/api/quote-requests', async (req: any, res) => {
     try {
       const { professionalId, projectDescription, timeline, budget, contactMethod, preferredStartDate } = req.body;
-      const clientId = req.user.uid;
+      const clientId = req.user?.uid || 'anonymous';
       
       // Create a quote request (we'd need to add this to the schema)
       // For now, just return success
