@@ -12,6 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { z } from "zod";
 
 // Session storage table.
 // (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
@@ -164,6 +165,9 @@ export const insertContractorSchema = createInsertSchema(contractors).omit({
   verified: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  hourlyRate: z.union([z.string(), z.number()]).transform(val => String(val)),
+  yearsExperience: z.union([z.string(), z.number()]).transform(val => Number(val)),
 });
 
 export type ProjectUpdate = typeof projectUpdates.$inferSelect;

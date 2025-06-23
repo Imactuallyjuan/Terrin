@@ -43,9 +43,10 @@ export const verifyFirebaseToken: RequestHandler = async (req: any, res, next) =
       // Fallback: Parse JWT payload directly
       try {
         const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-        const userId = payload.user_id || payload.sub;
+        const userId = payload.uid || payload.user_id || payload.sub;
         
         console.log(`🔧 Extracted User ID from token: ${userId}`);
+        console.log(`🔧 Full payload:`, payload);
         
         req.user = {
           uid: userId,
