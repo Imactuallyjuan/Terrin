@@ -23,20 +23,19 @@ export const verifyFirebaseToken: RequestHandler = async (req: any, res, next) =
 
     const token = authHeader.split(' ')[1];
     
-    // For development, we'll validate the token format but allow it through
-    // In production, full Firebase token verification would be used
-    if (token && token.includes('.')) {
-      // Basic JWT format check - has dots indicating it's a JWT
+    try {
+      // Properly verify the Firebase token
+      const decodedToken = await auth.verifyIdToken(token);
       req.user = {
-        uid: 'IE5CjY6AxYZAHjfFB6OLLCnn5dF2', // Use platform owner ID for now
-        email: 'test@example.com',
-        name: 'Test User',
-        picture: null
+        uid: decodedToken.uid,
+        email: decodedToken.email,
+        name: decodedToken.name,
+        picture: decodedToken.picture
       };
       next();
-    } else {
-      console.error('Invalid token format:', token);
-      return res.status(401).json({ message: 'Unauthorized' });
+    } catch (tokenError) {
+      console.error('Firebase token verification failed:', tokenError);
+      return res.status(401).json({ message: 'Invalid token' });
     }
   } catch (error) {
     console.error('Auth middleware error:', error);
