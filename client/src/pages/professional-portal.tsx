@@ -44,12 +44,10 @@ export default function ProfessionalPortal() {
   });
 
   // Fetch professional profile
-  const { data: profileArray, isLoading: profileLoading } = useQuery({
-    queryKey: [`/api/contractors/user/${user?.uid}`],
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ['/api/contractors/me', user?.uid],
     enabled: !!user?.uid
   });
-
-  const profile = Array.isArray(profileArray) ? profileArray[0] : profileArray;
 
   // Create/Update professional profile mutation
   const updateProfileMutation = useMutation({
@@ -61,7 +59,7 @@ export default function ProfessionalPortal() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/contractors/user/${user?.uid}`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contractors/me', user?.uid] });
       queryClient.invalidateQueries({ queryKey: ['/api/professionals'] });
       setEditingProfile(false);
       toast({
