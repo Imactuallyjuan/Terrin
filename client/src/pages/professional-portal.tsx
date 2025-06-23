@@ -442,18 +442,24 @@ export default function ProfessionalPortal() {
                             <div>
                               <Label htmlFor="businessName">Business Name *</Label>
                               <Input
+                                id="businessName"
+                                name="businessName"
                                 value={formData.businessName}
                                 onChange={(e) => setFormData({...formData, businessName: e.target.value})}
                                 placeholder="Your business name"
+                                autoComplete="organization"
                               />
                             </div>
                             <div>
                               <Label htmlFor="yearsExperience">Years of Experience</Label>
                               <Input
+                                id="yearsExperience"
+                                name="yearsExperience"
                                 type="number"
                                 value={formData.yearsExperience}
                                 onChange={(e) => setFormData({...formData, yearsExperience: e.target.value})}
                                 placeholder="5"
+                                autoComplete="off"
                               />
                             </div>
                           </div>
@@ -465,6 +471,9 @@ export default function ProfessionalPortal() {
                                 <label key={specialty} className="flex items-center space-x-2 text-sm">
                                   <input
                                     type="checkbox"
+                                    id={`specialty-${specialty.replace(/\s+/g, '-').toLowerCase()}`}
+                                    name="specialties"
+                                    value={specialty}
                                     checked={formData.specialties.includes(specialty)}
                                     onChange={() => handleSpecialtyChange(specialty)}
                                     className="rounded"
@@ -479,17 +488,23 @@ export default function ProfessionalPortal() {
                             <div>
                               <Label htmlFor="location">Location</Label>
                               <Input
+                                id="location"
+                                name="location"
                                 value={formData.location}
                                 onChange={(e) => setFormData({...formData, location: e.target.value})}
                                 placeholder="City, State"
+                                autoComplete="address-level2"
                               />
                             </div>
                             <div>
                               <Label htmlFor="serviceArea">Service Area</Label>
                               <Input
+                                id="serviceArea"
+                                name="serviceArea"
                                 value={formData.serviceArea}
                                 onChange={(e) => setFormData({...formData, serviceArea: e.target.value})}
                                 placeholder="Cities and regions you serve"
+                                autoComplete="off"
                               />
                             </div>
                           </div>
@@ -497,10 +512,13 @@ export default function ProfessionalPortal() {
                           <div>
                             <Label htmlFor="description">Business Description</Label>
                             <Textarea
+                              id="description"
+                              name="description"
                               value={formData.description}
                               onChange={(e) => setFormData({...formData, description: e.target.value})}
                               placeholder="Tell potential clients about your business, experience, and what sets you apart..."
                               rows={4}
+                              autoComplete="off"
                             />
                           </div>
 
@@ -508,18 +526,25 @@ export default function ProfessionalPortal() {
                             <div>
                               <Label htmlFor="phone">Phone Number</Label>
                               <Input
+                                id="phone"
+                                name="phone"
+                                type="tel"
                                 value={formData.phone}
                                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                                 placeholder="(555) 123-4567"
+                                autoComplete="tel"
                               />
                             </div>
                             <div>
                               <Label htmlFor="email">Email</Label>
                               <Input
+                                id="email"
+                                name="email"
                                 type="email"
                                 value={formData.email}
                                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                                 placeholder="your@email.com"
+                                autoComplete="email"
                               />
                             </div>
                           </div>
@@ -528,18 +553,25 @@ export default function ProfessionalPortal() {
                             <div>
                               <Label htmlFor="website">Website</Label>
                               <Input
+                                id="website"
+                                name="website"
+                                type="url"
                                 value={formData.website}
                                 onChange={(e) => setFormData({...formData, website: e.target.value})}
                                 placeholder="https://yourwebsite.com"
+                                autoComplete="url"
                               />
                             </div>
                             <div>
                               <Label htmlFor="hourlyRate">Hourly Rate</Label>
                               <Input
+                                id="hourlyRate"
+                                name="hourlyRate"
                                 type="number"
                                 value={formData.hourlyRate}
                                 onChange={(e) => setFormData({...formData, hourlyRate: e.target.value})}
                                 placeholder="75"
+                                autoComplete="off"
                               />
                             </div>
                           </div>

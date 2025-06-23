@@ -207,9 +207,12 @@ export default function ContractorProfile() {
             <input
               ref={fileInputRef}
               type="file"
+              id="profile-photo-upload"
+              name="profilePhoto"
               accept="image/*"
               onChange={handlePhotoSelect}
               className="hidden"
+              aria-label="Upload profile photo"
             />
             <p className="text-sm text-gray-600">Upload your profile photo</p>
           </div>
