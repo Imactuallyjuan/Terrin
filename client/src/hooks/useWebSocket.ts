@@ -18,6 +18,7 @@ export function useWebSocket() {
     if (!user?.uid) return;
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    // Use the same host and port as the current page to ensure WebSocket connects properly
     const wsUrl = `${protocol}//${window.location.host}/ws`;
     
     ws.current = new WebSocket(wsUrl);
