@@ -309,6 +309,9 @@ Changelog:
   * Professional profile creation and retrieval now work reliably with full end-to-end functionality
   * Improved browser autofill support and accessibility compliance for all professional portal forms
   * Database operations now handle numeric input transformation and proper type validation
+  * Fixed professional search visibility by removing verification filters - all profiles now appear in public searches
+  * Enhanced specialty filtering with partial matching for better search flexibility
+  * Valley Point and other user-created profiles now visible across different user accounts
 ```
 
 ## User Preferences
