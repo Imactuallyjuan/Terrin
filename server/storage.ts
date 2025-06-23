@@ -262,20 +262,33 @@ export class DatabaseStorage implements IStorage {
 
   async getUserContractors(userId: string): Promise<Contractor[]> {
     console.log(`🔍 Querying contractors for user: ${userId}`);
-    console.log(`🗄️ SQL Query: SELECT * FROM contractors WHERE user_id = '${userId}'`);
+    console.log(`🔍 User ID validation - type: ${typeof userId}, value: "${userId}"`);
     
-    const result = await db
-      .select()
-      .from(contractors)
-      .where(eq(contractors.userId, userId))
-      .orderBy(desc(contractors.createdAt));
-    
-    console.log(`🗄️ SQL Result: Found ${result.length} contractors for user ${userId}`);
-    if (result.length > 0) {
-      console.log(`📊 Contractor IDs:`, result.map(c => c.id));
+    if (!userId || userId === 'undefined' || userId === 'null' || userId.trim() === '') {
+      console.error(`❌ Invalid user ID provided: "${userId}"`);
+      return [];
     }
     
-    return result;
+    console.log(`🗄️ SQL Query: SELECT * FROM contractors WHERE user_id = '${userId}'`);
+    
+    try {
+      const result = await db
+        .select()
+        .from(contractors)
+        .where(eq(contractors.userId, userId))
+        .orderBy(desc(contractors.createdAt));
+      
+      console.log(`🗄️ SQL Result: Found ${result.length} contractors for user ${userId}`);
+      if (result.length > 0) {
+        console.log(`📊 Contractor IDs:`, result.map(c => c.id));
+      }
+      
+      return result;
+    } catch (error) {
+      console.error(`❌ Database error in getUserContractors:`, error);
+      console.error(`❌ Error details:`, (error as any).message);
+      throw error;
+    }
   }
 
   async updateContractor(id: number, updates: Partial<InsertContractor>): Promise<Contractor | undefined> {

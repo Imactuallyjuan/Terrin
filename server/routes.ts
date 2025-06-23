@@ -530,6 +530,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.uid;
       console.log(`🔍 Fetching current user's professional profile - User ID: ${userId}`);
+      console.log(`🔍 User ID type: ${typeof userId}, value: "${userId}"`);
+      
+      if (!userId || userId === 'undefined' || userId === 'null') {
+        console.error(`❌ Invalid user ID: ${userId}`);
+        return res.status(401).json({ message: "Invalid user authentication" });
+      }
       
       const professionals = await storage.getUserContractors(userId);
       const userProfile = professionals.length > 0 ? professionals[0] : null;
@@ -542,7 +548,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.json(userProfile);
     } catch (error) {
-      console.error("Error fetching current user professional profile:", error);
+      console.error("❌ Error fetching current user professional profile:", error);
+      console.error("❌ Error details:", (error as any).message);
+      console.error("❌ Error stack:", (error as any).stack);
       res.status(500).json({ message: "Failed to fetch professional profile" });
     }
   });
