@@ -246,7 +246,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(contractors)
-      .where(and(eq(contractors.specialty, specialty), eq(contractors.verified, true)))
+      .where(eq(contractors.specialty, specialty))
       .orderBy(desc(contractors.rating))
       .limit(limit);
   }

@@ -480,15 +480,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { specialty, location, search, limit = '50' } = req.query;
       const limitNum = parseInt(limit as string);
 
-      let professionals;
-      if (specialty && typeof specialty === 'string' && specialty !== 'all') {
-        professionals = await storage.getContractorsBySpecialty(specialty, limitNum);
-      } else {
-        professionals = await storage.getAllContractors(limitNum);
-      }
-
-      // Apply additional filters if provided
+      // Always start with all contractors for more flexible filtering
+      let professionals = await storage.getAllContractors(limitNum);
       let filteredProfessionals = professionals;
+
+      // Apply specialty filter with partial matching
+      if (specialty && typeof specialty === 'string' && specialty !== 'all') {
+        const specialtyTerm = specialty.toLowerCase();
+        filteredProfessionals = filteredProfessionals.filter(p => 
+          p.specialty.toLowerCase().includes(specialtyTerm)
+        );
+      }
       
       if (search && typeof search === 'string') {
         const searchTerm = search.toLowerCase();
