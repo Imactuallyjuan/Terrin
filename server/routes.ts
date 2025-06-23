@@ -103,7 +103,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/projects', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
+      console.log(`📊 Projects query - User ID: ${userId}`);
+      
       const projects = await storage.getUserProjects(userId);
+      console.log(`📊 Projects result - Count: ${projects.length}, User: ${userId}`);
+      
       res.json(projects);
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -242,7 +246,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/estimates', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
+      console.log(`📊 Estimates query - User ID: ${userId}`);
+      
       const estimates = await storage.getUserEstimates(userId);
+      console.log(`📊 Estimates result - Count: ${estimates.length}, User: ${userId}`);
+      
       res.json(estimates);
     } catch (error) {
       console.error("Error fetching estimates:", error);

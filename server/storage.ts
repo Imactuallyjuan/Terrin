@@ -147,11 +147,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserProjects(userId: string): Promise<Project[]> {
-    return await db
+    console.log(`🗄️ SQL Query: SELECT * FROM projects WHERE user_id = '${userId}'`);
+    
+    const result = await db
       .select()
       .from(projects)
       .where(eq(projects.userId, userId))
       .orderBy(desc(projects.createdAt));
+    
+    console.log(`🗄️ SQL Result: Found ${result.length} projects for user ${userId}`);
+    return result;
   }
 
   async updateProject(id: number, updates: Partial<InsertProject>): Promise<Project | undefined> {
@@ -189,11 +194,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserEstimates(userId: string): Promise<Estimate[]> {
-    return await db
+    console.log(`🗄️ SQL Query: SELECT * FROM estimates WHERE user_id = '${userId}'`);
+    
+    const result = await db
       .select()
       .from(estimates)
       .where(eq(estimates.userId, userId))
       .orderBy(desc(estimates.createdAt));
+    
+    console.log(`🗄️ SQL Result: Found ${result.length} estimates for user ${userId}`);
+    return result;
   }
 
   async getEstimate(id: number): Promise<Estimate | undefined> {
