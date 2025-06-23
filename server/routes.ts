@@ -525,21 +525,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get current user's contractor profile
-  app.get('/api/contractors/me', verifyFirebaseToken, async (req: any, res) => {
+  // Get current user's professional profile
+  app.get('/api/professionals/me', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
-      console.log(`🔍 Fetching current user's contractor profile - User ID: ${userId}`);
+      console.log(`🔍 Fetching current user's professional profile - User ID: ${userId}`);
       
-      const contractors = await storage.getUserContractors(userId);
-      const userProfile = contractors.length > 0 ? contractors[0] : null;
+      const professionals = await storage.getUserContractors(userId);
+      const userProfile = professionals.length > 0 ? professionals[0] : null;
       
-      console.log(`📊 User contractor profile result - User: ${userId}, Found: ${!!userProfile}`);
+      console.log(`📊 User professional profile result - User: ${userId}, Found: ${!!userProfile}`);
       if (userProfile) {
         console.log(`📊 Profile details:`, { id: userProfile.id, businessName: userProfile.businessName });
       }
       
-      // Disable caching to ensure fresh data
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.json(userProfile);
+    } catch (error) {
+      console.error("Error fetching current user professional profile:", error);
+      res.status(500).json({ message: "Failed to fetch professional profile" });
+    }
+  });
+
+  // Legacy contractor endpoint (alias for professionals)
+  app.get('/api/contractors/me', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const userId = req.user.uid;
+      const professionals = await storage.getUserContractors(userId);
+      const userProfile = professionals.length > 0 ? professionals[0] : null;
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.json(userProfile);
     } catch (error) {

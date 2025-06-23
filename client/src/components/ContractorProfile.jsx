@@ -128,7 +128,7 @@ export default function ContractorProfile() {
         reviewCount: 0
       };
 
-      const response = await fetch('/api/contractors', {
+      const response = await fetch('/api/professionals', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

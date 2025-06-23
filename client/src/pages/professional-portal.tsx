@@ -45,7 +45,7 @@ export default function ProfessionalPortal() {
 
   // Fetch professional profile
   const { data: profile, isLoading: profileLoading } = useQuery({
-    queryKey: ['/api/contractors/me', user?.uid],
+    queryKey: ['/api/professionals/me', user?.uid],
     enabled: !!user?.uid
   });
 
@@ -59,7 +59,7 @@ export default function ProfessionalPortal() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/contractors/me', user?.uid] });
+      queryClient.invalidateQueries({ queryKey: ['/api/professionals/me', user?.uid] });
       queryClient.invalidateQueries({ queryKey: ['/api/professionals'] });
       setEditingProfile(false);
       toast({
