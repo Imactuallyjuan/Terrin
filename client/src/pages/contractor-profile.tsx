@@ -82,22 +82,22 @@ export default function ContractorProfile() {
 
   // Fetch professional details
   const { data: professional, isLoading } = useQuery<Contractor>({
-    queryKey: ['/api/professionals', professionalId],
+    queryKey: [`/api/professionals/${professionalId}`],
     enabled: !!professionalId
   });
 
 
 
-  // Fetch professional reviews
+  // Fetch professional reviews (using mock data for now since reviews API doesn't exist)
   const { data: reviews = [] } = useQuery<Review[]>({
-    queryKey: ['/api/professionals', professionalId, 'reviews'],
-    enabled: !!professionalId
+    queryKey: [`/api/professionals/${professionalId}/reviews`],
+    enabled: false // Disable until reviews API is implemented
   });
 
-  // Fetch professional portfolio
+  // Fetch professional portfolio (using mock data for now since portfolio API doesn't exist)
   const { data: portfolio = [] } = useQuery<Project[]>({
-    queryKey: ['/api/professionals', professionalId, 'portfolio'],
-    enabled: !!professionalId
+    queryKey: [`/api/professionals/${professionalId}/portfolio`],
+    enabled: false // Disable until portfolio API is implemented
   });
 
   // Submit quote request
