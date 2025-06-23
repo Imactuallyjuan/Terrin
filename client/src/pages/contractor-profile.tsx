@@ -146,8 +146,8 @@ export default function ContractorProfile() {
           title: "Contact Initiated",
           description: `You can now message ${professional.businessName}`,
         });
-        // Redirect to messages page with the new conversation
-        setLocation('/messages');
+        // Redirect to messages page with the specific conversation ID
+        setLocation(`/messages?conversation=${conversation.id}`);
       }
     },
     onError: (error) => {

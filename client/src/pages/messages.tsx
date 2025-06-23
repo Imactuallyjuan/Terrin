@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, MessageSquare, ArrowLeft, Clock, Wifi, WifiOff } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { queryClient } from "@/lib/queryClient";
@@ -38,6 +38,7 @@ interface Message {
 export default function Messages() {
   const { user } = useFirebaseAuth();
   const { isConnected, sendMessage } = useWebSocket();
+  const searchParams = useSearch();
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState("");
 
@@ -55,16 +56,27 @@ export default function Messages() {
     enabled: !!user
   });
 
-  // Auto-select the newest conversation if none is selected
+  // Auto-select conversation based on URL parameter or newest conversation
   useEffect(() => {
     if (conversations.length > 0 && !selectedConversation) {
-      // Sort by createdAt and select the newest one
-      const sortedConversations = conversations.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
+      // Check if there's a conversation ID in the URL
+      const urlParams = new URLSearchParams(searchParams);
+      const conversationIdFromUrl = urlParams.get('conversation');
+      
+      if (conversationIdFromUrl) {
+        const conversationId = parseInt(conversationIdFromUrl);
+        const foundConversation = conversations.find(c => c.id === conversationId);
+        if (foundConversation) {
+          setSelectedConversation(conversationId);
+          return;
+        }
+      }
+      
+      // Otherwise, select the newest conversation
+      const sortedConversations = conversations.sort((a, b) => b.id - a.id);
       setSelectedConversation(sortedConversations[0].id);
     }
-  }, [conversations, selectedConversation]);
+  }, [conversations, selectedConversation, searchParams]);
 
   // Fetch messages for selected conversation
   const { data: messages = [], isLoading: loadingMessages } = useQuery<Message[]>({
