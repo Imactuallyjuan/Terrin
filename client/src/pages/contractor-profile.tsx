@@ -131,26 +131,35 @@ export default function ContractorProfile() {
         throw new Error('Missing professional or user information');
       }
       
+      const token = await user.getIdToken();
       const conversationData = {
         participants: [user.uid, professional.userId],
         title: `Discussion with ${professional.businessName}`,
         projectId: null
       };
       
-      const response = await apiRequest('POST', '/api/conversations', conversationData);
-      const conversation = await response.json();
-      console.log('Created conversation:', conversation);
-      return conversation;
+      const response = await fetch('/api/conversations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(conversationData)
+      });
+      
+      const data = await response.json();
+      console.log('Created conversation:', data);
+      return data;
     },
-    onSuccess: (conversation) => {
-      console.log('onSuccess conversation:', conversation);
-      if (professional) {
+    onSuccess: (data) => {
+      console.log('onSuccess conversation:', data);
+      if (professional && data?.id && typeof data.id === 'number') {
         toast({
           title: "Contact Initiated",
           description: `You can now message ${professional.businessName}`,
         });
-        // Redirect to messages page with the specific conversation ID
-        const url = `/messages?conversation=${conversation.id}`;
+        // Navigate to messages page with the specific conversation ID
+        const url = `/messages?conversation=${data.id}`;
         console.log('Redirecting to:', url);
         setLocation(url);
       }

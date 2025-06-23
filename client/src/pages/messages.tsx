@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, MessageSquare, ArrowLeft, Clock, Wifi, WifiOff } from "lucide-react";
-import { Link, useSearch } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { queryClient } from "@/lib/queryClient";
@@ -38,7 +38,7 @@ interface Message {
 export default function Messages() {
   const { user } = useFirebaseAuth();
   const { isConnected, sendMessage } = useWebSocket();
-  const searchParams = useSearch();
+  const [location] = useLocation();
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState("");
 
@@ -61,12 +61,12 @@ export default function Messages() {
     console.log('Messages effect running:', { 
       conversationsLength: conversations.length, 
       selectedConversation, 
-      searchParams 
+      location 
     });
     
     if (conversations.length > 0) {
       // Check if there's a conversation ID in the URL - this takes priority
-      const urlParams = new URLSearchParams(searchParams);
+      const urlParams = new URLSearchParams(location.search);
       const conversationIdFromUrl = urlParams.get('conversation');
       
       console.log('URL conversation param:', conversationIdFromUrl);
@@ -91,7 +91,7 @@ export default function Messages() {
         setSelectedConversation(sortedConversations[0].id);
       }
     }
-  }, [conversations, selectedConversation, searchParams]);
+  }, [conversations, selectedConversation, location]);
 
   // Fetch messages for selected conversation
   const { data: messages = [], isLoading: loadingMessages } = useQuery<Message[]>({
