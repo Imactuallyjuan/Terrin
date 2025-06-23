@@ -312,6 +312,9 @@ Changelog:
   * Fixed professional search visibility by removing verification filters - all profiles now appear in public searches
   * Enhanced specialty filtering with partial matching for better search flexibility
   * Valley Point and other user-created profiles now visible across different user accounts
+  * Added individual professional profile API endpoint (/api/professionals/:id) for detailed profile viewing
+  * Fixed contractor profile page data fetching - professional information now displays correctly
+  * Resolved React Query URL construction issues preventing profile details from loading
 ```
 
 ## User Preferences
