@@ -23,6 +23,7 @@ import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/header";
+import StripeOnboardingButton from "@/components/stripe-onboarding-button";
 
 export default function ProfessionalPortal() {
   const { user } = useFirebaseAuth();
