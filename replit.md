@@ -356,6 +356,8 @@ Changelog:
   * Dashboard messages tab now redirects to main /messages page with full functionality including payments
   * Moved role switching back to Settings page per user preference - removed dropdown from header
   * Created comprehensive Settings page with role selection, account info, and clear role descriptions
+  * Fixed missing role column in database - added role field to users table and set user to 'both' role
+  * Role switching now works properly in Settings page
 ```
 
 ## User Preferences
