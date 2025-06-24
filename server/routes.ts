@@ -100,30 +100,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid role" });
       }
 
-      // First check if user exists
-      let user = await storage.getUser(userId);
-      
-      if (!user) {
-        // User doesn't exist, create new user
-        user = await storage.upsertUser({
-          id: userId,
-          email: email,
-          role: role
-        });
-      } else {
-        // User exists, update role directly with SQL
-        const { users } = await import("@shared/schema");
-        const { eq } = await import("drizzle-orm");
-        const { db } = await import("./db");
-        
-        const [updatedUser] = await db
-          .update(users)
-          .set({ role: role })
-          .where(eq(users.id, userId))
-          .returning();
-        
-        user = updatedUser;
-      }
+      // Use upsertUser which now handles existing users properly
+      const user = await storage.upsertUser({
+        id: userId,
+        email: email,
+        role: role
+      });
 
       res.json({
         id: user.id,
