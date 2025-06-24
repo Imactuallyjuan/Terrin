@@ -350,6 +350,8 @@ Changelog:
   * Integrated Express dashboard access for contractors to view earnings and payouts
   * Enhanced system messages to show platform fee breakdown and professional earnings
   * Full marketplace compliance: identity verification, tax reporting, direct bank deposits
+  * Restored role switching functionality in header dropdown with icons and proper API integration
+  * Users can now switch between Visitor, Homeowner, Professional, and Both roles seamlessly
 ```
 
 ## User Preferences

@@ -157,8 +157,39 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="flex items-center gap-2 border-blue-600 text-blue-600 hover:bg-blue-50">
+                      {getRoleIcon(userProfile?.role || userRole || 'visitor')}
+                      <span>{getRoleLabel(userProfile?.role || userRole || 'visitor')}</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <div className="px-2 py-1.5 text-sm font-medium text-slate-700">
+                      Switch Role
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleRoleChange('visitor')}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      Visitor
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleRoleChange('homeowner')}>
+                      <UserCheck className="mr-2 h-4 w-4" />
+                      Homeowner
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleRoleChange('contractor')}>
+                      <Building2 className="mr-2 h-4 w-4" />
+                      Professional
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleRoleChange('both')}>
+                      <Users className="mr-2 h-4 w-4" />
+                      Both
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <span className="text-sm text-slate-600">
-                  Welcome, {user?.email?.split('@')[0] || 'User'}
+                  {user?.email?.split('@')[0] || 'User'}
                 </span>
                 <Button
                   variant="outline"
