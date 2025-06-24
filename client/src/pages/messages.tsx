@@ -100,20 +100,33 @@ export default function Messages() {
   const { data: messages = [], isLoading: loadingMessages } = useQuery<Message[]>({
     queryKey: ['/api/conversations', selectedConversation, 'messages'],
     queryFn: async () => {
-      const token = await user?.getIdToken();
+      if (!user) throw new Error('User not authenticated');
+      const token = await user.getIdToken();
+      if (!token) throw new Error('Failed to get auth token');
+      
       const response = await fetch(`/api/conversations/${selectedConversation}/messages`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!response.ok) throw new Error('Failed to fetch messages');
-      return response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to fetch messages:', response.status, errorText);
+        throw new Error(`Failed to fetch messages: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Messages fetched successfully:', data.length, 'messages');
+      return data;
     },
-    enabled: !!selectedConversation
+    enabled: !!selectedConversation && !!user,
+    retry: 1
   });
 
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (data: { conversationId: number; content: string }) => {
-      const token = await user?.getIdToken();
+      if (!user) throw new Error('User not authenticated');
+      const token = await user.getIdToken();
+      if (!token) throw new Error('Failed to get auth token');
+      
       const response = await fetch(`/api/conversations/${data.conversationId}/messages`, {
         method: 'POST',
         headers: { 
@@ -124,7 +137,11 @@ export default function Messages() {
           content: data.content
         })
       });
-      if (!response.ok) throw new Error('Failed to send message');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to send message:', response.status, errorText);
+        throw new Error('Failed to send message');
+      }
       return response.json();
     },
     onSuccess: (newMessageData) => {

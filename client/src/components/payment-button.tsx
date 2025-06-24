@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { CreditCard, Loader2 } from 'lucide-react';
 
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
@@ -28,7 +28,7 @@ export default function PaymentButton({
   className
 }: PaymentButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
+  const { user } = useFirebaseAuth();
   const { toast } = useToast();
 
   const handlePayment = async () => {
