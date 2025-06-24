@@ -15,9 +15,12 @@ export function useWebSocket() {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Temporarily disable WebSocket to prevent connection errors
-    console.log('WebSocket temporarily disabled for debugging');
-    return;
+    if (!user) return;
+
+    // Connect to WebSocket server
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    ws.current = new WebSocket(wsUrl);
 
     ws.current.onopen = () => {
       setIsConnected(true);
