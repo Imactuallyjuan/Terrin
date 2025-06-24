@@ -24,7 +24,12 @@ import {
   Download,
   Trash2,
   Save,
-  ArrowLeft
+  ArrowLeft,
+  UserCheck,
+  Building2,
+  Users,
+  Eye,
+  Settings as SettingsIcon
 } from "lucide-react";
 import { Link } from "wouter";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
@@ -206,6 +211,98 @@ export default function Settings() {
             <TabsTrigger value="privacy">Privacy</TabsTrigger>
             <TabsTrigger value="account">Account</TabsTrigger>
           </TabsList>
+
+          {/* Role Selection */}
+          <TabsContent value="role">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <SettingsIcon className="h-5 w-5" />
+                  Account Type
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Current Role
+                  </label>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Badge variant="outline" className="flex items-center gap-2">
+                      {getRoleIcon(userProfile?.role || 'visitor')}
+                      {getRoleLabel(userProfile?.role || 'visitor')}
+                    </Badge>
+                    <span className="text-sm text-gray-600">
+                      {getRoleDescription(userProfile?.role || 'visitor')}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Change Role
+                  </label>
+                  <Select
+                    value={userProfile?.role || 'visitor'}
+                    onValueChange={handleRoleChange}
+                    disabled={updateRoleMutation.isPending}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select your role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="visitor">
+                        <div className="flex items-center gap-2">
+                          <Eye className="h-4 w-4" />
+                          <div>
+                            <p className="font-medium">Visitor</p>
+                            <p className="text-xs text-gray-500">Browse projects and professionals</p>
+                          </div>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="homeowner">
+                        <div className="flex items-center gap-2">
+                          <UserCheck className="h-4 w-4" />
+                          <div>
+                            <p className="font-medium">Homeowner</p>
+                            <p className="text-xs text-gray-500">Post projects, get estimates, hire professionals</p>
+                          </div>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="contractor">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4" />
+                          <div>
+                            <p className="font-medium">Professional</p>
+                            <p className="text-xs text-gray-500">Find projects, submit quotes, receive payments</p>
+                          </div>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="both">
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4" />
+                          <div>
+                            <p className="font-medium">Both</p>
+                            <p className="text-xs text-gray-500">Full access to all platform features</p>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  {updateRoleMutation.isPending && (
+                    <p className="text-sm text-blue-600 mt-2">Updating role...</p>
+                  )}
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800">
+                    <strong>Note:</strong> Your role determines which features and pages you can access. 
+                    You can change this anytime in settings.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Profile Settings */}
           <TabsContent value="profile">

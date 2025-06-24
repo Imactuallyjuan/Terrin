@@ -1,78 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
 import { signOut } from "firebase/auth";
 import { auth } from "../lib/firebase";
 import { useFirebaseAuth } from "../hooks/useFirebaseAuth";
 import { useToast } from "../hooks/use-toast";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { UserCheck, Building2, Users, Eye, ChevronDown } from "lucide-react";
 
 export default function Header() {
   const { isAuthenticated, user, userRole } = useFirebaseAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const queryClient = useQueryClient();
-
-  const { data: userProfile } = useQuery({
-    queryKey: ['/api/auth/user'],
-    enabled: !!user,
-  });
-
-  const updateRoleMutation = useMutation({
-    mutationFn: async (role: string) => {
-      if (!user) return;
-      const token = await user.getIdToken();
-      const response = await fetch('/api/auth/update-role', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ role })
-      });
-      if (!response.ok) {
-        throw new Error('Failed to update role');
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      toast({
-        title: "Role updated",
-        description: "Your role has been updated successfully.",
-      });
-    }
-  });
-
-  const handleRoleChange = (role: string) => {
-    updateRoleMutation.mutate(role);
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'homeowner': return <UserCheck className="h-4 w-4" />;
-      case 'contractor': return <Building2 className="h-4 w-4" />;
-      case 'both': return <Users className="h-4 w-4" />;
-      default: return <Eye className="h-4 w-4" />;
-    }
-  };
-
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'homeowner': return 'Homeowner';
-      case 'contractor': return 'Professional';
-      case 'both': return 'Both';
-      default: return 'Visitor';
-    }
-  };
 
   const handleSignOut = async () => {
     try {
@@ -157,37 +93,6 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="flex items-center gap-2 border-blue-600 text-blue-600 hover:bg-blue-50">
-                      {getRoleIcon(userProfile?.role || userRole || 'visitor')}
-                      <span>{getRoleLabel(userProfile?.role || userRole || 'visitor')}</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <div className="px-2 py-1.5 text-sm font-medium text-slate-700">
-                      Switch Role
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => handleRoleChange('visitor')}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      Visitor
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleRoleChange('homeowner')}>
-                      <UserCheck className="mr-2 h-4 w-4" />
-                      Homeowner
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleRoleChange('contractor')}>
-                      <Building2 className="mr-2 h-4 w-4" />
-                      Professional
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleRoleChange('both')}>
-                      <Users className="mr-2 h-4 w-4" />
-                      Both
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
                 <span className="text-sm text-slate-600">
                   {user?.email?.split('@')[0] || 'User'}
                 </span>

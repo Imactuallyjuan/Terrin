@@ -354,6 +354,8 @@ Changelog:
   * Users can now switch between Visitor, Homeowner, Professional, and Both roles seamlessly
   * Consolidated messaging system to single working page - removed broken MessagingSystem component from dashboard
   * Dashboard messages tab now redirects to main /messages page with full functionality including payments
+  * Moved role switching back to Settings page per user preference - removed dropdown from header
+  * Created comprehensive Settings page with role selection, account info, and clear role descriptions
 ```
 
 ## User Preferences
