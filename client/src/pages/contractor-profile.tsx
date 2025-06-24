@@ -151,17 +151,23 @@ export default function ContractorProfile() {
       console.log('Created conversation:', data);
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('onSuccess conversation:', data);
       if (professional && data?.id && typeof data.id === 'number') {
+        // Invalidate conversations cache to ensure new conversation appears
+        await queryClient.invalidateQueries(['/api/conversations']);
+        
         toast({
           title: "Contact Initiated",
           description: `You can now message ${professional.businessName}`,
         });
-        // Navigate to messages page with the specific conversation ID
-        const url = `/messages?conversation=${data.id}`;
-        console.log('Redirecting to:', url);
-        setLocation(url);
+        
+        // Small delay to ensure cache invalidation completes
+        setTimeout(() => {
+          const url = `/messages?conversation=${data.id}`;
+          console.log('Redirecting to:', url);
+          setLocation(url);
+        }, 100);
       }
     },
     onError: (error) => {
