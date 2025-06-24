@@ -97,7 +97,7 @@ export default function Messages() {
   }, [conversations, conversationId, selectedConversation]);
 
   // Fetch messages for selected conversation
-  const { data: messages = [], isLoading: loadingMessages } = useQuery<Message[]>({
+  const { data: messages = [], isLoading: loadingMessages, error: messagesError } = useQuery<Message[]>({
     queryKey: ['/api/conversations', selectedConversation, 'messages'],
     queryFn: async () => {
       if (!user) throw new Error('User not authenticated');

@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { loadStripe } from '@stripe/stripe-js';
 import { CreditCard, DollarSign } from 'lucide-react';
 
@@ -38,7 +38,7 @@ export default function CustomPaymentForm({
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
+  const { user } = useFirebaseAuth();
   const { toast } = useToast();
 
   const handlePayment = async (e: React.FormEvent) => {
