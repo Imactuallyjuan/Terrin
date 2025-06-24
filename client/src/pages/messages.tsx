@@ -355,6 +355,9 @@ export default function Messages() {
                         <div className="text-center text-gray-500 py-8">
                           <p>No messages yet</p>
                           <p className="text-sm">Start the conversation below</p>
+                          {messagesError && (
+                            <p className="text-xs text-red-500 mt-2">Error: {messagesError.message}</p>
+                          )}
                         </div>
                       ) : (
                         messages.map((message: Message) => (
