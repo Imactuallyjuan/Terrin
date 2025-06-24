@@ -57,6 +57,16 @@ export default function Messages() {
     enabled: !!user
   });
 
+  // Fetch professionals to get names for participants
+  const { data: professionals = [] } = useQuery({
+    queryKey: ['/api/professionals'],
+    queryFn: async () => {
+      const response = await fetch('/api/professionals');
+      if (!response.ok) throw new Error('Failed to fetch professionals');
+      return response.json();
+    }
+  });
+
   // Track conversationId from URL parameters
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -173,6 +183,9 @@ export default function Messages() {
       setConversationId(null);
     }
   });
+
+  // Get selected conversation data
+  const selectedConversationData = conversations.find(c => c.id === selectedConversation);
 
   if (loadingConversations) {
     return (
