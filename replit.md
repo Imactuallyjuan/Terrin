@@ -340,6 +340,16 @@ Changelog:
   * Added flexible payment options: $100 deposit, $250 milestone, and custom amount form
   * Created CustomPaymentForm component with user-defined amounts and descriptions
   * Realistic payment amounts for construction industry (deposits, milestones, custom)
+- June 24, 2025. Stripe Connect Express Integration for Marketplace Payments
+  * Implemented Stripe Connect Express for direct contractor payouts and tax compliance
+  * Added stripe_account_id column to contractors table for Express account tracking
+  * Created contractor onboarding flow with /api/stripe/create-account-link endpoint
+  * Built StripeOnboardingButton component with "Set Up Payouts" and "View Payouts" functionality
+  * Updated payment intents to use transfer_data.destination for direct contractor payments
+  * Added 5% platform fee automatically deducted from payments (application_fee_amount)
+  * Integrated Express dashboard access for contractors to view earnings and payouts
+  * Enhanced system messages to show platform fee breakdown and professional earnings
+  * Full marketplace compliance: identity verification, tax reporting, direct bank deposits
 ```
 
 ## User Preferences

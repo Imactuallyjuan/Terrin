@@ -102,7 +102,7 @@ export default function CustomPaymentForm({
 
       toast({
         title: "Payment Successful",
-        description: `Payment of $${paymentAmount.toFixed(2)} completed successfully`,
+        description: `Payment of $${paymentAmount.toFixed(2)} completed successfully. Professional will receive funds directly.`,
       });
 
       // Reset form and close dialog

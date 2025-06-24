@@ -67,6 +67,7 @@ export interface IStorage {
   getAllContractors(limit?: number): Promise<Contractor[]>;
   getUserContractors(userId: string): Promise<Contractor[]>;
   updateContractor(id: number, updates: Partial<InsertContractor>): Promise<Contractor | undefined>;
+  updateContractorStripeAccount(userId: string, stripeAccountId: string): Promise<Contractor | undefined>;
   
   // Project Updates operations
   createProjectUpdate(update: InsertProjectUpdate): Promise<ProjectUpdate>;

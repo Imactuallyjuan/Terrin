@@ -1,0 +1,106 @@
+let’s upgrade Terrin’s payments to use Stripe Connect Express. Here’s exactly what to build next:
+
+✅ 1️⃣ Stripe Connect Express Onboarding for Contractors
+Backend:
+
+Add a new endpoint:
+
+ts
+Copy
+Edit
+POST /api/stripe/create-account-link
+This:
+
+Creates a Stripe Express account:
+
+ts
+Copy
+Edit
+const account = await stripe.accounts.create({
+  type: 'express',
+  country: 'US',
+  email: contractor.email,
+  capabilities: {
+    card_payments: { requested: true },
+    transfers: { requested: true },
+  },
+});
+Store account.id as stripe_account_id in the contractors table.
+
+Generate an account link:
+
+ts
+Copy
+Edit
+const accountLink = await stripe.accountLinks.create({
+  account: account.id,
+  refresh_url: `${YOUR_APP_URL}/reauth`,
+  return_url: `${YOUR_APP_URL}/dashboard`,
+  type: 'account_onboarding',
+});
+Respond with { url: accountLink.url }.
+
+✅ 2️⃣ Contractor DB Schema
+Add a column if missing:
+
+sql
+Copy
+Edit
+ALTER TABLE contractors ADD COLUMN stripe_account_id VARCHAR;
+✅ 3️⃣ Contractor Dashboard
+Add a clear button: “🔗 Set Up Payouts”
+
+Calls /api/stripe/create-account-link.
+
+Redirects to the returned URL.
+
+Once onboarding is done, save stripe_account_id permanently.
+
+✅ 4️⃣ Update Payment Intents
+When creating a Payment Intent for deposits, milestones, or custom payments:
+
+ts
+Copy
+Edit
+const paymentIntent = await stripe.paymentIntents.create({
+  amount: amountInCents,
+  currency: 'usd',
+  payment_method_types: ['card'],
+  application_fee_amount: platformFeeAmount, // optional
+  transfer_data: {
+    destination: contractorStripeAccountId, // from DB
+  },
+});
+✅ 5️⃣ Payout & Compliance
+Stripe automatically handles:
+
+Identity verification (KYC)
+
+Routing payments to contractors’ bank accounts
+
+Issuing 1099-K forms if thresholds are met
+
+Optional: Add a “View Payouts” link in the contractor dashboard:
+
+Use the Connect Express Dashboard link:
+
+ts
+Copy
+Edit
+const loginLink = await stripe.accounts.createLoginLink(accountId);
+✅ 6️⃣ What this achieves
+✅ Homeowners pay securely, with card on file
+✅ Contractors get paid directly to their bank
+✅ Stripe handles tax reporting and compliance
+✅ Terrin can take a platform fee automatically (optional)
+
+✅ 7️⃣ Reminder:
+👉 We do NOT want contractors to create separate Stripe accounts manually.
+👉 They must use Connect Express via onboarding link only.
+👉 Payments must always use transfer_data.destination.
+
+✅ 8️⃣ Final goal:
+🎯 By doing this, Terrin becomes a legal & safe marketplace — no manual money handling, no tax headaches, no shady back-door deals.
+
+✅ Please implement this full flow — onboarding, account linking, PaymentIntent with destination, and Express Dashboard link — and confirm when ready for me to test.
+

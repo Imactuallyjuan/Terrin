@@ -80,7 +80,7 @@ export default function PaymentButton({
 
       toast({
         title: "Payment Successful",
-        description: `Payment of $${amount.toFixed(2)} completed successfully`,
+        description: `Payment of $${amount.toFixed(2)} completed successfully. Professional will receive funds directly.`,
       });
 
     } catch (error: any) {

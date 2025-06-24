@@ -1418,6 +1418,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stripe Connect Express routes
+  app.post('/api/stripe/create-account-link', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      if (!stripe) {
+        return res.status(501).json({ message: "Stripe not configured" });
+      }
+
+      const userId = req.user.uid;
+      
+      // Get contractor profile
+      const contractors = await storage.getUserContractors(userId);
+      const contractor = contractors[0];
+      
+      if (!contractor) {
+        return res.status(404).json({ message: "Contractor profile not found. Please create your professional profile first." });
+      }
+
+      let stripeAccountId = contractor.stripeAccountId;
+
+      // Create Stripe Express account if doesn't exist
+      if (!stripeAccountId) {
+        const account = await stripe.accounts.create({
+          type: 'express',
+          country: 'US',
+          email: contractor.email || req.user.email,
+          capabilities: {
+            card_payments: { requested: true },
+            transfers: { requested: true },
+          },
+          business_profile: {
+            name: contractor.businessName,
+            support_email: contractor.email || req.user.email,
+          },
+        });
+
+        stripeAccountId = account.id;
+        
+        // Update contractor with Stripe account ID
+        await storage.updateContractorStripeAccount(userId, stripeAccountId);
+      }
+
+      // Create account link for onboarding
+      const accountLink = await stripe.accountLinks.create({
+        account: stripeAccountId,
+        refresh_url: `${req.headers.origin}/professional-portal?refresh=true`,
+        return_url: `${req.headers.origin}/professional-portal?success=true`,
+        type: 'account_onboarding',
+      });
+
+      res.json({ url: accountLink.url });
+    } catch (error) {
+      console.error("Error creating Stripe account link:", error);
+      res.status(500).json({ message: "Failed to create account link" });
+    }
+  });
+
+  app.post('/api/stripe/dashboard-link', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      if (!stripe) {
+        return res.status(501).json({ message: "Stripe not configured" });
+      }
+
+      const userId = req.user.uid;
+      
+      // Get contractor profile
+      const contractors = await storage.getUserContractors(userId);
+      const contractor = contractors[0];
+      
+      if (!contractor?.stripeAccountId) {
+        return res.status(404).json({ message: "Stripe account not found. Please complete onboarding first." });
+      }
+
+      // Create Express dashboard login link
+      const loginLink = await stripe.accounts.createLoginLink(contractor.stripeAccountId);
+
+      res.json({ url: loginLink.url });
+    } catch (error) {
+      console.error("Error creating dashboard link:", error);
+      res.status(500).json({ message: "Failed to create dashboard link" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time messaging
@@ -1496,11 +1578,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing required fields" });
       }
 
-      // Create Stripe Payment Intent
+      // Get contractor to find Stripe account ID
+      const contractors = await storage.getUserContractors(payee_id);
+      const contractor = contractors[0];
+      
+      if (!contractor?.stripeAccountId) {
+        return res.status(400).json({ 
+          message: "Professional must complete Stripe onboarding before receiving payments" 
+        });
+      }
+
+      // Calculate platform fee (5% of payment amount)
+      const platformFeeAmount = Math.round(parseFloat(amount) * 100 * 0.05);
+
+      // Create Stripe Payment Intent with Connect Express destination
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(parseFloat(amount) * 100), // convert to cents
         currency: "usd",
         payment_method_types: ["card"],
+        application_fee_amount: platformFeeAmount,
+        transfer_data: {
+          destination: contractor.stripeAccountId,
+        },
         metadata: {
           project_id: project_id.toString(),
           conversation_id: conversation_id?.toString() || '',
@@ -1561,11 +1660,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const conversationId = parseInt(intent.metadata.conversation_id);
           const projectId = intent.metadata.project_id;
           const amount = (intent.amount / 100).toFixed(2);
+          const platformFee = ((intent.application_fee_amount || 0) / 100).toFixed(2);
+          const professionalAmount = (amount - parseFloat(platformFee)).toFixed(2);
           
           await storage.createMessage({
             conversationId,
             senderId: 'system',
-            content: `✅ Payment of $${amount} for Project ${projectId} succeeded.`,
+            content: `✅ Payment of $${amount} succeeded. Professional receives $${professionalAmount} (after $${platformFee} platform fee).`,
             messageType: 'system'
           });
         }
