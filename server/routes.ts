@@ -749,6 +749,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/conversations/:id/hide', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const userId = req.user.uid;
+      
+      await storage.hideConversationForUser(conversationId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error hiding conversation:", error);
+      res.status(500).json({ message: "Failed to hide conversation" });
+    }
+  });
+
   app.get('/api/conversations/:id/messages', verifyFirebaseToken, async (req: any, res) => {
     try {
       const conversationId = parseInt(req.params.id);

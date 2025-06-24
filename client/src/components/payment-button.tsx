@@ -72,13 +72,7 @@ export default function PaymentButton({
         throw new Error('Stripe failed to load');
       }
 
-      const { error } = await stripe.confirmCardPayment(data.client_secret, {
-        payment_method: {
-          card: {
-            // This will prompt for card details
-          }
-        }
-      });
+      const { error } = await stripe.confirmCardPayment(data.client_secret);
 
       if (error) {
         throw new Error(error.message);

@@ -166,6 +166,12 @@ export default function Messages() {
     return conversation.participants.find(id => id !== user.uid) || '';
   };
 
+  // Helper function to get other participant ID
+  const getOtherParticipantId = (conversation: Conversation) => {
+    if (!conversation.participants || !user) return '';
+    return conversation.participants.find(id => id !== user.uid) || '';
+  };
+
   // Delete conversation mutation
   const deleteConversationMutation = useMutation({
     mutationFn: async (conversationId: number) => {
@@ -377,6 +383,8 @@ export default function Messages() {
                               className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                                 message.senderId === user?.uid
                                   ? 'bg-blue-600 text-white'
+                                  : message.senderId === 'system'
+                                  ? 'bg-green-100 text-green-800 border border-green-200'
                                   : 'bg-gray-200 text-gray-900'
                               }`}
                             >
@@ -395,6 +403,25 @@ export default function Messages() {
                   </ScrollArea>
 
                   <Separator />
+
+                  {/* Payment Section */}
+                  {selectedConversationData && (
+                    <div className="border-t p-4 bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">Quick Payment</p>
+                          <p className="text-xs text-gray-500">Send payment for this project</p>
+                        </div>
+                        <PaymentButton
+                          projectId={selectedConversationData.projectId || 1}
+                          conversationId={selectedConversationData.id}
+                          amount={500.00}
+                          payeeId={getOtherParticipantId(selectedConversationData)}
+                          className="bg-green-600 hover:bg-green-700"
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Message Input */}
                   <form onSubmit={handleSendMessage} className="flex gap-2">
