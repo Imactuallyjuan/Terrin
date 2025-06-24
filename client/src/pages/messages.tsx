@@ -137,6 +137,30 @@ export default function Messages() {
     });
   };
 
+  // Delete conversation mutation
+  const deleteConversationMutation = useMutation({
+    mutationFn: async (conversationId: number) => {
+      if (!user) return;
+      
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/conversations/${conversationId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) throw new Error('Failed to delete conversation');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.removeQueries(['/api/conversations']);
+      queryClient.invalidateQueries(['/api/conversations']);
+      setSelectedConversation(null);
+      setConversationId(null);
+    }
+  });
+
   if (loadingConversations) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
@@ -210,23 +234,35 @@ export default function Messages() {
                     {conversations.map((conversation: Conversation) => (
                       <div
                         key={conversation.id}
-                        className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors ${
+                        className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors group ${
                           selectedConversation === conversation.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
                         }`}
                         onClick={() => setSelectedConversation(conversation.id)}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="text-xs">
-                                  {conversation.projectTitle?.charAt(0) || 'P'}
-                                </AvatarFallback>
-                              </Avatar>
-                              <h3 className="font-medium text-sm">
-                                {conversation.projectTitle || 
-                                 (conversation.projectId ? `Project ${conversation.projectId}` : 'Discussion')}
-                              </h3>
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarFallback className="text-xs">
+                                    {conversation.title?.charAt(0) || 'D'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <h3 className="font-medium text-sm">
+                                  {conversation.title || 'Direct Message'}
+                                </h3>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteConversationMutation.mutate(conversation.id);
+                                }}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
                             </div>
                             {conversation.lastMessage && (
                               <p className="text-xs text-gray-600 truncate">

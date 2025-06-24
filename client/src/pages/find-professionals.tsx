@@ -22,11 +22,15 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/header";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
 export default function FindProfessionals() {
   const { user } = useAuth();
+  const { user: firebaseUser } = useFirebaseAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [searchFilters, setSearchFilters] = useState({
     specialty: '',
     location: '',
