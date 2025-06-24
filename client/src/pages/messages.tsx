@@ -160,6 +160,12 @@ export default function Messages() {
     return professional?.businessName || 'Professional';
   };
 
+  // Helper function to get other participant ID
+  const getOtherParticipantId = (conversation: Conversation) => {
+    if (!conversation.participants || !user) return '';
+    return conversation.participants.find(id => id !== user.uid) || '';
+  };
+
   // Delete conversation mutation
   const deleteConversationMutation = useMutation({
     mutationFn: async (conversationId: number) => {

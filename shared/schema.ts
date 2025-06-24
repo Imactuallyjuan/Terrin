@@ -235,6 +235,20 @@ export const projectDocuments = pgTable("project_documents", {
   uploadedAt: timestamp("uploaded_at").defaultNow(),
 });
 
+// Payment processing for projects
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  payerId: varchar("payer_id").notNull(),
+  payeeId: varchar("payee_id").notNull(),
+  projectId: integer("project_id").notNull().references(() => projects.id),
+  conversationId: integer("conversation_id").references(() => conversations.id),
+  amount: decimal("amount").notNull(),
+  currency: varchar("currency").default("USD"),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  status: varchar("status").default("pending"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export type ProjectCost = typeof projectCosts.$inferSelect;
 export type InsertProjectCost = typeof projectCosts.$inferInsert;
 
