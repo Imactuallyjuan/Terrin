@@ -1,0 +1,188 @@
+Create a payments table linked to projects & conversations:
+
+sql
+Copy
+Edit
+CREATE TABLE payments (
+  id SERIAL PRIMARY KEY,
+  payer_id VARCHAR NOT NULL,
+  payee_id VARCHAR NOT NULL,
+  project_id INTEGER NOT NULL,
+  conversation_id INTEGER,
+  amount DECIMAL NOT NULL,
+  currency VARCHAR DEFAULT 'USD',
+  stripe_payment_intent_id VARCHAR,
+  status VARCHAR CHECK (status IN ('pending', 'succeeded', 'refunded')) DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+🚀 2️⃣ Conversations Table — Soft Delete
+Add per-user soft delete:
+
+sql
+Copy
+Edit
+ALTER TABLE conversations ADD COLUMN hidden_for JSONB DEFAULT '[]';
+🚀 3️⃣ Backend API
+✅ POST /api/payments/create
+
+ts
+Copy
+Edit
+// server/routes/payments.ts
+
+router.post("/api/payments/create", authenticateUser, async (req, res) => {
+  const { project_id, conversation_id, amount, payee_id } = req.body;
+
+  // Validate input here
+
+  // Create Stripe Payment Intent
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: Math.round(amount * 100), // convert to cents
+    currency: "usd",
+    payment_method_types: ["card"],
+  });
+
+  // Insert into DB
+  const payment = await db.insertInto("payments").values({
+    payer_id: req.user.id,
+    payee_id,
+    project_id,
+    conversation_id,
+    amount,
+    stripe_payment_intent_id: paymentIntent.id,
+    status: "pending",
+  }).returning("id").executeTakeFirst();
+
+  res.json({
+    client_secret: paymentIntent.client_secret,
+    payment_id: payment.id
+  });
+});
+✅ Stripe Webhook
+
+ts
+Copy
+Edit
+// server/routes/stripeWebhook.ts
+
+router.post("/api/payments/webhook", express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error("Webhook Error:", err);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === "payment_intent.succeeded") {
+    const intent = event.data.object;
+
+    // Find payment record
+    const payment = await db.selectFrom("payments")
+      .where("stripe_payment_intent_id", "=", intent.id)
+      .selectAll().executeTakeFirst();
+
+    if (payment) {
+      await db.updateTable("payments")
+        .set({ status: "succeeded" })
+        .where("id", "=", payment.id)
+        .execute();
+
+      // Insert system message in chat
+      await db.insertInto("messages").values({
+        conversation_id: payment.conversation_id,
+        sender_id: "system",
+        content: `✅ Payment of $${payment.amount} for Project ${payment.project_id} succeeded.`,
+        created_at: new Date()
+      }).execute();
+    }
+  }
+
+  res.json({ received: true });
+});
+🚀 4️⃣ Frontend — Payment Button in Chat
+tsx
+Copy
+Edit
+const handlePayment = async () => {
+  const response = await fetch("/api/payments/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${userToken}`,
+    },
+    body: JSON.stringify({
+      project_id: currentProjectId,
+      conversation_id: currentConversationId,
+      amount: milestoneAmount,
+      payee_id: contractorUserId,
+    }),
+  });
+
+  const data = await response.json();
+
+  const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+  await stripe.confirmCardPayment(data.client_secret);
+};
+Add a button:
+
+jsx
+Copy
+Edit
+<button onClick={handlePayment} className="btn btn-primary">
+  💲 Make a Payment
+</button>
+🚀 5️⃣ Frontend — Soft Delete Chat
+When user clicks “Delete Chat”:
+
+ts
+Copy
+Edit
+await fetch(`/api/conversations/${conversationId}/hide`, {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${userToken}`
+  }
+});
+Backend route:
+
+ts
+Copy
+Edit
+router.post("/api/conversations/:id/hide", authenticateUser, async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  // Add user to hidden_for array
+  await db.updateTable("conversations")
+    .set({
+      hidden_for: db.raw(`jsonb_set(hidden_for, '{${userId}}', 'true', true)`)
+    })
+    .where("id", "=", id)
+    .execute();
+
+  res.json({ success: true });
+});
+When listing conversations:
+Always filter:
+
+sql
+Copy
+Edit
+WHERE NOT (hidden_for @> '["current_user_id"]')
+✅ 6️⃣ Summary
+This guarantees:
+
+Payments tied to project + conversation
+
+No accidental deletion of proof
+
+Stripe protects payment flow
+
+System messages record receipts
+
+🚀 Next:
+👉 Implement this step-by-step.
+👉 Let me test with my account.

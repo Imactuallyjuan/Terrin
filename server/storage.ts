@@ -10,6 +10,7 @@ import {
   projectMilestones,
   projectPhotos,
   projectDocuments,
+  payments,
   type User,
   type UpsertUser,
   type Project,
@@ -32,6 +33,8 @@ import {
   type InsertProjectPhoto,
   type ProjectDocument,
   type InsertProjectDocument,
+  type Payment,
+  type InsertPayment,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -108,6 +111,14 @@ export interface IStorage {
   // Additional conversation and message operations
   deleteConversation(id: number): Promise<void>;
   deleteMessage(id: number): Promise<void>;
+  hideConversationForUser(conversationId: number, userId: string): Promise<void>;
+  
+  // Payment operations
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  getPayment(id: number): Promise<Payment | undefined>;
+  updatePaymentStatus(stripePaymentIntentId: string, status: string): Promise<void>;
+  getProjectPayments(projectId: number): Promise<Payment[]>;
+  getConversationPayments(conversationId: number): Promise<Payment[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -635,6 +646,43 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMessage(id: number): Promise<void> {
     await db.delete(messages).where(eq(messages.id, id));
+  }
+
+  async hideConversationForUser(conversationId: number, userId: string): Promise<void> {
+    const conversation = await this.getConversation(conversationId);
+    if (!conversation) return;
+    
+    const hiddenFor = Array.isArray(conversation.hiddenFor) ? conversation.hiddenFor : [];
+    if (!hiddenFor.includes(userId)) {
+      hiddenFor.push(userId);
+      await db.update(conversations)
+        .set({ hiddenFor })
+        .where(eq(conversations.id, conversationId));
+    }
+  }
+
+  async createPayment(payment: InsertPayment): Promise<Payment> {
+    const [newPayment] = await db.insert(payments).values(payment).returning();
+    return newPayment;
+  }
+
+  async getPayment(id: number): Promise<Payment | undefined> {
+    const [payment] = await db.select().from(payments).where(eq(payments.id, id));
+    return payment || undefined;
+  }
+
+  async updatePaymentStatus(stripePaymentIntentId: string, status: string): Promise<void> {
+    await db.update(payments)
+      .set({ status })
+      .where(eq(payments.stripePaymentIntentId, stripePaymentIntentId));
+  }
+
+  async getProjectPayments(projectId: number): Promise<Payment[]> {
+    return await db.select().from(payments).where(eq(payments.projectId, projectId));
+  }
+
+  async getConversationPayments(conversationId: number): Promise<Payment[]> {
+    return await db.select().from(payments).where(eq(payments.conversationId, conversationId));
   }
 }
 

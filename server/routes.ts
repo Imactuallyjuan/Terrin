@@ -1458,5 +1458,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Payment routes
+  app.post('/api/payments/create', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const { project_id, conversation_id, amount, payee_id } = req.body;
+      const payerId = req.user.uid;
+
+      // Validate input
+      if (!project_id || !amount || !payee_id) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Create Stripe Payment Intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(parseFloat(amount) * 100), // convert to cents
+        currency: "usd",
+        payment_method_types: ["card"],
+        metadata: {
+          project_id: project_id.toString(),
+          conversation_id: conversation_id?.toString() || '',
+          payer_id: payerId,
+          payee_id: payee_id
+        }
+      });
+
+      // Insert into database
+      const payment = await storage.createPayment({
+        payerId,
+        payeeId: payee_id,
+        projectId: project_id,
+        conversationId: conversation_id || null,
+        amount: amount.toString(),
+        currency: "USD",
+        stripePaymentIntentId: paymentIntent.id,
+        status: "pending"
+      });
+
+      res.json({
+        client_secret: paymentIntent.client_secret,
+        payment_id: payment.id
+      });
+    } catch (error) {
+      console.error("Error creating payment:", error);
+      res.status(500).json({ message: "Failed to create payment" });
+    }
+  });
+
+  app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    let event;
+
+    try {
+      if (!process.env.STRIPE_WEBHOOK_SECRET) {
+        throw new Error('Missing Stripe webhook secret');
+      }
+      event = stripe.webhooks.constructEvent(req.body, sig as string, process.env.STRIPE_WEBHOOK_SECRET);
+    } catch (err: any) {
+      console.error('Webhook signature verification failed:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    if (event.type === 'payment_intent.succeeded') {
+      const intent = event.data.object as any;
+      
+      try {
+        // Update payment status
+        await storage.updatePaymentStatus(intent.id, 'succeeded');
+        
+        // Send system message if conversation exists
+        if (intent.metadata.conversation_id) {
+          const conversationId = parseInt(intent.metadata.conversation_id);
+          const projectId = intent.metadata.project_id;
+          const amount = (intent.amount / 100).toFixed(2);
+          
+          await storage.createMessage({
+            conversationId,
+            senderId: 'system',
+            content: `✅ Payment of $${amount} for Project ${projectId} succeeded.`,
+            messageType: 'system'
+          });
+        }
+      } catch (error) {
+        console.error('Error processing webhook:', error);
+      }
+    }
+
+    res.json({ received: true });
+  });
+
+  app.get('/api/projects/:id/payments', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const payments = await storage.getProjectPayments(projectId);
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching project payments:", error);
+      res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
+  app.get('/api/conversations/:id/payments', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const payments = await storage.getConversationPayments(conversationId);
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching conversation payments:", error);
+      res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
   return httpServer;
 }
