@@ -39,6 +39,7 @@ export default function Messages() {
   const { user } = useFirebaseAuth();
   const { isConnected, sendMessage } = useWebSocket();
   const [location] = useLocation();
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState("");
 
@@ -56,42 +57,32 @@ export default function Messages() {
     enabled: !!user
   });
 
-  // Auto-select conversation based on URL parameter or newest conversation
+  // Track conversationId from URL parameters
   useEffect(() => {
-    console.log('Messages effect running:', { 
-      conversationsLength: conversations.length, 
-      selectedConversation, 
-      location 
-    });
-    
+    const params = new URLSearchParams(location.search);
+    setConversationId(params.get("conversation"));
+  }, [location.search]);
+
+  // Auto-select conversation based on conversationId state or fallback to newest
+  useEffect(() => {
     if (conversations.length > 0) {
-      // Check if there's a conversation ID in the URL - this takes priority
-      const urlParams = new URLSearchParams(location.search);
-      const conversationIdFromUrl = urlParams.get('conversation');
-      
-      console.log('URL conversation param:', conversationIdFromUrl);
-      console.log('Available conversations:', conversations.map(c => c.id));
-      
-      if (conversationIdFromUrl) {
-        const conversationId = parseInt(conversationIdFromUrl);
-        const foundConversation = conversations.find(c => c.id === conversationId);
-        console.log('Looking for conversation ID:', conversationId, 'found:', !!foundConversation);
-        
-        if (foundConversation && selectedConversation !== conversationId) {
-          console.log('Selecting conversation from URL:', conversationId);
-          setSelectedConversation(conversationId);
+      if (conversationId) {
+        const selected = conversations.find(c => c.id === Number(conversationId));
+        if (selected && selectedConversation !== selected.id) {
+          console.log('Selecting conversation from URL param:', selected.id);
+          setSelectedConversation(selected.id);
           return;
         }
       }
       
-      // Otherwise, select the newest conversation if none is selected
-      if (!selectedConversation) {
+      // Only fallback if conversationId is truly null and no conversation is selected
+      if (!conversationId && !selectedConversation) {
         const sortedConversations = conversations.sort((a, b) => b.id - a.id);
-        console.log('Selecting newest conversation:', sortedConversations[0].id);
+        console.log('Fallback to newest conversation:', sortedConversations[0].id);
         setSelectedConversation(sortedConversations[0].id);
       }
     }
-  }, [conversations, selectedConversation, location]);
+  }, [conversations, conversationId, selectedConversation]);
 
   // Fetch messages for selected conversation
   const { data: messages = [], isLoading: loadingMessages } = useQuery<Message[]>({
