@@ -74,20 +74,49 @@ export default function FindProfessionals() {
     'Handyman Services'
   ];
 
-  const handleContactProfessional = (professional: any) => {
-    if (!user) {
+  // Contact professional mutation
+  const contactProfessionalMutation = useMutation({
+    mutationFn: async (professional: any) => {
+      if (!firebaseUser) throw new Error('Please sign in to contact professionals');
+      
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch('/api/conversations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: `Contact ${professional.businessName}`,
+          participants: [professional.userId || 'professional_placeholder']
+        })
+      });
+      
+      if (!response.ok) throw new Error('Failed to create conversation');
+      const data = await response.json();
+      return data;
+    },
+    onSuccess: (data, professional) => {
       toast({
-        title: "Sign In Required",
-        description: "Please sign in to contact professionals.",
+        title: "Contact Initiated",
+        description: `You can now message ${professional.businessName}`,
+      });
+      
+      setTimeout(() => {
+        setLocation(`/messages?conversation=${data.id}`);
+      }, 100);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to initiate contact",
         variant: "destructive",
       });
-      return;
     }
+  });
 
-    toast({
-      title: "Contact Initiated",
-      description: `You can now message ${professional.businessName}`,
-    });
+  const handleContactProfessional = (professional: any) => {
+    contactProfessionalMutation.mutate(professional);
   };
 
   return (
