@@ -67,6 +67,70 @@ export default function Settings() {
     allowMessages: true
   });
 
+  // Fetch user profile for role information
+  const { data: userProfile } = useQuery({
+    queryKey: ['/api/auth/user'],
+    enabled: !!user,
+  });
+
+  // Update role mutation
+  const updateRoleMutation = useMutation({
+    mutationFn: async (role) => {
+      if (!user) return;
+      const token = await user.getIdToken();
+      const response = await fetch('/api/auth/update-role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ role })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update role');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      toast({
+        title: "Role updated",
+        description: "Your role has been updated successfully.",
+      });
+    }
+  });
+
+  const handleRoleChange = (role) => {
+    updateRoleMutation.mutate(role);
+  };
+
+  const getRoleIcon = (role) => {
+    switch (role) {
+      case 'homeowner': return <UserCheck className="h-4 w-4" />;
+      case 'contractor': return <Building2 className="h-4 w-4" />;
+      case 'both': return <Users className="h-4 w-4" />;
+      default: return <Eye className="h-4 w-4" />;
+    }
+  };
+
+  const getRoleLabel = (role) => {
+    switch (role) {
+      case 'homeowner': return 'Homeowner';
+      case 'contractor': return 'Professional';
+      case 'both': return 'Both';
+      default: return 'Visitor';
+    }
+  };
+
+  const getRoleDescription = (role) => {
+    switch (role) {
+      case 'homeowner': return 'Post projects, get estimates, hire professionals';
+      case 'contractor': return 'Find projects, submit quotes, receive payments';
+      case 'both': return 'Full access to all platform features';
+      default: return 'Browse projects and professionals';
+    }
+  };
+
   // Load user profile data
   useEffect(() => {
     if (user?.email) {
@@ -205,8 +269,9 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="role">Account Type</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="privacy">Privacy</TabsTrigger>
             <TabsTrigger value="account">Account</TabsTrigger>
