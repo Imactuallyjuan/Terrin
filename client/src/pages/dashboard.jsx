@@ -8,7 +8,6 @@ import { Calendar, MapPin, DollarSign, Clock, Plus, User, Building, Settings, Ca
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import ProjectTimeline from "@/components/ProjectTimeline";
-import MessagingSystem from "@/components/MessagingSystem";
 
 export default function Dashboard() {
   const { user, userRole, loading, isAuthenticated } = useFirebaseAuth();
@@ -215,10 +214,20 @@ export default function Dashboard() {
                 </TabsContent>
 
                 <TabsContent value="messages" className="mt-6">
-                  <MessagingSystem 
-                    projectId={selectedProject.id} 
-                    projectTitle={selectedProject.title}
-                  />
+                  <Card>
+                    <CardContent className="text-center py-8">
+                      <MessageCircle className="h-12 w-12 mx-auto mb-4 text-blue-600" />
+                      <p className="text-lg font-medium mb-2">Project Messages</p>
+                      <p className="text-gray-600 mb-4">
+                        Access all your conversations and send payments to professionals
+                      </p>
+                      <Link href="/messages">
+                        <Button className="bg-blue-600 hover:bg-blue-700">
+                          Go to Messages
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
                 </TabsContent>
 
                 <TabsContent value="overview" className="mt-6">
