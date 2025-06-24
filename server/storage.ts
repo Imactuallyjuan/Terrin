@@ -359,11 +359,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserConversations(userId: string): Promise<Conversation[]> {
-    return await db
+    // Simple approach: get all conversations and filter in JavaScript
+    const allConversations = await db
       .select()
       .from(conversations)
-      .where(eq(conversations.participants, [userId]))
       .orderBy(desc(conversations.lastMessageAt));
+    
+    // Filter conversations where user is a participant
+    return allConversations.filter(conversation => 
+      conversation.participants && conversation.participants.includes(userId)
+    );
   }
 
   async getProjectConversation(projectId: number): Promise<Conversation | undefined> {
