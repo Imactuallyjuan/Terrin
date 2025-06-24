@@ -61,7 +61,8 @@ export default function PaymentButton({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create payment intent');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create payment intent');
       }
 
       const data = await response.json();
@@ -87,7 +88,9 @@ export default function PaymentButton({
       console.error('Payment error:', error);
       toast({
         title: "Payment Failed",
-        description: error.message || "An error occurred while processing the payment",
+        description: error.message.includes('must complete') 
+          ? "This professional needs to complete their payment setup first. Please contact them to set up their Stripe account."
+          : error.message || "An error occurred while processing the payment",
         variant: "destructive"
       });
     } finally {
