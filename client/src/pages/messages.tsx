@@ -137,6 +137,19 @@ export default function Messages() {
     });
   };
 
+  // Helper function to get participant name
+  const getParticipantName = (conversation: Conversation) => {
+    if (!conversation.participants || !user) return 'Unknown';
+    
+    // Find the other participant (not the current user)
+    const otherParticipantId = conversation.participants.find(id => id !== user.uid);
+    if (!otherParticipantId) return 'Direct Message';
+    
+    // Look up professional info
+    const professional = professionals.find((p: any) => p.userId === otherParticipantId);
+    return professional?.businessName || 'Professional';
+  };
+
   // Delete conversation mutation
   const deleteConversationMutation = useMutation({
     mutationFn: async (conversationId: number) => {
@@ -245,11 +258,11 @@ export default function Messages() {
                               <div className="flex items-center gap-2">
                                 <Avatar className="h-8 w-8">
                                   <AvatarFallback className="text-xs">
-                                    {conversation.title?.charAt(0) || 'D'}
+                                    {getParticipantName(conversation).charAt(0)}
                                   </AvatarFallback>
                                 </Avatar>
                                 <h3 className="font-medium text-sm">
-                                  {conversation.title || 'Direct Message'}
+                                  {getParticipantName(conversation)}
                                 </h3>
                               </div>
                               <Button
