@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, MessageSquare, ArrowLeft, Clock, Wifi, WifiOff, Trash2, MoreVertical } from "lucide-react";
+import PaymentButton from "@/components/payment-button";
 import { Link, useLocation } from "wouter";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -158,12 +159,6 @@ export default function Messages() {
     // Look up professional info
     const professional = professionals.find((p: any) => p.userId === otherParticipantId);
     return professional?.businessName || 'Professional';
-  };
-
-  // Helper function to get other participant ID
-  const getOtherParticipantId = (conversation: Conversation) => {
-    if (!conversation.participants || !user) return '';
-    return conversation.participants.find(id => id !== user.uid) || '';
   };
 
   // Helper function to get other participant ID

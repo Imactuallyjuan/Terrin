@@ -376,10 +376,12 @@ export class DatabaseStorage implements IStorage {
       .from(conversations)
       .orderBy(desc(conversations.lastMessageAt));
     
-    // Filter conversations where user is a participant
-    return allConversations.filter(conversation => 
-      conversation.participants && conversation.participants.includes(userId)
-    );
+    // Filter conversations where user is a participant and not hidden
+    return allConversations.filter(conversation => {
+      const isParticipant = conversation.participants && conversation.participants.includes(userId);
+      const isHidden = Array.isArray(conversation.hiddenFor) && conversation.hiddenFor.includes(userId);
+      return isParticipant && !isHidden;
+    });
   }
 
   async getProjectConversation(projectId: number): Promise<Conversation | undefined> {

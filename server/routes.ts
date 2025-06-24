@@ -1,6 +1,8 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
+import Stripe from "stripe";
 import { storage } from "./storage";
 import { verifyFirebaseToken } from "./firebaseAuth";
 import { insertProjectSchema, insertContractorSchema } from "@shared/schema";
@@ -57,6 +59,14 @@ function generateSmartTitle(description: string): string {
   const meaningfulWords = words.slice(0, 4);
   return meaningfulWords.join(' ').charAt(0).toUpperCase() + meaningfulWords.join(' ').slice(1);
 }
+
+// Initialize Stripe
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.warn('STRIPE_SECRET_KEY not found - payment functionality will be disabled');
+}
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-10-16",
+}) : null;
 
 export async function registerRoutes(app: Express): Promise<Server> {
 
@@ -1474,6 +1484,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Payment routes
   app.post('/api/payments/create', verifyFirebaseToken, async (req: any, res) => {
     try {
+      if (!stripe) {
+        return res.status(501).json({ message: "Payment processing not configured" });
+      }
+
       const { project_id, conversation_id, amount, payee_id } = req.body;
       const payerId = req.user.uid;
 
@@ -1518,6 +1532,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    if (!stripe) {
+      return res.status(501).json({ message: "Payment processing not configured" });
+    }
+
     const sig = req.headers['stripe-signature'];
     let event;
 

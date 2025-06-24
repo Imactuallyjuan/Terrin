@@ -327,6 +327,16 @@ Changelog:
   * Added proper conversation URL parameter handling and automatic conversation selection
   * Implemented comprehensive conversation management with create, read, and delete operations
   * All messaging functionality now works end-to-end: card contacts, profile messages, conversation deletion
+- June 24, 2025. Payment System Integration with Stripe
+  * Implemented comprehensive payment processing system with Stripe integration
+  * Added payments table to database with proper foreign key relationships to projects and conversations
+  * Created secure payment API endpoints with authentication and validation
+  * Built PaymentButton component with Stripe payment intent confirmation
+  * Added conversation soft delete functionality with hiddenFor array field
+  * Enhanced messaging interface with payment section and system message support
+  * Payment success automatically sends system messages to conversations
+  * Webhook handling for payment status updates and automated notifications
+  * Complete end-to-end payment flow from conversation to Stripe processing
 ```
 
 ## User Preferences
