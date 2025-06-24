@@ -337,6 +337,9 @@ Changelog:
   * Payment success automatically sends system messages to conversations
   * Webhook handling for payment status updates and automated notifications
   * Complete end-to-end payment flow from conversation to Stripe processing
+  * Added flexible payment options: $100 deposit, $250 milestone, and custom amount form
+  * Created CustomPaymentForm component with user-defined amounts and descriptions
+  * Realistic payment amounts for construction industry (deposits, milestones, custom)
 ```
 
 ## User Preferences

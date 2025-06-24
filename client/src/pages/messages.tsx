@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, MessageSquare, ArrowLeft, Clock, Wifi, WifiOff, Trash2, MoreVertical } from "lucide-react";
 import PaymentButton from "@/components/payment-button";
+import CustomPaymentForm from "@/components/custom-payment-form";
 import { Link, useLocation } from "wouter";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -404,16 +405,33 @@ export default function Messages() {
                     <div className="border-t p-4 bg-gray-50">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium">Quick Payment</p>
-                          <p className="text-xs text-gray-500">Send payment for this project</p>
+                          <p className="text-sm font-medium">Send Payment</p>
+                          <p className="text-xs text-gray-500">Pay for project milestone or deposit</p>
                         </div>
-                        <PaymentButton
-                          projectId={selectedConversationData.projectId || 1}
-                          conversationId={selectedConversationData.id}
-                          amount={500.00}
-                          payeeId={getOtherParticipantId(selectedConversationData)}
-                          className="bg-green-600 hover:bg-green-700"
-                        />
+                        <div className="flex gap-2">
+                          <PaymentButton
+                            projectId={selectedConversationData.projectId || 1}
+                            conversationId={selectedConversationData.id}
+                            amount={100.00}
+                            payeeId={getOtherParticipantId(selectedConversationData)}
+                            description="Project Deposit"
+                            className="bg-blue-600 hover:bg-blue-700 text-xs px-3 py-1"
+                          />
+                          <PaymentButton
+                            projectId={selectedConversationData.projectId || 1}
+                            conversationId={selectedConversationData.id}
+                            amount={250.00}
+                            payeeId={getOtherParticipantId(selectedConversationData)}
+                            description="Milestone Payment"
+                            className="bg-green-600 hover:bg-green-700 text-xs px-3 py-1"
+                          />
+                          <CustomPaymentForm
+                            projectId={selectedConversationData.projectId || 1}
+                            conversationId={selectedConversationData.id}
+                            payeeId={getOtherParticipantId(selectedConversationData)}
+                            className="text-xs px-3 py-1"
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
