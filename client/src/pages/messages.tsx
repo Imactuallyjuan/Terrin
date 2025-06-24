@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, MessageSquare, ArrowLeft, Clock, Wifi, WifiOff } from "lucide-react";
+import { Send, MessageSquare, ArrowLeft, Clock, Wifi, WifiOff, Trash2, MoreVertical } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";

@@ -717,6 +717,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/conversations/:id', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const userId = req.user.uid;
+      
+      // Get conversation to verify user has access
+      const conversation = await storage.getConversation(conversationId);
+      if (!conversation) {
+        return res.status(404).json({ message: "Conversation not found" });
+      }
+      
+      // Check if user is a participant
+      if (!conversation.participants.includes(userId)) {
+        return res.status(403).json({ message: "Not authorized to delete this conversation" });
+      }
+      
+      // Delete all messages in the conversation first
+      const messages = await storage.getConversationMessages(conversationId);
+      for (const message of messages) {
+        await storage.deleteMessage(message.id);
+      }
+      
+      // Delete the conversation
+      await storage.deleteConversation(conversationId);
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
+      res.status(500).json({ message: "Failed to delete conversation" });
+    }
+  });
+
   app.get('/api/conversations/:id/messages', verifyFirebaseToken, async (req: any, res) => {
     try {
       const conversationId = parseInt(req.params.id);

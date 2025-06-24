@@ -104,6 +104,10 @@ export interface IStorage {
   createProjectDocument(document: InsertProjectDocument): Promise<ProjectDocument>;
   getProjectDocuments(projectId: number): Promise<ProjectDocument[]>;
   deleteProjectDocument(id: number): Promise<void>;
+  
+  // Additional conversation and message operations
+  deleteConversation(id: number): Promise<void>;
+  deleteMessage(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {

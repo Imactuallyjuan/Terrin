@@ -78,12 +78,8 @@ export default function MatchTradesFirebase() {
   };
 
   const handleContactContractor = (professional) => {
-    const message = `Hi ${professional.businessName}, I found your profile on Terrin and I'm interested in your ${professional.specialties.toLowerCase()} services. Could we discuss my project?`;
-    const phoneNumber = professional.phone?.replace(/\D/g, '');
-    
-    if (phoneNumber) {
-      window.open(`tel:${phoneNumber}`, '_blank');
-    }
+    // Navigate to professional profile to use messaging system
+    window.location.href = `/professional/${professional.id}`;
   };
 
   if (loading) {

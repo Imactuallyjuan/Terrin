@@ -155,6 +155,7 @@ export default function ContractorProfile() {
       console.log('onSuccess conversation:', data);
       if (professional && data?.id && typeof data.id === 'number') {
         // Invalidate conversations cache to ensure new conversation appears
+        queryClient.removeQueries(['/api/conversations']);
         await queryClient.invalidateQueries(['/api/conversations']);
         
         toast({
