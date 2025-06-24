@@ -1,14 +1,78 @@
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
 import { signOut } from "firebase/auth";
 import { auth } from "../lib/firebase";
 import { useFirebaseAuth } from "../hooks/useFirebaseAuth";
 import { useToast } from "../hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { UserCheck, Building2, Users, Eye, ChevronDown } from "lucide-react";
 
 export default function Header() {
   const { isAuthenticated, user, userRole } = useFirebaseAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+
+  const { data: userProfile } = useQuery({
+    queryKey: ['/api/auth/user'],
+    enabled: !!user,
+  });
+
+  const updateRoleMutation = useMutation({
+    mutationFn: async (role: string) => {
+      if (!user) return;
+      const token = await user.getIdToken();
+      const response = await fetch('/api/auth/update-role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ role })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update role');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      toast({
+        title: "Role updated",
+        description: "Your role has been updated successfully.",
+      });
+    }
+  });
+
+  const handleRoleChange = (role: string) => {
+    updateRoleMutation.mutate(role);
+  };
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'homeowner': return <UserCheck className="h-4 w-4" />;
+      case 'contractor': return <Building2 className="h-4 w-4" />;
+      case 'both': return <Users className="h-4 w-4" />;
+      default: return <Eye className="h-4 w-4" />;
+    }
+  };
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'homeowner': return 'Homeowner';
+      case 'contractor': return 'Professional';
+      case 'both': return 'Both';
+      default: return 'Visitor';
+    }
+  };
 
   const handleSignOut = async () => {
     try {
