@@ -1,16 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, MessageSquare, ArrowLeft, Clock, Wifi, WifiOff, Trash2, MoreVertical } from "lucide-react";
+import { MessageSquare, ArrowLeft, Clock, Wifi, WifiOff, Trash2 } from "lucide-react";
 import PaymentButton from "@/components/payment-button";
 import CustomPaymentForm from "@/components/custom-payment-form";
+import ChatInput from "@/components/chat-input";
 import { Link, useLocation } from "wouter";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -43,7 +43,7 @@ export default function Messages() {
   const [location] = useLocation();
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
-  const [newMessage, setNewMessage] = useState("");
+
 
   // Fetch conversations
   const { data: conversations = [], isLoading: loadingConversations } = useQuery<Conversation[]>({
@@ -59,7 +59,8 @@ export default function Messages() {
     enabled: !!user,
     refetchInterval: false,
     refetchOnWindowFocus: false,
-    staleTime: 30000 // 30 seconds
+    refetchOnMount: false,
+    staleTime: 300000 // 5 minutes
   });
 
   // Fetch professionals to get names for participants
@@ -111,17 +112,16 @@ export default function Messages() {
       });
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Failed to fetch messages:', response.status, errorText);
         throw new Error(`Failed to fetch messages: ${response.status}`);
       }
-      const data = await response.json();
-      return data;
+      return response.json();
     },
     enabled: !!selectedConversation && !!user,
     retry: 1,
     refetchInterval: false,
     refetchOnWindowFocus: false,
-    staleTime: 10000 // 10 seconds
+    refetchOnMount: false,
+    staleTime: 300000 // 5 minutes
   });
 
   // Send message mutation
@@ -149,7 +149,6 @@ export default function Messages() {
       return response.json();
     },
     onSuccess: (newMessageData) => {
-      setNewMessage("");
       // Manually add message to cache to prevent refetch delay
       queryClient.setQueryData(
         ['/api/conversations', selectedConversation, 'messages'], 
@@ -158,16 +157,14 @@ export default function Messages() {
     }
   });
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !selectedConversation || sendMessageMutation.isPending) return;
+  const handleSendMessage = useCallback((content: string) => {
+    if (!selectedConversation || sendMessageMutation.isPending) return;
     
-    console.log('📤 Sending message to conversation:', selectedConversation);
     sendMessageMutation.mutate({
       conversationId: selectedConversation,
-      content: newMessage.trim()
+      content
     });
-  };
+  }, [selectedConversation, sendMessageMutation]);
 
   // Helper function to get participant name
   const getParticipantName = (conversation: Conversation) => {
@@ -458,36 +455,12 @@ export default function Messages() {
                     </div>
                   )}
 
-                  {/* Message Input - Always rendered to prevent remounting */}
-                  <form onSubmit={handleSendMessage} className="flex gap-2" key={`message-form-${selectedConversation}`}>
-                    <Textarea
-                      placeholder="Type your message..."
-                      value={newMessage}
-                      onChange={(e) => {
-                        console.log('📝 Input changed:', e.target.value.length, 'chars');
-                        setNewMessage(e.target.value);
-                      }}
-                      className="flex-1 min-h-[60px] resize-none"
-                      disabled={!selectedConversation}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleSendMessage(e);
-                        }
-                      }}
-                    />
-                    <Button
-                      type="submit"
-                      disabled={!newMessage.trim() || sendMessageMutation.isPending || !selectedConversation}
-                      className="self-end"
-                    >
-                      {sendMessageMutation.isPending ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      ) : (
-                        <Send className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </form>
+                  {/* Message Input - Isolated component */}
+                  <ChatInput
+                    onSendMessage={handleSendMessage}
+                    disabled={!selectedConversation}
+                    isLoading={sendMessageMutation.isPending}
+                  />
                 </div>
               )}
             </CardContent>
