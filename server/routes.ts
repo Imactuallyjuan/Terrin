@@ -5,9 +5,11 @@ import { WebSocketServer, WebSocket } from "ws";
 import Stripe from "stripe";
 import { storage } from "./storage";
 import { verifyFirebaseToken } from "./firebaseAuth";
-import { insertProjectSchema, insertContractorSchema } from "@shared/schema";
+import { insertProjectSchema, insertContractorSchema, users } from "@shared/schema";
 import { generateCostEstimate, generateProjectTimeline } from "./openai";
 import { z } from "zod";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 // Smart title generation function
 function generateSmartTitle(description: string): string {
@@ -96,25 +98,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const email = req.user.email;
       const { role } = req.body;
 
+      console.log(`🔄 Updating role for user ${userId} to ${role}`);
+
       if (!['visitor', 'homeowner', 'contractor', 'both'].includes(role)) {
         return res.status(400).json({ message: "Invalid role" });
       }
 
-      // Use upsertUser which now handles existing users properly
-      const user = await storage.upsertUser({
-        id: userId,
-        email: email,
-        role: role
-      });
+      // Check if user exists first
+      const existingUser = await db.select().from(users).where(eq(users.id, userId)).limit(1);
 
-      res.json({
-        id: user.id,
-        email: user.email,
-        role: user.role
-      });
+      if (existingUser.length > 0) {
+        // User exists, update role
+        console.log(`✅ User exists, updating role from ${existingUser[0].role} to ${role}`);
+        const [updatedUser] = await db
+          .update(users)
+          .set({ role: role, updatedAt: new Date() })
+          .where(eq(users.id, userId))
+          .returning();
+        
+        console.log(`✅ Role updated successfully for user ${userId}`);
+        res.json({
+          id: updatedUser.id,
+          email: updatedUser.email,
+          role: updatedUser.role
+        });
+      } else {
+        // User doesn't exist, create new user
+        console.log(`➕ Creating new user ${userId} with role ${role}`);
+        const [newUser] = await db
+          .insert(users)
+          .values({
+            id: userId,
+            email: email,
+            role: role
+          })
+          .returning();
+        
+        console.log(`✅ New user created successfully`);
+        res.json({
+          id: newUser.id,
+          email: newUser.email,
+          role: newUser.role
+        });
+      }
     } catch (error) {
-      console.error("Error updating user role:", error);
-      res.status(500).json({ message: "Failed to update role" });
+      console.error("Failed to update user role:", error);
+      res.status(500).json({ 
+        error: "Role update failed", 
+        details: error.message 
+      });
     }
   });
 
