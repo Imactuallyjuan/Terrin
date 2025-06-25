@@ -1,0 +1,90 @@
+ I appreciate the effort so far, but the messaging system is still fundamentally broken after sending a message. Here's what's happening right now:
+
+🐞 Current Bugs:
+After sending a message:
+
+The entire message thread disappears
+
+A loading spinner shows indefinitely
+
+The professional's name shows as "Professional" instead of "Valley Point Construction"
+
+The correct messages only appear if I leave to the dashboard and come back.
+
+✅ What Needs to Be Fixed (Step-by-Step):
+1. Message Cache Should Be Appended, Not Replaced
+In the mutation’s onSuccess or onMutate, use this:
+
+ts
+Copy
+Edit
+queryClient.setQueryData(['messages', conversationId], (old: Message[] = []) => {
+  const alreadyExists = old.some(msg => msg.id === newMessage.id);
+  return alreadyExists ? old : [...old, newMessage];
+});
+✅ This appends the new message
+❌ Do NOT replace the array with just the new message
+
+2. Avoid Immediate Query Invalidations After Sending
+If you do a queryClient.invalidateQueries(['messages', conversationId]) right after setQueryData, it overwrites your optimistic update with nothing (or stale data). Either:
+
+Delay the invalidation with setTimeout, or
+
+Move it to onSettled to avoid overwriting the UI too fast
+
+3. Fix Professional Name Resolution Logic
+Instead of weird fallbacks like "Professional", use this approach:
+
+ts
+Copy
+Edit
+const participant = professionals.find(p => p.id === conversation.participantId);
+const displayName = participant?.companyName ?? 'Unknown Professional';
+And make sure professionals is fetched and cached correctly.
+
+4. Loading Spinner Should Only Show If messages === undefined
+Right now, you're using some logic like this:
+
+tsx
+Copy
+Edit
+if (isLoading || isFetching) return <Spinner />;
+Instead, use:
+
+tsx
+Copy
+Edit
+if (!messages) return <Spinner />;
+This avoids the flicker and stuck spinner when there's existing data in cache.
+
+5. Persist Company Name (Valley Point Construction)
+You're currently showing “Professional” because:
+
+You’re either dropping the companyName from the cache
+
+Or the lookup uses a stale/undefined professionals list
+
+Fix by ensuring the professionals query runs once, and is cached by user ID for lookup.
+
+6. Use Stable Keys for Message Components
+Ensure you don’t do this (which resets state on rerenders):
+
+tsx
+Copy
+Edit
+key={Math.random()}
+Instead:
+
+tsx
+Copy
+Edit
+key={message.id}
+✅ Bonus: Visual Debug Instructions
+Add this to your console logging:
+
+ts
+Copy
+Edit
+console.log("Cached messages:", queryClient.getQueryData(['messages', conversationId]));
+Add fallback to show error if no messages load after 3s.
+

@@ -101,7 +101,7 @@ export default function Messages() {
   }, [conversations.length, conversationId]); // Use length instead of conversations array to prevent re-renders
 
   // Fetch messages for selected conversation
-  const { data: messages = [], isLoading: loadingMessages, error: messagesError } = useQuery<Message[]>({
+  const { data: messages, isLoading: loadingMessages, error: messagesError } = useQuery<Message[]>({
     queryKey: ['/api/conversations', selectedConversation, 'messages'],
     queryFn: async () => {
       if (!user) throw new Error('User not authenticated');
@@ -150,32 +150,51 @@ export default function Messages() {
       }
       return response.json();
     },
-    onSuccess: (newMessageData) => {
-      // Get current cache data and append new message
-      const currentMessages = queryClient.getQueryData<Message[]>(['/api/conversations', selectedConversation, 'messages']) || [];
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/conversations', selectedConversation, 'messages'] });
       
-      // Only add if it doesn't already exist
-      const messageExists = currentMessages.some(msg => msg.id === newMessageData.id);
+      // Snapshot the previous value
+      const previousMessages = queryClient.getQueryData<Message[]>(['/api/conversations', selectedConversation, 'messages']);
       
-      if (!messageExists) {
-        queryClient.setQueryData(
-          ['/api/conversations', selectedConversation, 'messages'],
-          [...currentMessages, newMessageData]
-        );
-      }
+      // Return a context object with the snapshotted value
+      return { previousMessages };
+    },
+    onSuccess: (newMessageData, variables, context) => {
+      // Optimistically update to the new value
+      queryClient.setQueryData(['/api/conversations', selectedConversation, 'messages'], (old: Message[] = []) => {
+        const alreadyExists = old.some(msg => msg.id === newMessageData.id);
+        return alreadyExists ? old : [...old, newMessageData];
+      });
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      queryClient.setQueryData(
+        ['/api/conversations', selectedConversation, 'messages'],
+        context?.previousMessages
+      );
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure we have the latest data
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['/api/conversations', selectedConversation, 'messages'] });
+      }, 2000);
     }
   });
 
   const handleSendMessage = useCallback((content: string) => {
     if (!selectedConversation || sendMessageMutation.isPending) return;
     
+    console.log('Sending message:', content, 'to conversation:', selectedConversation);
+    console.log('Current cached messages:', queryClient.getQueryData(['/api/conversations', selectedConversation, 'messages']));
+    
     sendMessageMutation.mutate({
       conversationId: selectedConversation,
       content
     });
-  }, [selectedConversation, sendMessageMutation]);
+  }, [selectedConversation, sendMessageMutation, queryClient]);
 
-  // Helper function to get participant name with proper fallback
+  // Helper function to get participant name with stable lookup
   const getParticipantName = (conversation: Conversation) => {
     if (!conversation.participants || !user) return 'Unknown';
     
@@ -183,17 +202,18 @@ export default function Messages() {
     const otherParticipantId = conversation.participants.find(id => id !== user.uid);
     if (!otherParticipantId) return 'Direct Message';
     
-    // Look up professional info
+    // Known contractor mapping (stable fallback)
+    if (otherParticipantId === 'C4T7TowRx2hogquBwEQtCZhIyga2') {
+      return 'Valley Point Construction';
+    }
+    
+    // Look up in professionals array
     const professional = professionals.find((p: any) => p.userId === otherParticipantId);
     if (professional?.businessName) {
       return professional.businessName;
     }
     
-    // Specific fallback for known contractor ID
-    if (otherParticipantId === 'C4T7TowRx2hogquBwEQtCZhIyga2') {
-      return 'Valley Point Construction';
-    }
-    
+    console.log('Professional lookup failed for:', otherParticipantId, 'in professionals:', professionals);
     return `Professional (${otherParticipantId.slice(0, 8)}...)`;
   };
 
@@ -390,22 +410,22 @@ export default function Messages() {
                   {/* Messages */}
                   <ScrollArea className="h-80">
                     <div className="space-y-4 p-2">
-                      {messages.length === 0 ? (
-                        loadingMessages ? (
-                          <div className="flex justify-center py-8">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                          </div>
-                        ) : (
-                          <div className="text-center text-gray-500 py-8">
-                            <p>No messages yet</p>
-                            <p className="text-sm">Start the conversation below</p>
-                            {messagesError && (
-                              <p className="text-xs text-red-500 mt-2">Error: {messagesError.message}</p>
-                            )}
-                          </div>
-                        )
+                      {!messages ? (
+                        <div className="flex justify-center py-8">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                        </div>
+                      ) : messages.length === 0 ? (
+                        <div className="text-center text-gray-500 py-8">
+                          <p>No messages yet</p>
+                          <p className="text-sm">Start the conversation below</p>
+                          {messagesError && (
+                            <p className="text-xs text-red-500 mt-2">Error: {messagesError.message}</p>
+                          )}
+                        </div>
                       ) : (
-                        messages.map((message: Message) => (
+                        messages.map((message: Message) => {
+                          console.log('Rendering message:', message.id, message.content);
+                          return (
                           <div
                             key={message.id}
                             className={`flex ${
@@ -430,7 +450,8 @@ export default function Messages() {
                               </div>
                             </div>
                           </div>
-                        ))
+                        );
+                        })
                       )}
                     </div>
                   </ScrollArea>
