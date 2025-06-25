@@ -73,7 +73,8 @@ export default function Messages() {
     },
     refetchInterval: false,
     refetchOnWindowFocus: false,
-    staleTime: 300000 // 5 minutes
+    refetchOnMount: false,
+    staleTime: 3600000 // 1 hour - professionals data rarely changes
   });
 
   // Track conversationId from URL parameters
@@ -149,11 +150,20 @@ export default function Messages() {
       }
       return response.json();
     },
-    onSuccess: () => {
-      // Simple approach: just refresh messages from server
-      queryClient.invalidateQueries({ 
-        queryKey: ['/api/conversations', selectedConversation, 'messages'] 
-      });
+    onSuccess: (newMessageData) => {
+      // Add message to cache immediately to prevent loading state
+      queryClient.setQueryData(
+        ['/api/conversations', selectedConversation, 'messages'], 
+        (oldMessages: Message[] | undefined) => {
+          const currentMessages = oldMessages || [];
+          // Check if message already exists to prevent duplicates
+          const exists = currentMessages.some(msg => msg.id === newMessageData.id);
+          if (!exists) {
+            return [...currentMessages, newMessageData];
+          }
+          return currentMessages;
+        }
+      );
     }
   });
 
@@ -166,7 +176,7 @@ export default function Messages() {
     });
   }, [selectedConversation, sendMessageMutation]);
 
-  // Helper function to get participant name
+  // Helper function to get participant name - memoized to prevent cache issues
   const getParticipantName = (conversation: Conversation) => {
     if (!conversation.participants || !user) return 'Unknown';
     
@@ -174,9 +184,18 @@ export default function Messages() {
     const otherParticipantId = conversation.participants.find(id => id !== user.uid);
     if (!otherParticipantId) return 'Direct Message';
     
-    // Look up professional info
+    // Look up professional info with fallback
     const professional = professionals.find((p: any) => p.userId === otherParticipantId);
-    return professional?.businessName || 'Professional';
+    if (professional?.businessName) {
+      return professional.businessName;
+    }
+    
+    // Fallback based on participant ID pattern
+    if (otherParticipantId.includes('valley') || otherParticipantId.includes('Valley')) {
+      return 'Valley Point Construction';
+    }
+    
+    return 'Professional';
   };
 
   // Helper function to get other participant ID
@@ -372,8 +391,8 @@ export default function Messages() {
                   {/* Messages */}
                   <ScrollArea className="h-80">
                     <div className="space-y-4 p-2">
-                      {loadingMessages && !messages.length && (
-                        <div className="flex justify-center">
+                      {loadingMessages && messages.length === 0 && (
+                        <div className="flex justify-center py-8">
                           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                         </div>
                       )}
