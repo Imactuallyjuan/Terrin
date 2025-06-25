@@ -83,12 +83,10 @@ export default function Messages() {
 
   // Auto-select conversation based on conversationId state or fallback to newest
   useEffect(() => {
-    console.log('🔄 useEffect triggered - conversations:', conversations.length, 'selectedConversation:', selectedConversation, 'conversationId:', conversationId);
     if (conversations.length > 0 && !selectedConversation) {
       if (conversationId) {
         const selected = conversations.find(c => c.id === Number(conversationId));
         if (selected) {
-          console.log('📌 Selecting conversation from URL:', selected.id);
           setSelectedConversation(selected.id);
           return;
         }
@@ -96,10 +94,9 @@ export default function Messages() {
       
       // Fallback to newest conversation only if none selected
       const sortedConversations = conversations.sort((a, b) => b.id - a.id);
-      console.log('📌 Fallback to newest conversation:', sortedConversations[0].id);
       setSelectedConversation(sortedConversations[0].id);
     }
-  }, [conversations, conversationId]); // Removed selectedConversation dependency to prevent loops
+  }, [conversations.length, conversationId]); // Use length instead of conversations array to prevent re-renders
 
   // Fetch messages for selected conversation
   const { data: messages = [], isLoading: loadingMessages, error: messagesError } = useQuery<Message[]>({
@@ -152,9 +149,12 @@ export default function Messages() {
       return response.json();
     },
     onSuccess: (newMessageData) => {
-      console.log('✅ Message sent successfully, clearing input field');
       setNewMessage("");
-      // Note: Query invalidation handled by WebSocket to prevent double refresh
+      // Manually add message to cache to prevent refetch delay
+      queryClient.setQueryData(
+        ['/api/conversations', selectedConversation, 'messages'], 
+        (oldMessages: Message[] = []) => [...oldMessages, newMessageData]
+      );
     }
   });
 
@@ -375,11 +375,12 @@ export default function Messages() {
                   {/* Messages */}
                   <ScrollArea className="h-80">
                     <div className="space-y-4 p-2">
-                      {loadingMessages ? (
+                      {loadingMessages && (
                         <div className="flex justify-center">
                           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                         </div>
-                      ) : messages.length === 0 ? (
+                      )}
+                      {!loadingMessages && messages.length === 0 && (
                         <div className="text-center text-gray-500 py-8">
                           <p>No messages yet</p>
                           <p className="text-sm">Start the conversation below</p>
@@ -387,7 +388,8 @@ export default function Messages() {
                             <p className="text-xs text-red-500 mt-2">Error: {messagesError.message}</p>
                           )}
                         </div>
-                      ) : (
+                      )}
+                      {!loadingMessages && messages.length > 0 && (
                         messages.map((message: Message) => (
                           <div
                             key={message.id}
@@ -456,13 +458,17 @@ export default function Messages() {
                     </div>
                   )}
 
-                  {/* Message Input */}
-                  <form onSubmit={handleSendMessage} className="flex gap-2">
+                  {/* Message Input - Always rendered to prevent remounting */}
+                  <form onSubmit={handleSendMessage} className="flex gap-2" key={`message-form-${selectedConversation}`}>
                     <Textarea
                       placeholder="Type your message..."
                       value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
+                      onChange={(e) => {
+                        console.log('📝 Input changed:', e.target.value.length, 'chars');
+                        setNewMessage(e.target.value);
+                      }}
                       className="flex-1 min-h-[60px] resize-none"
+                      disabled={!selectedConversation}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
@@ -472,7 +478,7 @@ export default function Messages() {
                     />
                     <Button
                       type="submit"
-                      disabled={!newMessage.trim() || sendMessageMutation.isPending}
+                      disabled={!newMessage.trim() || sendMessageMutation.isPending || !selectedConversation}
                       className="self-end"
                     >
                       {sendMessageMutation.isPending ? (
