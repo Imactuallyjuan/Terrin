@@ -73,8 +73,8 @@ export default function Messages() {
     },
     refetchInterval: false,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    staleTime: 3600000 // 1 hour - professionals data rarely changes
+    staleTime: 3600000, // 1 hour - professionals data rarely changes
+    retry: 3
   });
 
   // Track conversationId from URL parameters
@@ -175,7 +175,7 @@ export default function Messages() {
     });
   }, [selectedConversation, sendMessageMutation]);
 
-  // Helper function to get participant name - memoized to prevent cache issues
+  // Helper function to get participant name with proper fallback
   const getParticipantName = (conversation: Conversation) => {
     if (!conversation.participants || !user) return 'Unknown';
     
@@ -183,18 +183,18 @@ export default function Messages() {
     const otherParticipantId = conversation.participants.find(id => id !== user.uid);
     if (!otherParticipantId) return 'Direct Message';
     
-    // Look up professional info with fallback
+    // Look up professional info
     const professional = professionals.find((p: any) => p.userId === otherParticipantId);
     if (professional?.businessName) {
       return professional.businessName;
     }
     
-    // Fallback based on participant ID pattern
-    if (otherParticipantId.includes('valley') || otherParticipantId.includes('Valley')) {
+    // Specific fallback for known contractor ID
+    if (otherParticipantId === 'C4T7TowRx2hogquBwEQtCZhIyga2') {
       return 'Valley Point Construction';
     }
     
-    return 'Professional';
+    return `Professional (${otherParticipantId.slice(0, 8)}...)`;
   };
 
   // Helper function to get other participant ID
@@ -390,21 +390,21 @@ export default function Messages() {
                   {/* Messages */}
                   <ScrollArea className="h-80">
                     <div className="space-y-4 p-2">
-                      {loadingMessages && messages.length === 0 && (
-                        <div className="flex justify-center py-8">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                        </div>
-                      )}
-                      {!loadingMessages && messages.length === 0 && (
-                        <div className="text-center text-gray-500 py-8">
-                          <p>No messages yet</p>
-                          <p className="text-sm">Start the conversation below</p>
-                          {messagesError && (
-                            <p className="text-xs text-red-500 mt-2">Error: {messagesError.message}</p>
-                          )}
-                        </div>
-                      )}
-                      {messages.length > 0 && (
+                      {messages.length === 0 ? (
+                        loadingMessages ? (
+                          <div className="flex justify-center py-8">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                          </div>
+                        ) : (
+                          <div className="text-center text-gray-500 py-8">
+                            <p>No messages yet</p>
+                            <p className="text-sm">Start the conversation below</p>
+                            {messagesError && (
+                              <p className="text-xs text-red-500 mt-2">Error: {messagesError.message}</p>
+                            )}
+                          </div>
+                        )
+                      ) : (
                         messages.map((message: Message) => (
                           <div
                             key={message.id}
