@@ -104,8 +104,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid role" });
       }
 
-      // Check if user exists first
-      const existingUser = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      // Check if user exists first by both ID and email to handle different ID formats
+      const existingUserById = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      const existingUserByEmail = await db.select().from(users).where(eq(users.email, email)).limit(1);
+      
+      const existingUser = existingUserById.length > 0 ? existingUserById : existingUserByEmail;
 
       if (existingUser.length > 0) {
         // User exists, update role
@@ -113,7 +116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const [updatedUser] = await db
           .update(users)
           .set({ role: role, updatedAt: new Date() })
-          .where(eq(users.id, userId))
+          .where(eq(users.email, email))
           .returning();
         
         console.log(`✅ Role updated successfully for user ${userId}`);
