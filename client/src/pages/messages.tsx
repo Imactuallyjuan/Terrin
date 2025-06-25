@@ -151,19 +151,18 @@ export default function Messages() {
       return response.json();
     },
     onSuccess: (newMessageData) => {
-      // Add message to cache immediately to prevent loading state
-      queryClient.setQueryData(
-        ['/api/conversations', selectedConversation, 'messages'], 
-        (oldMessages: Message[] | undefined) => {
-          const currentMessages = oldMessages || [];
-          // Check if message already exists to prevent duplicates
-          const exists = currentMessages.some(msg => msg.id === newMessageData.id);
-          if (!exists) {
-            return [...currentMessages, newMessageData];
-          }
-          return currentMessages;
-        }
-      );
+      // Get current cache data and append new message
+      const currentMessages = queryClient.getQueryData<Message[]>(['/api/conversations', selectedConversation, 'messages']) || [];
+      
+      // Only add if it doesn't already exist
+      const messageExists = currentMessages.some(msg => msg.id === newMessageData.id);
+      
+      if (!messageExists) {
+        queryClient.setQueryData(
+          ['/api/conversations', selectedConversation, 'messages'],
+          [...currentMessages, newMessageData]
+        );
+      }
     }
   });
 
