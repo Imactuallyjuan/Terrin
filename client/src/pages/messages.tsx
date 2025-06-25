@@ -69,7 +69,10 @@ export default function Messages() {
       const response = await fetch('/api/professionals');
       if (!response.ok) throw new Error('Failed to fetch professionals');
       return response.json();
-    }
+    },
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    staleTime: 300000 // 5 minutes
   });
 
   // Track conversationId from URL parameters
@@ -80,10 +83,12 @@ export default function Messages() {
 
   // Auto-select conversation based on conversationId state or fallback to newest
   useEffect(() => {
+    console.log('🔄 useEffect triggered - conversations:', conversations.length, 'selectedConversation:', selectedConversation, 'conversationId:', conversationId);
     if (conversations.length > 0 && !selectedConversation) {
       if (conversationId) {
         const selected = conversations.find(c => c.id === Number(conversationId));
         if (selected) {
+          console.log('📌 Selecting conversation from URL:', selected.id);
           setSelectedConversation(selected.id);
           return;
         }
@@ -91,6 +96,7 @@ export default function Messages() {
       
       // Fallback to newest conversation only if none selected
       const sortedConversations = conversations.sort((a, b) => b.id - a.id);
+      console.log('📌 Fallback to newest conversation:', sortedConversations[0].id);
       setSelectedConversation(sortedConversations[0].id);
     }
   }, [conversations, conversationId]); // Removed selectedConversation dependency to prevent loops
@@ -146,21 +152,17 @@ export default function Messages() {
       return response.json();
     },
     onSuccess: (newMessageData) => {
-      // Only invalidate messages for this specific conversation
-      queryClient.invalidateQueries({ queryKey: ['/api/conversations', selectedConversation, 'messages'] });
+      console.log('✅ Message sent successfully, clearing input field');
       setNewMessage("");
-      
-      // Send WebSocket message for real-time delivery
-      if (selectedConversation) {
-        sendMessage(selectedConversation, newMessageData);
-      }
+      // Note: Query invalidation handled by WebSocket to prevent double refresh
     }
   });
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedConversation) return;
+    if (!newMessage.trim() || !selectedConversation || sendMessageMutation.isPending) return;
     
+    console.log('📤 Sending message to conversation:', selectedConversation);
     sendMessageMutation.mutate({
       conversationId: selectedConversation,
       content: newMessage.trim()
@@ -203,8 +205,8 @@ export default function Messages() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.removeQueries(['/api/conversations']);
-      queryClient.invalidateQueries(['/api/conversations']);
+      console.log('🗑️ Conversation deleted, refreshing list');
+      queryClient.invalidateQueries({ queryKey: ['/api/conversations'] });
       setSelectedConversation(null);
       setConversationId(null);
     }
