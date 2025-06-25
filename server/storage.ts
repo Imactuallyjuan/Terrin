@@ -131,18 +131,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
+    try {
+      // First try to get existing user
+      const existingUser = await this.getUser(userData.id);
+      
+      if (existingUser) {
+        // User exists, update their data
+        const [user] = await db
+          .update(users)
+          .set({
+            ...userData,
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, userData.id))
+          .returning();
+        return user;
+      } else {
+        // User doesn't exist, insert new user
+        const [user] = await db
+          .insert(users)
+          .values(userData)
+          .returning();
+        return user;
+      }
+    } catch (error) {
+      console.error('Error upserting user:', error);
+      throw error;
+    }
   }
 
   // Project operations
