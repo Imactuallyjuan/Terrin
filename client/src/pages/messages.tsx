@@ -56,7 +56,10 @@ export default function Messages() {
       if (!response.ok) throw new Error('Failed to fetch conversations');
       return response.json();
     },
-    enabled: !!user
+    enabled: !!user,
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    staleTime: 30000 // 30 seconds
   });
 
   // Fetch professionals to get names for participants
@@ -77,24 +80,20 @@ export default function Messages() {
 
   // Auto-select conversation based on conversationId state or fallback to newest
   useEffect(() => {
-    if (conversations.length > 0) {
+    if (conversations.length > 0 && !selectedConversation) {
       if (conversationId) {
         const selected = conversations.find(c => c.id === Number(conversationId));
-        if (selected && selectedConversation !== selected.id) {
-          console.log('Selecting conversation from URL param:', selected.id);
+        if (selected) {
           setSelectedConversation(selected.id);
           return;
         }
       }
       
-      // Only fallback if conversationId is truly null and no conversation is selected
-      if (!conversationId && !selectedConversation) {
-        const sortedConversations = conversations.sort((a, b) => b.id - a.id);
-        console.log('Fallback to newest conversation:', sortedConversations[0].id);
-        setSelectedConversation(sortedConversations[0].id);
-      }
+      // Fallback to newest conversation only if none selected
+      const sortedConversations = conversations.sort((a, b) => b.id - a.id);
+      setSelectedConversation(sortedConversations[0].id);
     }
-  }, [conversations, conversationId, selectedConversation]);
+  }, [conversations, conversationId]); // Removed selectedConversation dependency to prevent loops
 
   // Fetch messages for selected conversation
   const { data: messages = [], isLoading: loadingMessages, error: messagesError } = useQuery<Message[]>({
@@ -113,11 +112,13 @@ export default function Messages() {
         throw new Error(`Failed to fetch messages: ${response.status}`);
       }
       const data = await response.json();
-      console.log('Messages fetched successfully:', data.length, 'messages');
       return data;
     },
     enabled: !!selectedConversation && !!user,
-    retry: 1
+    retry: 1,
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    staleTime: 10000 // 10 seconds
   });
 
   // Send message mutation
@@ -145,8 +146,8 @@ export default function Messages() {
       return response.json();
     },
     onSuccess: (newMessageData) => {
+      // Only invalidate messages for this specific conversation
       queryClient.invalidateQueries({ queryKey: ['/api/conversations', selectedConversation, 'messages'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/conversations'] });
       setNewMessage("");
       
       // Send WebSocket message for real-time delivery
