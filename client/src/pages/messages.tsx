@@ -151,7 +151,7 @@ export default function Messages() {
       return response.json();
     },
     onSuccess: (newMessage) => {
-      queryClient.setQueryData(['messages', selectedConversation], (oldMessages: any[] = []) => {
+      queryClient.setQueryData(['/api/conversations', selectedConversation, 'messages'], (oldMessages: any[] = []) => {
         // Only add if it's not already in the cache
         const alreadyExists = oldMessages.some((m) => m.id === newMessage.id);
         if (alreadyExists) return oldMessages;
