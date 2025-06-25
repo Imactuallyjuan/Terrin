@@ -117,11 +117,11 @@ export default function Messages() {
       return response.json();
     },
     enabled: !!selectedConversation && !!user,
-    retry: 1,
+    retry: 2,
     refetchInterval: false,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    staleTime: 300000 // 5 minutes
+    refetchOnMount: true, // Re-enable mount refresh to fix loading spinner issue
+    staleTime: 60000 // Reduce to 1 minute for better real-time updates
   });
 
   // Send message mutation
@@ -152,7 +152,10 @@ export default function Messages() {
       // Manually add message to cache to prevent refetch delay
       queryClient.setQueryData(
         ['/api/conversations', selectedConversation, 'messages'], 
-        (oldMessages: Message[] = []) => [...oldMessages, newMessageData]
+        (oldMessages: Message[] | undefined) => {
+          if (!oldMessages) return [newMessageData];
+          return [...oldMessages, newMessageData];
+        }
       );
     }
   });

@@ -38,8 +38,7 @@ export function useWebSocket() {
         if (data.type === 'auth_success') {
           console.log('WebSocket authenticated for user:', data.userId);
         } else if (data.type === 'new_message') {
-          // Only invalidate messages for the specific conversation
-          console.log('📨 WebSocket: New message received for conversation:', data.conversationId);
+          // Only invalidate messages for the specific conversation to refresh from server
           queryClient.invalidateQueries({ 
             queryKey: ['/api/conversations', data.conversationId, 'messages'] 
           });
