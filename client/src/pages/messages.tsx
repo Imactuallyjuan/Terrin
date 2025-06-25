@@ -120,8 +120,9 @@ export default function Messages() {
     retry: 2,
     refetchInterval: false,
     refetchOnWindowFocus: false,
-    refetchOnMount: true, // Re-enable mount refresh to fix loading spinner issue
-    staleTime: 60000 // Reduce to 1 minute for better real-time updates
+    refetchOnMount: true,
+    staleTime: 300000, // 5 minutes - rely on optimistic updates and WebSocket
+    gcTime: 600000 // Keep cached data for 10 minutes
   });
 
   // Send message mutation
@@ -149,14 +150,22 @@ export default function Messages() {
       return response.json();
     },
     onSuccess: (newMessageData) => {
-      // Manually add message to cache to prevent refetch delay
+      // Optimistic update: append new message to existing cache
       queryClient.setQueryData(
         ['/api/conversations', selectedConversation, 'messages'], 
         (oldMessages: Message[] | undefined) => {
-          if (!oldMessages) return [newMessageData];
-          return [...oldMessages, newMessageData];
+          const currentMessages = oldMessages || [];
+          return [...currentMessages, newMessageData];
         }
       );
+    },
+    onSettled: () => {
+      // Only refresh from server after a delay to ensure message is saved
+      setTimeout(() => {
+        queryClient.invalidateQueries({ 
+          queryKey: ['/api/conversations', selectedConversation, 'messages'] 
+        });
+      }, 1000);
     }
   });
 
@@ -375,7 +384,7 @@ export default function Messages() {
                   {/* Messages */}
                   <ScrollArea className="h-80">
                     <div className="space-y-4 p-2">
-                      {loadingMessages && (
+                      {loadingMessages && !messages.length && (
                         <div className="flex justify-center">
                           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                         </div>
@@ -389,7 +398,7 @@ export default function Messages() {
                           )}
                         </div>
                       )}
-                      {!loadingMessages && messages.length > 0 && (
+                      {messages.length > 0 && (
                         messages.map((message: Message) => (
                           <div
                             key={message.id}
