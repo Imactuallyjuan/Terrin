@@ -38,12 +38,10 @@ export function useWebSocket() {
         if (data.type === 'auth_success') {
           console.log('WebSocket authenticated for user:', data.userId);
         } else if (data.type === 'new_message') {
-          // Only refresh if this is a message from another user (not our own optimistic update)
-          if (data.messageData && data.messageData.senderId !== user?.uid) {
-            queryClient.invalidateQueries({ 
-              queryKey: ['/api/conversations', data.conversationId, 'messages'] 
-            });
-          }
+          // Refresh messages when new message received via WebSocket
+          queryClient.invalidateQueries({ 
+            queryKey: ['/api/conversations', data.conversationId, 'messages'] 
+          });
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);

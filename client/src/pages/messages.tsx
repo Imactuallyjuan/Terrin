@@ -121,8 +121,8 @@ export default function Messages() {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
-    staleTime: 300000, // 5 minutes - rely on optimistic updates and WebSocket
-    gcTime: 600000 // Keep cached data for 10 minutes
+    staleTime: 30000, // 30 seconds
+    gcTime: 300000 // Keep cached data for 5 minutes
   });
 
   // Send message mutation
@@ -149,23 +149,11 @@ export default function Messages() {
       }
       return response.json();
     },
-    onSuccess: (newMessageData) => {
-      // Optimistic update: append new message to existing cache
-      queryClient.setQueryData(
-        ['/api/conversations', selectedConversation, 'messages'], 
-        (oldMessages: Message[] | undefined) => {
-          const currentMessages = oldMessages || [];
-          return [...currentMessages, newMessageData];
-        }
-      );
-    },
-    onSettled: () => {
-      // Only refresh from server after a delay to ensure message is saved
-      setTimeout(() => {
-        queryClient.invalidateQueries({ 
-          queryKey: ['/api/conversations', selectedConversation, 'messages'] 
-        });
-      }, 1000);
+    onSuccess: () => {
+      // Simple approach: just refresh messages from server
+      queryClient.invalidateQueries({ 
+        queryKey: ['/api/conversations', selectedConversation, 'messages'] 
+      });
     }
   });
 
