@@ -102,7 +102,7 @@ export default function Messages() {
 
   // Fetch messages for selected conversation
   const { data: messages, isLoading: loadingMessages, error: messagesError } = useQuery<Message[]>({
-    queryKey: ['/api/conversations', selectedConversation, 'messages'],
+    queryKey: ['messages', selectedConversation],
     queryFn: async () => {
       if (!user) throw new Error('User not authenticated');
       const token = await user.getIdToken();
@@ -151,9 +151,10 @@ export default function Messages() {
       return response.json();
     },
     onSuccess: (newMessage) => {
-      queryClient.setQueryData(['/api/conversations', selectedConversation, 'messages'], (oldMessages: Message[] = []) => {
-        const exists = oldMessages.some(m => m.id === newMessage.id);
-        if (exists) return oldMessages;
+      queryClient.setQueryData(['messages', selectedConversation], (oldMessages: any[] = []) => {
+        // Only add if it's not already in the cache
+        const alreadyExists = oldMessages.some((m) => m.id === newMessage.id);
+        if (alreadyExists) return oldMessages;
         return [...oldMessages, newMessage];
       });
     }
