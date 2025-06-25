@@ -150,49 +150,23 @@ export default function Messages() {
       }
       return response.json();
     },
-    onMutate: async (variables) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['/api/conversations', selectedConversation, 'messages'] });
-      
-      // Snapshot the previous value
-      const previousMessages = queryClient.getQueryData<Message[]>(['/api/conversations', selectedConversation, 'messages']);
-      
-      // Return a context object with the snapshotted value
-      return { previousMessages };
-    },
-    onSuccess: (newMessageData, variables, context) => {
-      // Optimistically update to the new value
-      queryClient.setQueryData(['/api/conversations', selectedConversation, 'messages'], (old: Message[] = []) => {
-        const alreadyExists = old.some(msg => msg.id === newMessageData.id);
-        return alreadyExists ? old : [...old, newMessageData];
+    onSuccess: (newMessage) => {
+      queryClient.setQueryData(['/api/conversations', selectedConversation, 'messages'], (oldMessages: Message[] = []) => {
+        const exists = oldMessages.some(m => m.id === newMessage.id);
+        if (exists) return oldMessages;
+        return [...oldMessages, newMessage];
       });
-    },
-    onError: (err, variables, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      queryClient.setQueryData(
-        ['/api/conversations', selectedConversation, 'messages'],
-        context?.previousMessages
-      );
-    },
-    onSettled: () => {
-      // Always refetch after error or success to ensure we have the latest data
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['/api/conversations', selectedConversation, 'messages'] });
-      }, 2000);
     }
   });
 
   const handleSendMessage = useCallback((content: string) => {
     if (!selectedConversation || sendMessageMutation.isPending) return;
     
-    console.log('Sending message:', content, 'to conversation:', selectedConversation);
-    console.log('Current cached messages:', queryClient.getQueryData(['/api/conversations', selectedConversation, 'messages']));
-    
     sendMessageMutation.mutate({
       conversationId: selectedConversation,
       content
     });
-  }, [selectedConversation, sendMessageMutation, queryClient]);
+  }, [selectedConversation, sendMessageMutation]);
 
   // Helper function to get participant name with stable lookup
   const getParticipantName = (conversation: Conversation) => {
@@ -213,7 +187,7 @@ export default function Messages() {
       return professional.businessName;
     }
     
-    console.log('Professional lookup failed for:', otherParticipantId, 'in professionals:', professionals);
+
     return `Professional (${otherParticipantId.slice(0, 8)}...)`;
   };
 
@@ -423,9 +397,7 @@ export default function Messages() {
                           )}
                         </div>
                       ) : (
-                        messages.map((message: Message) => {
-                          console.log('Rendering message:', message.id, message.content);
-                          return (
+                        messages.map((message: Message) => (
                           <div
                             key={message.id}
                             className={`flex ${
@@ -450,8 +422,7 @@ export default function Messages() {
                               </div>
                             </div>
                           </div>
-                        );
-                        })
+                        ))
                       )}
                     </div>
                   </ScrollArea>
