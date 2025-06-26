@@ -11,7 +11,7 @@ import { insertProjectSchema } from "@shared/schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { Send } from "lucide-react";
 import { z } from "zod";
 
@@ -23,7 +23,7 @@ const formSchema = insertProjectSchema.extend({
 
 export default function PostProject() {
   const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
+  const { user } = useFirebaseAuth();
   const queryClient = useQueryClient();
 
   const [customBudget, setCustomBudget] = useState('');
@@ -90,7 +90,7 @@ export default function PostProject() {
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     console.log('Form submitted with data:', data);
-    console.log('Is authenticated:', isAuthenticated);
+    console.log('User authenticated:', !!user);
     console.log('Form errors:', form.formState.errors);
     
     console.log('Triggering project creation...');

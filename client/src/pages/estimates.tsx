@@ -13,7 +13,7 @@ export default function Estimates() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const { data: estimates = [], isLoading } = useQuery({
+  const { data: estimates = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/estimates"],
     enabled: !!user,
   });

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { useQuery } from '@tanstack/react-query';
 import { CreditCard, ExternalLink, Loader2, DollarSign } from 'lucide-react';
 
@@ -14,7 +14,7 @@ interface StripeOnboardingButtonProps {
 export default function StripeOnboardingButton({ contractorId, className }: StripeOnboardingButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [dashboardLoading, setDashboardLoading] = useState(false);
-  const { user } = useAuth();
+  const { user } = useFirebaseAuth();
   const { toast } = useToast();
 
   // Get contractor data to check Stripe status

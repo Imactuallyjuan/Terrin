@@ -19,7 +19,6 @@ import {
   Filter,
   MessageSquare
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/header";
 import { Link, useLocation } from "wouter";
@@ -27,7 +26,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
 export default function FindProfessionals() {
-  const { user } = useAuth();
+  const { user } = useFirebaseAuth();
   const { user: firebaseUser } = useFirebaseAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
