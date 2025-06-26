@@ -4,18 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, DollarSign, Clock, MapPin, Trash2 } from "lucide-react";
 import { Link } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function Estimates() {
-  const { user } = useAuth();
+  const { user } = useFirebaseAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
   const { data: estimates = [], isLoading } = useQuery({
-    queryKey: ["/api/estimates", user?.uid],
-    enabled: !!user?.uid,
+    queryKey: ["/api/estimates"],
+    enabled: !!user,
   });
 
   const deleteEstimateMutation = useMutation({
@@ -51,7 +51,7 @@ export default function Estimates() {
         return `${type}${location}`;
       }
     } catch (error) {
-      // If parsing fails, fall back to generic name
+      console.log('Error parsing estimate inputData:', error);
     }
     return `Construction Estimate`;
   };
@@ -205,7 +205,7 @@ export default function Estimates() {
                       </div>
                       
                       {/* Trade Breakdowns */}
-                      {estimate.tradeBreakdowns && Object.keys(estimate.tradeBreakdowns).length > 0 && (
+                      {estimate.tradeBreakdowns && typeof estimate.tradeBreakdowns === 'object' && Object.keys(estimate.tradeBreakdowns).length > 0 && (
                         <div className="mt-6 pt-4 border-t border-slate-200">
                           <h4 className="text-sm font-semibold text-slate-700 mb-3">Trade-Specific Costs</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
@@ -252,15 +252,22 @@ export default function Estimates() {
                                   <span className="ml-2 font-medium">{inputData.squareFootage} sq ft</span>
                                 </div>
                               )}
+                              {inputData.description && (
+                                <div className="text-sm">
+                                  <span className="text-slate-600">Details:</span>
+                                  <span className="ml-2">{inputData.description.substring(0, 100)}...</span>
+                                </div>
+                              )}
                             </div>
                           );
-                        } catch {
+                        } catch (error) {
+                          console.log('Error parsing inputData for metadata:', error);
                           return null;
                         }
                       })()}
 
                       {/* AI Analysis Preview */}
-                      {estimate.aiAnalysis && estimate.aiAnalysis.factors && (
+                      {estimate.aiAnalysis && typeof estimate.aiAnalysis === 'object' && estimate.aiAnalysis.factors && Array.isArray(estimate.aiAnalysis.factors) && (
                         <div className="mt-4 p-3 bg-slate-50 rounded-lg">
                           <h4 className="text-sm font-medium text-slate-900 mb-2">Key Factors</h4>
                           <ul className="text-xs text-slate-600 space-y-1">
