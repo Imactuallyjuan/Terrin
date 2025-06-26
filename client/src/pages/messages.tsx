@@ -13,7 +13,7 @@ import CustomPaymentForm from "@/components/custom-payment-form";
 import ChatInput from "@/components/chat-input";
 import { Link, useLocation } from "wouter";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
-import { useWebSocket } from "@/hooks/useWebSocket";
+
 import { queryClient } from "@/lib/queryClient";
 import { formatDistanceToNow } from "date-fns";
 
@@ -39,10 +39,9 @@ interface Message {
 
 export default function Messages() {
   const { user } = useFirebaseAuth();
-  const { isConnected, sendMessage } = useWebSocket();
-  const [location] = useLocation();
-  const [conversationId, setConversationId] = useState<string | null>(null);
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
+  const location = useLocation();
+  const queryClient = useQueryClient();
 
 
   // Fetch conversations
@@ -77,11 +76,9 @@ export default function Messages() {
     retry: 3
   });
 
-  // Track conversationId from URL parameters
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    setConversationId(params.get("conversation"));
-  }, [location.search]);
+  // Extract conversationId from URL parameters
+  const params = new URLSearchParams(location[1] || '');
+  const conversationId = params.get("conversation");
 
   // Auto-select conversation based on conversationId state or fallback to newest
   useEffect(() => {
