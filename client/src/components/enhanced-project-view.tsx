@@ -178,48 +178,11 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
     queryKey: [`/api/projects/${project.id}/milestones`],
   });
 
-  const [photoOffset, setPhotoOffset] = useState(0);
-  const [allPhotos, setAllPhotos] = useState<ProjectPhoto[]>([]);
-  const [hasMorePhotos, setHasMorePhotos] = useState(true);
-  const [loadingPhotos, setLoadingPhotos] = useState(false);
-
-  // Load 4 photos for preview
-  const loadPhotos = async (offset: number = 0, append: boolean = false) => {
-    if (loadingPhotos) return;
-    
-    setLoadingPhotos(true);
-    try {
-      const response = await fetch(`/api/projects/${project.id}/photos?offset=${offset}&limit=4`, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        const newPhotos = await response.json();
-        if (newPhotos.length === 0) {
-          setHasMorePhotos(false);
-        } else {
-          setAllPhotos(prev => append ? [...prev, ...newPhotos] : newPhotos);
-          if (append) {
-            setPhotoOffset(offset + 4);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error loading photos:', error);
-    } finally {
-      setLoadingPhotos(false);
-    }
-  };
-
-  // Initial photo load
-  useEffect(() => {
-    loadPhotos(0, false);
-  }, [project.id]);
-
-  // Use allPhotos for rendering
-  const photos = allPhotos;
+  // Photos query using React Query for consistency
+  const { data: photos = [], isLoading: photosLoading } = useQuery<ProjectPhoto[]>({
+    queryKey: [`/api/projects/${project.id}/photos`],
+    staleTime: 30000, // Cache for 30 seconds
+  });
 
   const { data: documents = [] } = useQuery<ProjectDocument[]>({
     queryKey: [`/api/projects/${project.id}/documents`],
