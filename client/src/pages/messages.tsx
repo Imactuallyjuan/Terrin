@@ -40,7 +40,7 @@ interface Message {
 export default function Messages() {
   const { user } = useFirebaseAuth();
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
-  const location = useLocation();
+  const [location] = useLocation();
   const queryClient = useQueryClient();
 
 
@@ -77,7 +77,7 @@ export default function Messages() {
   });
 
   // Extract conversationId from URL parameters
-  const params = new URLSearchParams(location[1] || '');
+  const params = new URLSearchParams(location.includes('?') ? location.split('?')[1] : '');
   const conversationId = params.get("conversation");
 
   // Auto-select conversation based on conversationId state or fallback to newest
@@ -255,17 +255,10 @@ export default function Messages() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {isConnected ? (
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
-                <Wifi className="h-3 w-3 mr-1" />
-                Live
-              </Badge>
-            ) : (
-              <Badge variant="secondary" className="bg-gray-100 text-gray-600">
-                <WifiOff className="h-3 w-3 mr-1" />
-                Offline
-              </Badge>
-            )}
+            <Badge variant="secondary" className="bg-green-100 text-green-800">
+              <Wifi className="h-3 w-3 mr-1" />
+              Live
+            </Badge>
           </div>
         </div>
 
