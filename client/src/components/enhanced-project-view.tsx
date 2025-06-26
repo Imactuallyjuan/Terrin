@@ -275,10 +275,7 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
       return await apiRequest('POST', `/api/projects/${project.id}/photos`, photoData);
     },
     onSuccess: () => {
-      // Refresh photo list after successful upload
-      loadPhotos(0, false);
-      setPhotoOffset(0);
-      setHasMorePhotos(true);
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${project.id}/photos`] });
       
       setNewPhoto({
         fileName: '',

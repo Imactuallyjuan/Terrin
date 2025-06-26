@@ -18,12 +18,12 @@ export default function StripeOnboardingButton({ contractorId, className }: Stri
   const { toast } = useToast();
 
   // Get contractor data to check Stripe status
-  const { data: contractors } = useQuery({
+  const { data: contractors } = useQuery<any[]>({
     queryKey: ['/api/contractors/user'],
     enabled: !!user,
   });
 
-  const contractor = contractors?.[0];
+  const contractor = Array.isArray(contractors) ? contractors[0] : null;
   const hasStripeAccount = contractor?.stripeAccountId;
 
   const handleOnboarding = async () => {

@@ -272,18 +272,32 @@ export default function PostProject() {
                 />
 
                 <div className="flex justify-center">
-                  <Button
-                    type="submit"
-                    className="bg-blue-600 text-white hover:bg-blue-700 flex items-center"
-                    disabled={createProjectMutation.isPending}
-                  >
-                    {createProjectMutation.isPending ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    ) : (
-                      <Send className="mr-2 h-4 w-4" />
-                    )}
-                    Post Project
-                  </Button>
+                  {!user ? (
+                    <div className="text-center">
+                      <p className="text-gray-600 mb-4">Please sign in to post a project</p>
+                      <Button asChild className="bg-blue-600 text-white hover:bg-blue-700">
+                        <Link href="/auth">Sign In</Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      type="submit"
+                      className="bg-blue-600 text-white hover:bg-blue-700 flex items-center"
+                      disabled={createProjectMutation.isPending}
+                    >
+                      {createProjectMutation.isPending ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Posting...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="mr-2 h-4 w-4" />
+                          Post Project
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </div>
               </form>
             </Form>
