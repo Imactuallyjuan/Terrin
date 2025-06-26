@@ -28,6 +28,13 @@ export function useWebSocket() {
         return;
       }
       
+      // Additional validation for port
+      const portMatch = host.match(/:(\d+)$/);
+      if (!portMatch || portMatch[1] === 'undefined') {
+        console.warn('Invalid port detected in host:', host, '- skipping WebSocket connection');
+        return;
+      }
+      
       const wsUrl = `${protocol}//${host}/ws`;
       
       // Additional URL validation
