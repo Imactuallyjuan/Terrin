@@ -17,11 +17,25 @@ export function useWebSocket() {
   useEffect(() => {
     if (!user) return;
 
-    // Connect to WebSocket server with proper error handling
+    // Connect to WebSocket server with comprehensive validation
     try {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const host = window.location.host || 'localhost:5000';
+      const host = window.location.host;
+      
+      // Validate host and prevent invalid connections
+      if (!host || host.includes('undefined') || host.includes('localhost:undefined')) {
+        console.warn('Invalid host detected:', host, '- skipping WebSocket connection');
+        return;
+      }
+      
       const wsUrl = `${protocol}//${host}/ws`;
+      
+      // Additional URL validation
+      if (wsUrl.includes('undefined') || wsUrl.includes('localhost:undefined')) {
+        console.warn('Invalid WebSocket URL detected:', wsUrl, '- skipping connection');
+        return;
+      }
+      
       console.log('WebSocket connecting to:', wsUrl);
       ws.current = new WebSocket(wsUrl);
     } catch (error) {
