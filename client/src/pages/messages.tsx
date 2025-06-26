@@ -108,7 +108,6 @@ export default function Messages() {
       const token = await user.getIdToken();
       if (!token) throw new Error('Failed to get auth token');
       
-      console.log('🔍 Fetching messages for conversation:', selectedConversation);
       const response = await fetch(`/api/conversations/${selectedConversation}/messages`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -116,9 +115,7 @@ export default function Messages() {
         const errorText = await response.text();
         throw new Error(`Failed to fetch messages: ${response.status}`);
       }
-      const data = await response.json();
-      console.log('🔍 Fetched messages from server:', data.length, 'messages');
-      return data;
+      return response.json();
     },
     enabled: !!selectedConversation && !!user,
     retry: 2,
@@ -154,25 +151,10 @@ export default function Messages() {
       return response.json();
     },
     onSuccess: (newMessage) => {
-      console.log('🔥 onSuccess - New message received:', newMessage);
-      console.log('🔥 onSuccess - Using query key:', ['messages', selectedConversation]);
-      
-      queryClient.setQueryData(['messages', selectedConversation], (oldMessages) => {
-        console.log('🔥 setQueryData - Old messages from cache:', oldMessages);
-        console.log('🔥 setQueryData - Old messages is array?', Array.isArray(oldMessages));
-        console.log('🔥 setQueryData - Old messages length:', oldMessages?.length || 0);
-        
-        const safeOldMessages = Array.isArray(oldMessages) ? oldMessages : [];
-        const exists = safeOldMessages.some((m) => m.id === newMessage.id);
-        
-        if (exists) {
-          console.log('🔥 setQueryData - Message already exists, returning old messages');
-          return safeOldMessages;
-        }
-        
-        const updatedMessages = [...safeOldMessages, newMessage];
-        console.log('🔥 setQueryData - Returning updated messages:', updatedMessages.length, 'total');
-        return updatedMessages;
+      queryClient.setQueryData(['messages', selectedConversation], (oldMessages: Message[] = []) => {
+        // Append new message ONLY if it doesn't already exist
+        const exists = oldMessages.some(msg => msg.id === newMessage.id);
+        return exists ? oldMessages : [...oldMessages, newMessage];
       });
     }
   });
