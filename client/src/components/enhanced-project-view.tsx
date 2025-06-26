@@ -1463,16 +1463,21 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                 <CardTitle>Project Photos</CardTitle>
               </CardHeader>
               <CardContent>
-                {photos.length === 0 ? (
+                {photosLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading photos...</p>
+                  </div>
+                ) : photos.length === 0 ? (
                   <p className="text-muted-foreground text-center py-4">No photos uploaded yet.</p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {photos.map((photo: ProjectPhoto) => (
+                    {Array.isArray(photos) && photos.map((photo: any) => (
                       <div key={photo.id} className="border rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-shadow">
                         <div className="bg-gray-100 h-48 relative overflow-hidden group">
                           <img
                             src={photo.filePath}
-                            alt={photo.caption || photo.fileName}
+                            alt={photo.caption || photo.fileName || 'Project photo'}
                             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
@@ -1497,7 +1502,7 @@ export default function EnhancedProjectView({ project }: EnhancedProjectViewProp
                             <Badge variant="outline">{photo.category}</Badge>
                             <div className="flex items-center space-x-2">
                               <span className="text-sm text-muted-foreground">
-                                {new Date(photo.uploadedAt).toLocaleDateString()}
+                                {photo.uploadedAt ? new Date(photo.uploadedAt).toLocaleDateString() : 'Unknown date'}
                               </span>
                               <Button
                                 variant="ghost"
