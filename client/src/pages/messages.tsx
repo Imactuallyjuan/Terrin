@@ -214,7 +214,6 @@ export default function Messages() {
       console.log('🗑️ Conversation deleted, refreshing list');
       queryClient.invalidateQueries({ queryKey: ['/api/conversations'] });
       setSelectedConversation(null);
-      setConversationId(null);
     }
   });
 
