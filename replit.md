@@ -358,6 +358,12 @@ Changelog:
   * Created comprehensive Settings page with role selection, account info, and clear role descriptions
   * Fixed missing role column in database - added role field to users table and set user to 'both' role
   * Role switching now works properly in Settings page
+- June 26, 2025. Critical Messaging System & WebSocket Connection Fixes
+  * Fixed fundamental messaging cache bug where new messages replaced entire conversation thread
+  * Resolved WebSocket connection issues with undefined port causing 'wss://localhost:undefined' errors
+  * Updated cache handling to properly append messages using consistent query keys ['messages', conversationId]
+  * Enhanced WebSocket error handling and connection logging for stable real-time messaging
+  * Messages now maintain full conversation history when sending without requiring page refresh
 ```
 
 ## User Preferences

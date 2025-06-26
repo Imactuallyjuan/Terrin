@@ -17,18 +17,28 @@ export function useWebSocket() {
   useEffect(() => {
     if (!user) return;
 
-    // Connect to WebSocket server
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
-    ws.current = new WebSocket(wsUrl);
+    // Connect to WebSocket server with proper error handling
+    try {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const host = window.location.host || 'localhost:5000';
+      const wsUrl = `${protocol}//${host}/ws`;
+      console.log('WebSocket connecting to:', wsUrl);
+      ws.current = new WebSocket(wsUrl);
+    } catch (error) {
+      console.error('Failed to create WebSocket connection:', error);
+      return;
+    }
 
     ws.current.onopen = () => {
+      console.log('WebSocket connected successfully');
       setIsConnected(true);
       // Authenticate with user ID
-      ws.current?.send(JSON.stringify({
-        type: 'auth',
-        userId: user.uid
-      }));
+      if (ws.current && user?.uid) {
+        ws.current.send(JSON.stringify({
+          type: 'auth',
+          userId: user.uid
+        }));
+      }
     };
 
     ws.current.onmessage = (event) => {
@@ -47,7 +57,13 @@ export function useWebSocket() {
       }
     };
 
-    ws.current.onclose = () => {
+    ws.current.onclose = (event) => {
+      console.log('WebSocket disconnected:', event.code, event.reason);
+      setIsConnected(false);
+    };
+
+    ws.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
       setIsConnected(false);
     };
 
@@ -57,7 +73,10 @@ export function useWebSocket() {
     };
 
     return () => {
-      ws.current?.close();
+      if (ws.current) {
+        ws.current.close();
+        ws.current = null;
+      }
     };
   }, [user?.uid]);
 
