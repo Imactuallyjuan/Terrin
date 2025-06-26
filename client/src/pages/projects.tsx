@@ -5,20 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, DollarSign, MapPin, Clock, Trash2, Edit, Eye } from "lucide-react";
 import { Link } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import EnhancedProjectView from "@/components/enhanced-project-view";
 
 export default function Projects() {
-  const { user } = useAuth();
+  const { user } = useFirebaseAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedProject, setSelectedProject] = useState<any>(null);
   
-  const { data: projects = [], isLoading } = useQuery({
-    queryKey: ["/api/projects", user?.uid],
-    enabled: !!user?.uid,
+  const { data: projects = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/projects"],
+    enabled: !!user,
   });
 
   const deleteProjectMutation = useMutation({
