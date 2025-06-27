@@ -173,9 +173,12 @@ export default function Messages() {
     const otherParticipantId = conversation.participants.find(id => id !== user.uid);
     if (!otherParticipantId) return 'Direct Message';
     
-    // Known contractor mapping (stable fallback)
+    // Known contractor mapping based on actual database data
     if (otherParticipantId === 'C4T7TowRx2hogquBwEQtCZhIyga2') {
-      return 'Valley Point Construction';
+      return 'Valley Point';
+    }
+    if (otherParticipantId === 'IE5CjY6AxYZAHjfFB6OLLCnn5dF2') {
+      return 'Terrin Construction Solutions';
     }
     
     // Look up in professionals array
@@ -184,7 +187,6 @@ export default function Messages() {
       return professional.businessName;
     }
     
-
     return `Professional (${otherParticipantId.slice(0, 8)}...)`;
   };
 
