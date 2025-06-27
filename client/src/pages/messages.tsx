@@ -87,6 +87,8 @@ export default function Messages() {
         const selected = conversations.find(c => c.id === Number(conversationId));
         if (selected) {
           setSelectedConversation(selected.id);
+          // Clear messages cache when switching conversations
+          queryClient.removeQueries({ queryKey: ['messages'] });
           return;
         }
       }
@@ -94,12 +96,14 @@ export default function Messages() {
       // Fallback to newest conversation only if none selected
       const sortedConversations = conversations.sort((a, b) => b.id - a.id);
       setSelectedConversation(sortedConversations[0].id);
+      // Clear messages cache when switching conversations
+      queryClient.removeQueries({ queryKey: ['messages'] });
     }
-  }, [conversations.length, conversationId]); // Use length instead of conversations array to prevent re-renders
+  }, [conversations.length, conversationId, queryClient]);
 
   // Fetch messages for selected conversation
   const { data: messages, isLoading: loadingMessages, error: messagesError } = useQuery<any[]>({
-    queryKey: ['messages', selectedConversation],
+    queryKey: ['messages', selectedConversation, user?.uid],
     queryFn: async () => {
       if (!user) throw new Error('User not authenticated');
       const token = await user.getIdToken();
@@ -107,7 +111,10 @@ export default function Messages() {
       
       console.log(`🔍 Fetching messages for conversation ${selectedConversation}`);
       const response = await fetch(`/api/conversations/${selectedConversation}/messages`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache'
+        }
       });
       if (!response.ok) {
         const errorText = await response.text();
@@ -119,12 +126,12 @@ export default function Messages() {
       return data;
     },
     enabled: !!selectedConversation && !!user,
-    retry: 2,
+    retry: 1,
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
-    staleTime: 30000, // 30 seconds
-    gcTime: 300000 // Keep cached data for 5 minutes
+    staleTime: 0, // No cache
+    gcTime: 0 // Clear immediately
   });
 
   // Send message mutation
