@@ -17,32 +17,18 @@ export function useWebSocket() {
   useEffect(() => {
     if (!user) return;
 
-    // Connect to WebSocket server with comprehensive validation
+    // Connect to WebSocket server with fixed port handling
     try {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const host = window.location.host;
+      let host = window.location.host;
       
-      // Validate host and prevent invalid connections
-      if (!host || host.includes('undefined') || host.includes('localhost:undefined')) {
-        console.warn('Invalid host detected:', host, '- skipping WebSocket connection');
-        return;
-      }
-      
-      // Additional validation for port
-      const portMatch = host.match(/:(\d+)$/);
-      if (!portMatch || portMatch[1] === 'undefined') {
-        console.warn('Invalid port detected in host:', host, '- skipping WebSocket connection');
-        return;
+      // Fix undefined port issue - use default port 5000 for development
+      if (!host || host.includes('undefined') || host === 'localhost:undefined') {
+        console.warn('Invalid host detected, using fallback:', host);
+        host = 'localhost:5000';
       }
       
       const wsUrl = `${protocol}//${host}/ws`;
-      
-      // Additional URL validation
-      if (wsUrl.includes('undefined') || wsUrl.includes('localhost:undefined')) {
-        console.warn('Invalid WebSocket URL detected:', wsUrl, '- skipping connection');
-        return;
-      }
-      
       console.log('WebSocket connecting to:', wsUrl);
       ws.current = new WebSocket(wsUrl);
     } catch (error) {

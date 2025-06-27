@@ -394,35 +394,32 @@ export default function Messages() {
                           <p className="text-sm">Start the conversation below</p>
                         </div>
                       ) : (
-                        messages.map((message: any) => {
-                          console.log('Rendering message:', message);
-                          return (
+                        messages.map((message: any) => (
+                          <div
+                            key={message.id}
+                            className={`flex ${
+                              message.senderId === user?.uid ? 'justify-end' : 'justify-start'
+                            }`}
+                          >
                             <div
-                              key={message.id}
-                              className={`flex ${
-                                message.senderId === user?.uid ? 'justify-end' : 'justify-start'
+                              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                message.senderId === user?.uid
+                                  ? 'bg-blue-600 text-white'
+                                  : message.senderId === 'system'
+                                  ? 'bg-green-100 text-green-800 border border-green-200'
+                                  : 'bg-gray-200 text-gray-900'
                               }`}
                             >
-                              <div
-                                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                                  message.senderId === user?.uid
-                                    ? 'bg-blue-600 text-white'
-                                    : message.senderId === 'system'
-                                    ? 'bg-green-100 text-green-800 border border-green-200'
-                                    : 'bg-gray-200 text-gray-900'
-                                }`}
-                              >
-                                <p className="text-sm">{message.content}</p>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <Clock className="h-3 w-3 opacity-70" />
-                                  <span className="text-xs opacity-70">
-                                    {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
-                                  </span>
-                                </div>
+                              <p className="text-sm">{message.content}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Clock className="h-3 w-3 opacity-70" />
+                                <span className="text-xs opacity-70">
+                                  {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
+                                </span>
                               </div>
                             </div>
-                          );
-                        })
+                          </div>
+                        ))
                       )}
                     </div>
                   </ScrollArea>
