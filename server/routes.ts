@@ -1277,17 +1277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Messages and conversations routes
-  app.get('/api/conversations', verifyFirebaseToken, async (req: any, res) => {
-    try {
-      const userId = req.user.uid;
-      const conversations = await storage.getUserConversations(userId);
-      res.json(conversations);
-    } catch (error) {
-      console.error("Error fetching conversations:", error);
-      res.status(500).json({ message: "Failed to fetch conversations" });
-    }
-  });
+  // Remove duplicate - keeping the first one at line 764
 
   app.get('/api/conversations/:id/messages', verifyFirebaseToken, async (req: any, res) => {
     try {

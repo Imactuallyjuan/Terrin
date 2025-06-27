@@ -386,18 +386,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserConversations(userId: string): Promise<Conversation[]> {
-    // Simple approach: get all conversations and filter in JavaScript
+    console.log(`🔍 Getting conversations for user: ${userId}`);
+    
+    // Get all conversations and filter in JavaScript for reliability
     const allConversations = await db
       .select()
       .from(conversations)
       .orderBy(desc(conversations.lastMessageAt));
     
+    console.log(`📊 Found ${allConversations.length} total conversations`);
+    
     // Filter conversations where user is a participant and not hidden
-    return allConversations.filter(conversation => {
+    const userConversations = allConversations.filter(conversation => {
       const isParticipant = conversation.participants && conversation.participants.includes(userId);
-      const isHidden = Array.isArray(conversation.hiddenFor) && conversation.hiddenFor.includes(userId);
-      return isParticipant && !isHidden;
+      const isHidden = conversation.hiddenFor && Array.isArray(conversation.hiddenFor) && conversation.hiddenFor.includes(userId);
+      const shouldInclude = isParticipant && !isHidden;
+      
+      if (isParticipant) {
+        console.log(`✅ User ${userId} is participant in conversation ${conversation.id}: ${conversation.title}`);
+      }
+      
+      return shouldInclude;
     });
+    
+    console.log(`📋 Returning ${userConversations.length} conversations for user ${userId}`);
+    return userConversations;
   }
 
   async getProjectConversation(projectId: number): Promise<Conversation | undefined> {
