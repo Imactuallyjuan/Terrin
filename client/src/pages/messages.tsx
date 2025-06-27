@@ -98,21 +98,25 @@ export default function Messages() {
   }, [conversations.length, conversationId]); // Use length instead of conversations array to prevent re-renders
 
   // Fetch messages for selected conversation
-  const { data: messages, isLoading: loadingMessages, error: messagesError } = useQuery<Message[]>({
+  const { data: messages, isLoading: loadingMessages, error: messagesError } = useQuery<any[]>({
     queryKey: ['messages', selectedConversation],
     queryFn: async () => {
       if (!user) throw new Error('User not authenticated');
       const token = await user.getIdToken();
       if (!token) throw new Error('Failed to get auth token');
       
+      console.log(`🔍 Fetching messages for conversation ${selectedConversation}`);
       const response = await fetch(`/api/conversations/${selectedConversation}/messages`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!response.ok) {
         const errorText = await response.text();
+        console.error(`❌ Messages fetch failed: ${response.status} - ${errorText}`);
         throw new Error(`Failed to fetch messages: ${response.status}`);
       }
-      return response.json();
+      const data = await response.json();
+      console.log(`📨 Fetched ${data.length} messages:`, data);
+      return data;
     },
     enabled: !!selectedConversation && !!user,
     retry: 2,
@@ -375,45 +379,50 @@ export default function Messages() {
                   {/* Messages */}
                   <ScrollArea className="h-80">
                     <div className="space-y-4 p-2">
-                      {!messages ? (
+                      {loadingMessages ? (
                         <div className="flex justify-center py-8">
                           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                         </div>
-                      ) : messages.length === 0 ? (
+                      ) : messagesError ? (
+                        <div className="text-center text-red-500 py-8">
+                          <p>Error loading messages</p>
+                          <p className="text-xs">{messagesError.message}</p>
+                        </div>
+                      ) : !messages || messages.length === 0 ? (
                         <div className="text-center text-gray-500 py-8">
                           <p>No messages yet</p>
                           <p className="text-sm">Start the conversation below</p>
-                          {messagesError && (
-                            <p className="text-xs text-red-500 mt-2">Error: {messagesError.message}</p>
-                          )}
                         </div>
                       ) : (
-                        messages.map((message: Message) => (
-                          <div
-                            key={message.id}
-                            className={`flex ${
-                              message.senderId === user?.uid ? 'justify-end' : 'justify-start'
-                            }`}
-                          >
+                        messages.map((message: any) => {
+                          console.log('Rendering message:', message);
+                          return (
                             <div
-                              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                                message.senderId === user?.uid
-                                  ? 'bg-blue-600 text-white'
-                                  : message.senderId === 'system'
-                                  ? 'bg-green-100 text-green-800 border border-green-200'
-                                  : 'bg-gray-200 text-gray-900'
+                              key={message.id}
+                              className={`flex ${
+                                message.senderId === user?.uid ? 'justify-end' : 'justify-start'
                               }`}
                             >
-                              <p className="text-sm">{message.content}</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Clock className="h-3 w-3 opacity-70" />
-                                <span className="text-xs opacity-70">
-                                  {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
-                                </span>
+                              <div
+                                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                  message.senderId === user?.uid
+                                    ? 'bg-blue-600 text-white'
+                                    : message.senderId === 'system'
+                                    ? 'bg-green-100 text-green-800 border border-green-200'
+                                    : 'bg-gray-200 text-gray-900'
+                                }`}
+                              >
+                                <p className="text-sm">{message.content}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Clock className="h-3 w-3 opacity-70" />
+                                  <span className="text-xs opacity-70">
+                                    {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))
+                          );
+                        })
                       )}
                     </div>
                   </ScrollArea>
