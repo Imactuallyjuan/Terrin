@@ -379,30 +379,44 @@ export default function Messages() {
                   {/* Messages */}
                   <ScrollArea className="h-80">
                     <div className="space-y-4 p-2">
+                      <div className="bg-yellow-100 p-2 text-xs">
+                        <p>DEBUG STATE:</p>
+                        <p>Loading: {loadingMessages ? 'true' : 'false'}</p>
+                        <p>Error: {messagesError ? messagesError.message : 'none'}</p>
+                        <p>Messages: {messages ? `array with ${messages.length} items` : 'undefined/null'}</p>
+                        <p>Selected Conv: {selectedConversation}</p>
+                        <p>User: {user?.uid || 'none'}</p>
+                      </div>
+                      
                       {loadingMessages ? (
                         <div className="flex justify-center py-8">
                           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                          <span className="ml-2">Loading messages...</span>
                         </div>
                       ) : messagesError ? (
                         <div className="text-center text-red-500 py-8">
                           <p>Error loading messages</p>
                           <p className="text-xs">{messagesError.message}</p>
                         </div>
-                      ) : !messages || messages.length === 0 ? (
+                      ) : !messages ? (
+                        <div className="text-center text-orange-500 py-8">
+                          <p>Messages is null/undefined</p>
+                        </div>
+                      ) : messages.length === 0 ? (
                         <div className="text-center text-gray-500 py-8">
-                          <p>No messages yet</p>
+                          <p>No messages yet (empty array)</p>
                           <p className="text-sm">Start the conversation below</p>
                         </div>
                       ) : (
                         <div>
-                          <p className="text-xs text-blue-600 mb-2">DEBUG: Found {messages.length} messages</p>
+                          <p className="text-xs text-blue-600 mb-2">RENDERING {messages.length} messages</p>
                           {messages.map((message: any, index: number) => (
                             <div
                               key={message.id}
                               className={`flex mb-4 ${
                                 message.senderId === user?.uid ? 'justify-end' : 'justify-start'
                               }`}
-                              style={{ border: '1px solid red', padding: '4px' }}
+                              style={{ border: '2px solid red', padding: '8px', margin: '4px 0' }}
                             >
                               <div
                                 className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
