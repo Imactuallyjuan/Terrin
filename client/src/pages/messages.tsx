@@ -105,25 +105,38 @@ export default function Messages() {
   const { data: messages, isLoading: loadingMessages, error: messagesError } = useQuery<any[]>({
     queryKey: ['messages', selectedConversation, user?.uid],
     queryFn: async () => {
-      if (!user) throw new Error('User not authenticated');
-      const token = await user.getIdToken();
-      if (!token) throw new Error('Failed to get auth token');
-      
-      console.log(`🔍 Fetching messages for conversation ${selectedConversation}`);
-      const response = await fetch(`/api/conversations/${selectedConversation}/messages`, {
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Cache-Control': 'no-cache'
+      try {
+        if (!user) throw new Error('User not authenticated');
+        const token = await user.getIdToken();
+        if (!token) throw new Error('Failed to get auth token');
+        
+        console.log(`🔍 Fetching messages for conversation ${selectedConversation}`);
+        console.log(`🔑 Using token: ${token.substring(0, 20)}...`);
+        
+        const response = await fetch(`/api/conversations/${selectedConversation}/messages`, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        console.log(`📡 Response status: ${response.status}`);
+        console.log(`📡 Response headers:`, response.headers);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`❌ Messages fetch failed: ${response.status} - ${errorText}`);
+          throw new Error(`Failed to fetch messages: ${response.status} - ${errorText}`);
         }
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`❌ Messages fetch failed: ${response.status} - ${errorText}`);
-        throw new Error(`Failed to fetch messages: ${response.status}`);
+        
+        const data = await response.json();
+        console.log(`📨 Successfully fetched ${data.length} messages:`, data);
+        return data;
+      } catch (error) {
+        console.error('💥 Query function error:', error);
+        throw error;
       }
-      const data = await response.json();
-      console.log(`📨 Fetched ${data.length} messages:`, data);
-      return data;
     },
     enabled: !!selectedConversation && !!user,
     retry: 1,
@@ -393,6 +406,13 @@ export default function Messages() {
                         <p>Messages: {messages ? `array with ${messages.length} items` : 'undefined/null'}</p>
                         <p>Selected Conv: {selectedConversation}</p>
                         <p>User: {user?.uid || 'none'}</p>
+                        <p>Query Enabled: {(!!selectedConversation && !!user).toString()}</p>
+                        <button 
+                          onClick={() => queryClient.invalidateQueries({ queryKey: ['messages'] })}
+                          className="bg-red-500 text-white px-2 py-1 text-xs rounded mt-2"
+                        >
+                          Force Refresh Messages
+                        </button>
                       </div>
                       
                       {loadingMessages ? (
