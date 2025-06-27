@@ -396,17 +396,15 @@ export class DatabaseStorage implements IStorage {
     
     console.log(`📊 Found ${allConversations.length} total conversations`);
     
-    // Filter conversations where user is a participant and not hidden
+    // Filter conversations where user is a participant (ignore hiddenFor for now since it doesn't exist in current schema)
     const userConversations = allConversations.filter(conversation => {
       const isParticipant = conversation.participants && conversation.participants.includes(userId);
-      const isHidden = conversation.hiddenFor && Array.isArray(conversation.hiddenFor) && conversation.hiddenFor.includes(userId);
-      const shouldInclude = isParticipant && !isHidden;
       
       if (isParticipant) {
         console.log(`✅ User ${userId} is participant in conversation ${conversation.id}: ${conversation.title}`);
       }
       
-      return shouldInclude;
+      return isParticipant;
     });
     
     console.log(`📋 Returning ${userConversations.length} conversations for user ${userId}`);
