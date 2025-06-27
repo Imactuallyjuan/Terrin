@@ -394,32 +394,37 @@ export default function Messages() {
                           <p className="text-sm">Start the conversation below</p>
                         </div>
                       ) : (
-                        messages.map((message: any) => (
-                          <div
-                            key={message.id}
-                            className={`flex ${
-                              message.senderId === user?.uid ? 'justify-end' : 'justify-start'
-                            }`}
-                          >
+                        <div>
+                          <p className="text-xs text-blue-600 mb-2">DEBUG: Found {messages.length} messages</p>
+                          {messages.map((message: any, index: number) => (
                             <div
-                              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                                message.senderId === user?.uid
-                                  ? 'bg-blue-600 text-white'
-                                  : message.senderId === 'system'
-                                  ? 'bg-green-100 text-green-800 border border-green-200'
-                                  : 'bg-gray-200 text-gray-900'
+                              key={message.id}
+                              className={`flex mb-4 ${
+                                message.senderId === user?.uid ? 'justify-end' : 'justify-start'
                               }`}
+                              style={{ border: '1px solid red', padding: '4px' }}
                             >
-                              <p className="text-sm">{message.content}</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Clock className="h-3 w-3 opacity-70" />
-                                <span className="text-xs opacity-70">
-                                  {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
-                                </span>
+                              <div
+                                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                  message.senderId === user?.uid
+                                    ? 'bg-blue-600 text-white'
+                                    : message.senderId === 'system'
+                                    ? 'bg-green-100 text-green-800 border border-green-200'
+                                    : 'bg-gray-200 text-gray-900'
+                                }`}
+                              >
+                                <p className="text-xs text-orange-500">Message #{index + 1} - ID: {message.id}</p>
+                                <p className="text-sm">{message.content}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Clock className="h-3 w-3 opacity-70" />
+                                  <span className="text-xs opacity-70">
+                                    {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))
+                          ))}
+                        </div>
                       )}
                     </div>
                   </ScrollArea>
