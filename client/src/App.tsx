@@ -23,6 +23,7 @@ import ProjectGallery from "@/pages/project-gallery";
 import ContractorProfile from "@/pages/contractor-profile";
 import Payment from "@/pages/payment";
 import ContractorDashboard from "@/pages/contractor-dashboard";
+import Tutorial from "@/pages/tutorial";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
@@ -102,6 +103,7 @@ function Router() {
       <Route path="/find-professionals" component={FindProfessionals} />
       <Route path="/for-professionals" component={ForProfessionals} />
       <Route path="/gallery" component={Gallery} />
+      <Route path="/tutorial" component={Tutorial} />
       <Route path="/professionals/:id" component={ContractorProfile} />
       
       {/* Protected Project Gallery - Requires Authentication */}
