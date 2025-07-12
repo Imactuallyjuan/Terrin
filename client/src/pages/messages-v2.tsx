@@ -15,7 +15,9 @@ import {
   Clock, 
   User,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  DollarSign,
+  CreditCard
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -43,6 +45,7 @@ export default function MessagesV2() {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
 
   // Fetch conversations
   const fetchConversations = async () => {
@@ -114,6 +117,87 @@ export default function MessagesV2() {
       console.error('Error sending message:', error);
     } finally {
       setSendingMessage(false);
+    }
+  };
+
+  // Send payment
+  const sendPayment = async (amount: number, description: string) => {
+    if (!user || !selectedConversation) return;
+    
+    try {
+      const token = await user.getIdToken();
+      
+      // Get conversation details to find the other participant (payee)
+      const currentConversation = conversations.find(c => c.id === selectedConversation);
+      if (!currentConversation) {
+        console.error('Conversation not found');
+        return;
+      }
+      
+      // Find the other participant (not the current user)
+      const payeeId = currentConversation.participants.find(p => p !== user.uid);
+      if (!payeeId) {
+        console.error('Payee not found in conversation');
+        return;
+      }
+      
+      // Create payment using the marketplace endpoint
+      const response = await fetch('/api/payments/create', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          project_id: currentConversation.projectId || 1, // Default project ID if not linked
+          conversation_id: selectedConversation,
+          amount: amount.toString(),
+          payee_id: payeeId
+        })
+      });
+      
+      if (response.ok) {
+        const { client_secret } = await response.json();
+        
+        // Create a system message about the payment
+        await fetch(`/api/conversations/${selectedConversation}/messages`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            content: `💰 Payment Request: $${amount} - ${description}`,
+            messageType: 'system'
+          })
+        });
+        
+        // Refresh messages to show the new system message
+        await fetchMessages(selectedConversation);
+        
+        // Redirect to payment processing
+        window.location.href = `/payment?client_secret=${client_secret}&conversation_id=${selectedConversation}`;
+      } else {
+        const errorData = await response.json();
+        console.error('Payment creation failed:', errorData.message);
+        
+        // Show error message in conversation
+        await fetch(`/api/conversations/${selectedConversation}/messages`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            content: `❌ Payment setup failed: ${errorData.message}`,
+            messageType: 'system'
+          })
+        });
+        
+        await fetchMessages(selectedConversation);
+      }
+    } catch (error) {
+      console.error('Error creating payment:', error);
     }
   };
 
@@ -351,6 +435,59 @@ export default function MessagesV2() {
                       </ScrollArea>
                     </div>
 
+                    {/* Payment Options */}
+                    {showPaymentOptions && (
+                      <div className="flex-shrink-0 mb-4 p-4 bg-gray-50 rounded-lg border">
+                        <h4 className="font-medium mb-3 flex items-center">
+                          <DollarSign className="h-4 w-4 mr-2" />
+                          Send Payment
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => sendPayment(100, "Project Deposit")}
+                            className="flex items-center"
+                          >
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            $100 Deposit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => sendPayment(500, "Milestone Payment")}
+                            className="flex items-center"
+                          >
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            $500 Milestone
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const amount = prompt("Enter payment amount:");
+                              const description = prompt("Enter payment description:");
+                              if (amount && description) {
+                                sendPayment(parseFloat(amount), description);
+                              }
+                            }}
+                            className="flex items-center"
+                          >
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            Custom Amount
+                          </Button>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowPaymentOptions(false)}
+                          className="mt-2 w-full"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
+
                     {/* Message Input - Fixed at bottom */}
                     <div className="flex-shrink-0 mt-4 pt-4 border-t bg-white">
                       <div className="flex space-x-2">
@@ -366,18 +503,27 @@ export default function MessagesV2() {
                           }}
                           className="flex-1 min-h-[60px] max-h-[120px] resize-none"
                         />
-                        <Button
-                          onClick={sendMessage}
-                          disabled={!newMessage.trim() || sendingMessage}
-                          size="sm"
-                          className="self-end"
-                        >
-                          {sendingMessage ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                          ) : (
-                            <Send className="h-4 w-4" />
-                          )}
-                        </Button>
+                        <div className="flex flex-col space-y-2">
+                          <Button
+                            onClick={() => setShowPaymentOptions(!showPaymentOptions)}
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center"
+                          >
+                            <DollarSign className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={sendMessage}
+                            disabled={!newMessage.trim() || sendingMessage}
+                            size="sm"
+                          >
+                            {sendingMessage ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                            ) : (
+                              <Send className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </>

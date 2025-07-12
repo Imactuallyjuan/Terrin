@@ -105,6 +105,7 @@ function Router() {
       <Route path="/for-professionals" component={ForProfessionals} />
       <Route path="/gallery" component={Gallery} />
       <Route path="/tutorial" component={Tutorial} />
+      <Route path="/payment" component={Payment} />
       <Route path="/professionals/:id" component={ContractorProfile} />
       
       {/* Protected Project Gallery - Requires Authentication */}
