@@ -278,7 +278,7 @@ export default function MessagesV2() {
           {/* Messages Area */}
           <div className="lg:col-span-2">
             <Card className="h-[600px] flex flex-col">
-              <CardHeader>
+              <CardHeader className="flex-shrink-0 pb-4">
                 <CardTitle className="flex items-center justify-between">
                   <span>
                     {selectedConversation 
@@ -292,7 +292,7 @@ export default function MessagesV2() {
                 </CardTitle>
               </CardHeader>
               
-              <CardContent className="flex-1 flex flex-col">
+              <CardContent className="flex-1 flex flex-col p-4 min-h-0">
                 {!selectedConversation ? (
                   <div className="flex-1 flex items-center justify-center text-gray-500">
                     <div className="text-center">
@@ -303,54 +303,56 @@ export default function MessagesV2() {
                 ) : (
                   <>
                     {/* Messages */}
-                    <ScrollArea className="flex-1 pr-4">
-                      <div className="space-y-4">
-                        {messages.length === 0 ? (
-                          <div className="text-center py-8 text-gray-500">
-                            <p>No messages yet</p>
-                            <p className="text-sm">Start the conversation below</p>
-                          </div>
-                        ) : (
-                          messages.map((message) => (
-                            <div
-                              key={message.id}
-                              className={`flex ${
-                                message.senderId === user.uid ? 'justify-end' : 'justify-start'
-                              }`}
-                            >
+                    <div className="flex-1 overflow-hidden">
+                      <ScrollArea className="h-full pr-4">
+                        <div className="space-y-4 pb-4">
+                          {messages.length === 0 ? (
+                            <div className="text-center py-8 text-gray-500">
+                              <p>No messages yet</p>
+                              <p className="text-sm">Start the conversation below</p>
+                            </div>
+                          ) : (
+                            messages.map((message) => (
                               <div
-                                className={`max-w-[70%] sm:max-w-xs lg:max-w-md px-4 py-3 rounded-lg break-words overflow-hidden ${
-                                  message.senderId === user.uid
-                                    ? 'bg-blue-600 text-white'
-                                    : message.senderId === 'system'
-                                    ? 'bg-green-100 text-green-800 border border-green-200'
-                                    : 'bg-gray-100 text-gray-900'
+                                key={message.id}
+                                className={`flex ${
+                                  message.senderId === user.uid ? 'justify-end' : 'justify-start'
                                 }`}
                               >
-                                <div className="flex items-center space-x-2 mb-1">
-                                  {message.senderId !== user.uid && (
-                                    <Avatar className="h-6 w-6">
-                                      <AvatarFallback className="text-xs">
-                                        <User className="h-3 w-3" />
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  )}
-                                </div>
-                                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                                <div className="flex items-center justify-end mt-2">
-                                  <span className="text-xs opacity-70">
-                                    {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
-                                  </span>
+                                <div
+                                  className={`max-w-[70%] sm:max-w-xs lg:max-w-md px-4 py-3 rounded-lg break-words overflow-hidden ${
+                                    message.senderId === user.uid
+                                      ? 'bg-blue-600 text-white'
+                                      : message.senderId === 'system'
+                                      ? 'bg-green-100 text-green-800 border border-green-200'
+                                      : 'bg-gray-100 text-gray-900'
+                                  }`}
+                                >
+                                  <div className="flex items-center space-x-2 mb-1">
+                                    {message.senderId !== user.uid && (
+                                      <Avatar className="h-6 w-6">
+                                        <AvatarFallback className="text-xs">
+                                          <User className="h-3 w-3" />
+                                        </AvatarFallback>
+                                      </Avatar>
+                                    )}
+                                  </div>
+                                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                  <div className="flex items-center justify-end mt-2">
+                                    <span className="text-xs opacity-70">
+                                      {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </ScrollArea>
+                            ))
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </div>
 
-                    {/* Message Input */}
-                    <div className="mt-4 pt-4 border-t">
+                    {/* Message Input - Fixed at bottom */}
+                    <div className="flex-shrink-0 mt-4 pt-4 border-t bg-white">
                       <div className="flex space-x-2">
                         <Textarea
                           placeholder="Type your message..."
