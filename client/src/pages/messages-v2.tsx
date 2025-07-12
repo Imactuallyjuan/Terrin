@@ -319,7 +319,7 @@ export default function MessagesV2() {
                               }`}
                             >
                               <div
-                                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
+                                className={`max-w-[70%] sm:max-w-xs lg:max-w-md px-4 py-3 rounded-lg break-words overflow-hidden ${
                                   message.senderId === user.uid
                                     ? 'bg-blue-600 text-white'
                                     : message.senderId === 'system'
@@ -336,7 +336,7 @@ export default function MessagesV2() {
                                     </Avatar>
                                   )}
                                 </div>
-                                <p className="text-sm">{message.content}</p>
+                                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                                 <div className="flex items-center justify-end mt-2">
                                   <span className="text-xs opacity-70">
                                     {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
