@@ -18,6 +18,7 @@ import FindContractors from "@/pages/find-contractors";
 import FindProfessionals from "@/pages/find-professionals";
 import ForProfessionals from "@/pages/for-professionals";
 import Messages from "@/pages/messages";
+import MessagesV2 from "@/pages/messages-v2";
 import Gallery from "@/pages/gallery";
 import ProjectGallery from "@/pages/project-gallery";
 import ContractorProfile from "@/pages/contractor-profile";
@@ -79,7 +80,7 @@ function Router() {
       {/* Messages Page - Requires Authentication */}
       <Route path="/messages">
         <ProtectedRoute requireAuth={true}>
-          <Messages />
+          <MessagesV2 />
         </ProtectedRoute>
       </Route>
       
