@@ -101,50 +101,39 @@ export default function Messages() {
     }
   }, [conversations.length, conversationId, queryClient]);
 
-  // Fetch messages for selected conversation
-  const { data: messages, isLoading: loadingMessages, error: messagesError } = useQuery<any[]>({
-    queryKey: ['messages', selectedConversation, user?.uid],
+  // Fetch messages for selected conversation using direct API call
+  const { data: messages, isLoading: loadingMessages, error: messagesError, refetch: refetchMessages } = useQuery<any[]>({
+    queryKey: ['messages', selectedConversation],
     queryFn: async () => {
-      try {
-        if (!user) throw new Error('User not authenticated');
-        const token = await user.getIdToken();
-        if (!token) throw new Error('Failed to get auth token');
-        
-        console.log(`🔍 Fetching messages for conversation ${selectedConversation}`);
-        console.log(`🔑 Using token: ${token.substring(0, 20)}...`);
-        
-        const response = await fetch(`/api/conversations/${selectedConversation}/messages`, {
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        console.log(`📡 Response status: ${response.status}`);
-        console.log(`📡 Response headers:`, response.headers);
-        
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`❌ Messages fetch failed: ${response.status} - ${errorText}`);
-          throw new Error(`Failed to fetch messages: ${response.status} - ${errorText}`);
+      if (!selectedConversation) throw new Error('No conversation selected');
+      
+      console.log(`🔍 Direct API call for conversation ${selectedConversation}`);
+      
+      // Use direct API call without complex auth
+      const response = await fetch(`/api/conversations/${selectedConversation}/messages`, {
+        method: 'GET',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
         }
-        
-        const data = await response.json();
-        console.log(`📨 Successfully fetched ${data.length} messages:`, data);
-        return data;
-      } catch (error) {
-        console.error('💥 Query function error:', error);
-        throw error;
+      });
+      
+      console.log(`📡 Direct response status: ${response.status}`);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ Direct API failed: ${response.status} - ${errorText}`);
+        throw new Error(`API Error: ${response.status}`);
       }
+      
+      const data = await response.json();
+      console.log(`📨 Direct API success: ${data.length} messages`);
+      return data;
     },
-    enabled: !!selectedConversation && !!user,
+    enabled: !!selectedConversation,
     retry: 1,
-    refetchInterval: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-    staleTime: 0, // No cache
-    gcTime: 0 // Clear immediately
+    staleTime: 0,
+    gcTime: 0
   });
 
   // Send message mutation
@@ -407,12 +396,20 @@ export default function Messages() {
                         <p>Selected Conv: {selectedConversation}</p>
                         <p>User: {user?.uid || 'none'}</p>
                         <p>Query Enabled: {(!!selectedConversation && !!user).toString()}</p>
-                        <button 
-                          onClick={() => queryClient.invalidateQueries({ queryKey: ['messages'] })}
-                          className="bg-red-500 text-white px-2 py-1 text-xs rounded mt-2"
-                        >
-                          Force Refresh Messages
-                        </button>
+                        <div className="flex gap-2 mt-2">
+                          <button 
+                            onClick={() => queryClient.invalidateQueries({ queryKey: ['messages'] })}
+                            className="bg-red-500 text-white px-2 py-1 text-xs rounded"
+                          >
+                            Force Refresh
+                          </button>
+                          <button 
+                            onClick={() => refetchMessages()}
+                            className="bg-blue-500 text-white px-2 py-1 text-xs rounded"
+                          >
+                            Direct Refetch
+                          </button>
+                        </div>
                       </div>
                       
                       {loadingMessages ? (

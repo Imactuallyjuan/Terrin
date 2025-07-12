@@ -120,6 +120,9 @@ export interface IStorage {
   updatePaymentStatus(stripePaymentIntentId: string, status: string): Promise<void>;
   getProjectPayments(projectId: number): Promise<Payment[]>;
   getConversationPayments(conversationId: number): Promise<Payment[]>;
+  
+  // Stripe account operations
+  updateContractorStripeAccount(userId: string, stripeAccountId: string): Promise<Contractor | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -712,6 +715,15 @@ export class DatabaseStorage implements IStorage {
 
   async getConversationPayments(conversationId: number): Promise<Payment[]> {
     return await db.select().from(payments).where(eq(payments.conversationId, conversationId));
+  }
+  
+  async updateContractorStripeAccount(userId: string, stripeAccountId: string): Promise<Contractor | undefined> {
+    const [contractor] = await db
+      .update(contractors)
+      .set({ stripeAccountId })
+      .where(eq(contractors.userId, userId))
+      .returning();
+    return contractor || undefined;
   }
 }
 
