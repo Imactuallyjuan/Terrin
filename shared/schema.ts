@@ -101,6 +101,7 @@ export const contractors = pgTable("contractors", {
   phone: varchar("phone"),
   email: varchar("email"),
   website: varchar("website"),
+  stripeAccountId: varchar("stripe_account_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
