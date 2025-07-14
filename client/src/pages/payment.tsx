@@ -11,6 +11,74 @@ import {
   XCircle,
   Loader2
 } from "lucide-react";
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+
+// Load Stripe
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || '');
+
+// Payment form component that uses Stripe Elements
+function CheckoutForm({ conversationId, onSuccess, onError }: { 
+  conversationId: string | null, 
+  onSuccess: () => void, 
+  onError: () => void 
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!stripe || !elements) return;
+
+    setIsProcessing(true);
+
+    try {
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/payment?conversation_id=${conversationId}&redirect_status=succeeded`,
+        },
+      });
+
+      if (error) {
+        console.error('Payment confirmation error:', error);
+        onError();
+      } else {
+        onSuccess();
+      }
+    } catch (error) {
+      console.error('Payment processing error:', error);
+      onError();
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <PaymentElement />
+      <Button 
+        type="submit" 
+        disabled={!stripe || isProcessing}
+        className="w-full"
+      >
+        {isProcessing ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          <>
+            <CreditCard className="h-4 w-4 mr-2" />
+            Complete Payment
+          </>
+        )}
+      </Button>
+    </form>
+  );
+}
 
 export default function Payment() {
   const { user } = useFirebaseAuth();
@@ -43,12 +111,9 @@ export default function Payment() {
     setPaymentStatus('processing');
     
     try {
-      // For demo purposes, we'll simulate payment processing
-      // In production, this would integrate with Stripe Elements
-      setTimeout(() => {
-        setPaymentStatus('success');
-        sendSuccessMessage();
-      }, 3000);
+      // Real Stripe payment processing happens in the CheckoutForm component
+      // This is called when client_secret is available
+      setPaymentStatus('processing');
     } catch (error) {
       console.error('Payment processing error:', error);
       setPaymentStatus('error');
@@ -137,11 +202,21 @@ export default function Payment() {
                 </div>
               )}
 
-              {paymentStatus === 'processing' && (
+              {paymentStatus === 'processing' && clientSecret && (
                 <div className="py-8">
-                  <Loader2 className="h-16 w-16 mx-auto mb-4 text-blue-600 animate-spin" />
-                  <h3 className="text-lg font-medium mb-2">Processing Payment</h3>
-                  <p className="text-gray-600">Your payment is being processed. This may take a few moments...</p>
+                  <div className="max-w-md mx-auto">
+                    <h3 className="text-lg font-medium mb-4 text-center">Complete Your Payment</h3>
+                    <Elements stripe={stripePromise} options={{ clientSecret }}>
+                      <CheckoutForm 
+                        conversationId={conversationId}
+                        onSuccess={() => {
+                          setPaymentStatus('success');
+                          sendSuccessMessage();
+                        }}
+                        onError={() => setPaymentStatus('error')}
+                      />
+                    </Elements>
+                  </div>
                 </div>
               )}
 
@@ -189,15 +264,15 @@ export default function Payment() {
             </CardContent>
           </Card>
 
-          {/* Payment Integration Notice */}
+          {/* Payment Security Notice */}
           <Card className="mt-6">
             <CardContent className="p-4">
               <div className="text-center text-sm text-gray-500">
                 <p className="mb-2">
-                  <strong>Demo Mode:</strong> This is a demonstration of the payment flow.
+                  <strong>Secure Payment:</strong> Your payment is processed securely by Stripe.
                 </p>
                 <p>
-                  In production, this would integrate with Stripe Elements for secure payment processing.
+                  Platform fee: 5% • Professional receives 95% of payment amount
                 </p>
               </div>
             </CardContent>
