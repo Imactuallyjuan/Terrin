@@ -37,8 +37,14 @@ export default function StripeOnboardingButton({
       });
 
       if (response.ok) {
-        const { accountLink } = await response.json();
-        window.location.href = accountLink;
+        const { url } = await response.json();
+        // Open Stripe onboarding in a new window to avoid CORS issues
+        window.open(url, '_blank', 'noopener,noreferrer');
+        
+        toast({
+          title: "Stripe Onboarding Started",
+          description: "Complete the setup in the new window and return here.",
+        });
       } else {
         const errorData = await response.json();
         toast({
