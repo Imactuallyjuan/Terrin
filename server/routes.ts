@@ -92,6 +92,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user role endpoint
+  app.get('/api/user/role', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const userId = req.user.uid;
+      console.log(`🔍 Fetching role for user: ${userId}`);
+      
+      const [user] = await db
+        .select({ role: users.role })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      
+      if (user) {
+        console.log(`✅ Found role for user ${userId}: ${user.role}`);
+        res.json({ role: user.role });
+      } else {
+        console.log(`❌ No user found with ID: ${userId}`);
+        res.status(404).json({ message: "User not found" });
+      }
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+      res.status(500).json({ message: "Failed to fetch user role" });
+    }
+  });
+
   app.post('/api/auth/update-role', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;

@@ -5,7 +5,7 @@ import { auth, db } from '../lib/firebase';
 import { queryClient } from '../lib/queryClient';
 
 interface UserData {
-  role: 'homeowner' | 'contractor' | 'both' | 'visitor';
+  role: 'homeowner' | 'contractor' | 'professional' | 'both' | 'visitor';
   email: string;
   profilePhotoUrl?: string;
   createdAt?: any;
@@ -25,15 +25,30 @@ export function useFirebaseAuth() {
         return;
       }
 
-      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data() as UserData;
-        const role = userData.role || 'visitor';
-        setUserRole(role);
-        sessionStorage.setItem(`userRole_${firebaseUser.uid}`, role);
+      // Fetch user role from PostgreSQL database instead of Firebase
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch('/api/user/role', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const { role } = await response.json();
+        setUserRole(role || 'visitor');
+        sessionStorage.setItem(`userRole_${firebaseUser.uid}`, role || 'visitor');
       } else {
-        setUserRole('visitor');
-        sessionStorage.setItem(`userRole_${firebaseUser.uid}`, 'visitor');
+        // Fallback to Firebase if PostgreSQL fails
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data() as UserData;
+          const role = userData.role || 'visitor';
+          setUserRole(role);
+          sessionStorage.setItem(`userRole_${firebaseUser.uid}`, role);
+        } else {
+          setUserRole('visitor');
+          sessionStorage.setItem(`userRole_${firebaseUser.uid}`, 'visitor');
+        }
       }
     } catch (error) {
       console.error('Error fetching user role:', error);
