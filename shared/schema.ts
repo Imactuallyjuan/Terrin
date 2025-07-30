@@ -34,7 +34,8 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").default("visitor").notNull(),
+  role: varchar("role").$type<'homeowner' | 'professional' | 'both' | 'visitor'>().default("visitor").notNull(),
+  initialized: boolean("initialized").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -27,6 +27,7 @@ import ContractorDashboard from "@/pages/contractor-dashboard";
 import Tutorial from "@/pages/tutorial";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import RoleChecker from "@/components/RoleChecker";
 
 function Router() {
   const { isAuthenticated, loading } = useFirebaseAuth();
@@ -139,6 +140,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
+        <RoleChecker />
         <Router />
       </TooltipProvider>
     </QueryClientProvider>

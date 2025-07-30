@@ -92,10 +92,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user role endpoint
+  // Get user role endpoint with auto-initialization
   app.get('/api/user/role', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
+      const userEmail = req.user.email;
       console.log(`🔍 Fetching role for user: ${userId}`);
       
       const [user] = await db
@@ -108,8 +109,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`✅ Found role for user ${userId}: ${user.role}`);
         res.json({ role: user.role });
       } else {
-        console.log(`❌ No user found with ID: ${userId}`);
-        res.status(404).json({ message: "User not found" });
+        // Auto-initialize new users with visitor role
+        console.log(`🔄 Auto-initializing new user: ${userId}`);
+        try {
+          const [newUser] = await db
+            .insert(users)
+            .values({
+              id: userId,
+              email: userEmail || 'unknown@terrin.com',
+              role: 'visitor'
+            })
+            .returning();
+          console.log(`✅ Auto-initialized user with visitor role: ${userId}`);
+          res.json({ role: newUser.role });
+        } catch (createError) {
+          console.error(`❌ Failed to auto-initialize user ${userId}:`, createError);
+          res.json({ role: 'visitor' }); // Fallback
+        }
       }
     } catch (error) {
       console.error("Error fetching user role:", error);

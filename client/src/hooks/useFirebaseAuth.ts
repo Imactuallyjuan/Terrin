@@ -5,7 +5,7 @@ import { auth, db } from '../lib/firebase';
 import { queryClient } from '../lib/queryClient';
 
 interface UserData {
-  role: 'homeowner' | 'contractor' | 'professional' | 'both' | 'visitor';
+  role: 'homeowner' | 'professional' | 'both' | 'visitor';
   email: string;
   profilePhotoUrl?: string;
   createdAt?: any;
@@ -37,8 +37,13 @@ export function useFirebaseAuth() {
         const { role } = await response.json();
         setUserRole(role || 'visitor');
         sessionStorage.setItem(`userRole_${firebaseUser.uid}`, role || 'visitor');
+      } else if (response.status === 404) {
+        // User not found - this should auto-initialize now, but fallback just in case
+        console.log('User not found, should auto-initialize');
+        setUserRole('visitor');
+        sessionStorage.setItem(`userRole_${firebaseUser.uid}`, 'visitor');
       } else {
-        // Fallback to Firebase if PostgreSQL fails
+        // Other error - fallback to Firebase
         const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data() as UserData;
