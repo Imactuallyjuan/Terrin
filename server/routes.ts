@@ -1724,24 +1724,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check Stripe account status
-      let stripeAccount;
-      try {
-        stripeAccount = await stripe.accounts.retrieve(contractor.stripeAccountId);
-        console.log(`📊 Stripe Account Status for ${contractor.stripeAccountId}:`, {
-          charges_enabled: stripeAccount.charges_enabled,
-          details_submitted: stripeAccount.details_submitted,
-          type: stripeAccount.type
-        });
-      } catch (error) {
-        console.error('Failed to retrieve Stripe account:', error);
-        return res.status(400).json({ 
-          message: "Professional Stripe account verification failed" 
-        });
-      }
-
       // For development/testing, allow payments even if not fully verified
       const isTestMode = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+      
+      // Check Stripe account status (skip for test accounts)
+      let stripeAccount;
+      if (isTestMode && contractor.stripeAccountId.startsWith('acct_test_')) {
+        console.log('🧪 Test mode: Skipping Stripe account verification for test account');
+        stripeAccount = { charges_enabled: true, type: 'express' }; // Mock account for testing
+      } else {
+        try {
+          stripeAccount = await stripe.accounts.retrieve(contractor.stripeAccountId);
+          console.log(`📊 Stripe Account Status for ${contractor.stripeAccountId}:`, {
+            charges_enabled: stripeAccount.charges_enabled,
+            details_submitted: stripeAccount.details_submitted,
+            type: stripeAccount.type
+          });
+        } catch (error) {
+          console.error('Failed to retrieve Stripe account:', error);
+          return res.status(400).json({ 
+            message: "Professional Stripe account verification failed" 
+          });
+        }
+      }
       
       if (isTestMode) {
         console.log('🧪 Test mode: Bypassing Stripe verification requirements');
