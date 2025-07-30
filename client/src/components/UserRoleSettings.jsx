@@ -27,7 +27,7 @@ export default function UserRoleSettings() {
     },
     {
       value: 'professional',
-      label: 'Contractor',
+      label: 'Professional',
       description: 'Find projects and submit bids',
       icon: Building,
       color: 'bg-green-100 text-green-800'
@@ -67,7 +67,25 @@ export default function UserRoleSettings() {
     const selectedRoleInfo = getNewRoleInfo();
     
     try {
-      // Update the role in Firestore using setDoc with merge
+      // Update the role in PostgreSQL database first
+      console.log('Updating PostgreSQL database...');
+      const token = await user.getIdToken();
+      const response = await fetch('/api/auth/update-role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ role: newRole })
+      });
+
+      if (response.ok) {
+        console.log('PostgreSQL update successful');
+      } else {
+        console.error('PostgreSQL update failed');
+      }
+
+      // Update the role in Firestore as backup using setDoc with merge
       console.log('Updating Firestore document with setDoc...');
       await setDoc(doc(db, 'users', user.uid), {
         role: newRole,

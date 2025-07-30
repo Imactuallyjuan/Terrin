@@ -55,7 +55,7 @@ export default function Header() {
                       Messages
                     </span>
                   </Link>
-                  {(userRole === 'professional' || userRole === 'contractor' || userRole === 'both') && (
+                  {(userRole === 'professional' || userRole === 'both') && (
                     <Link href="/professional-portal">
                       <span className="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors">
                         Professional Portal

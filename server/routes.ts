@@ -125,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`🔄 Updating role for user ${userId} to ${role}`);
 
-      if (!['visitor', 'homeowner', 'contractor', 'both'].includes(role)) {
+      if (!['visitor', 'homeowner', 'professional', 'both'].includes(role)) {
         return res.status(400).json({ message: "Invalid role" });
       }
 
