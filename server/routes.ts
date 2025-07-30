@@ -1690,6 +1690,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Check Stripe account status
+      let stripeAccount;
+      try {
+        stripeAccount = await stripe.accounts.retrieve(contractor.stripeAccountId);
+        console.log(`📊 Stripe Account Status for ${contractor.stripeAccountId}:`, {
+          charges_enabled: stripeAccount.charges_enabled,
+          details_submitted: stripeAccount.details_submitted,
+          type: stripeAccount.type
+        });
+      } catch (error) {
+        console.error('Failed to retrieve Stripe account:', error);
+        return res.status(400).json({ 
+          message: "Professional Stripe account verification failed" 
+        });
+      }
+
+      // For development/testing, allow payments even if not fully verified
+      const isTestMode = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+      if (!isTestMode && !stripeAccount.charges_enabled) {
+        return res.status(400).json({ 
+          message: "Professional must complete Stripe account verification before receiving payments" 
+        });
+      }
+
       // Calculate platform fee (5% of payment amount)
       const platformFeeAmount = Math.round(parseFloat(amount) * 100 * 0.05);
 
