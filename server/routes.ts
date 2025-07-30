@@ -657,6 +657,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get contractor for current authenticated user
+  app.get('/api/contractors/user', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const userId = req.user.uid;
+      console.log(`🔍 Fetching contractors for authenticated user: ${userId}`);
+      
+      const contractors = await storage.getUserContractors(userId);
+      console.log(`📊 Found ${contractors.length} contractors for user ${userId}`);
+      
+      res.json(contractors.length > 0 ? contractors[0] : null);
+    } catch (error) {
+      console.error("Error fetching contractor for authenticated user:", error);
+      res.status(500).json({ message: "Failed to fetch contractor profile" });
+    }
+  });
+
   app.get('/api/contractors/user/:userId', async (req, res) => {
     try {
       const { userId } = req.params;
