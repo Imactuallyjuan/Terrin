@@ -37,14 +37,23 @@ export default function StripeOnboardingButton({
       });
 
       if (response.ok) {
-        const { url } = await response.json();
-        // Open Stripe onboarding in a new window to avoid CORS issues
-        window.open(url, '_blank', 'noopener,noreferrer');
+        const { url, test_mode, message } = await response.json();
         
-        toast({
-          title: "Stripe Onboarding Started",
-          description: "Complete the setup in the new window and return here.",
-        });
+        if (test_mode) {
+          // In test mode, redirect directly without opening external window
+          window.location.href = url;
+          toast({
+            title: "Test Mode Setup Complete",
+            description: "Stripe onboarding bypassed for testing. Payments are now enabled.",
+          });
+        } else {
+          // Production mode - open Stripe onboarding in new window
+          window.open(url, '_blank', 'noopener,noreferrer');
+          toast({
+            title: "Stripe Onboarding Started",
+            description: "Complete the setup in the new window and return here.",
+          });
+        }
       } else {
         const errorData = await response.json();
         toast({

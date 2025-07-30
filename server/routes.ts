@@ -1528,6 +1528,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userId = req.user.uid;
+      const isTestMode = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
       
       // Get contractor profile
       const contractors = await storage.getUserContractors(userId);
@@ -1539,7 +1540,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let stripeAccountId = contractor.stripeAccountId;
 
-      // Create Stripe Express account if doesn't exist
+      // In test mode, create a dummy account ID to avoid real verification
+      if (isTestMode) {
+        if (!stripeAccountId) {
+          // Create a test account ID and save it
+          const testAccountId = `acct_test_${userId.substring(0, 8)}_${Date.now()}`;
+          await storage.updateContractorStripeAccount(userId, testAccountId);
+          console.log(`🧪 Test mode: Created dummy Stripe account ${testAccountId}`);
+        }
+        
+        // Return success without actual Stripe onboarding
+        return res.json({ 
+          url: `${req.headers.origin}/professional-portal?success=true&test_mode=true`,
+          test_mode: true,
+          message: "Test mode: Stripe onboarding skipped"
+        });
+      }
+
+      // Production mode - create real Stripe account
       if (!stripeAccountId) {
         const account = await stripe.accounts.create({
           type: 'express',
@@ -1708,6 +1726,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // For development/testing, allow payments even if not fully verified
       const isTestMode = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+      
+      if (isTestMode) {
+        console.log('🧪 Test mode: Bypassing Stripe verification requirements');
+      }
       if (!isTestMode && !stripeAccount.charges_enabled) {
         return res.status(400).json({ 
           message: "Professional must complete Stripe account verification before receiving payments" 
@@ -1717,22 +1739,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Calculate platform fee (5% of payment amount)
       const platformFeeAmount = Math.round(parseFloat(amount) * 100 * 0.05);
 
-      // Create Stripe Payment Intent with Connect Express destination
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(parseFloat(amount) * 100), // convert to cents
-        currency: "usd",
-        payment_method_types: ["card"],
-        application_fee_amount: platformFeeAmount,
-        transfer_data: {
-          destination: contractor.stripeAccountId,
-        },
-        metadata: {
-          project_id: project_id.toString(),
-          conversation_id: conversation_id?.toString() || '',
-          payer_id: payerId,
-          payee_id: payee_id
-        }
-      });
+      // Create Stripe Payment Intent - simplified for test mode
+      let paymentIntent;
+      if (isTestMode) {
+        // In test mode, create simple payment intent without Connect Express
+        console.log('🧪 Creating test mode payment intent without Connect Express');
+        paymentIntent = await stripe.paymentIntents.create({
+          amount: Math.round(parseFloat(amount) * 100), // convert to cents
+          currency: "usd",
+          payment_method_types: ["card"],
+          metadata: {
+            project_id: project_id.toString(),
+            conversation_id: conversation_id?.toString() || '',
+            payer_id: payerId,
+            payee_id: payee_id,
+            platform_fee: platformFeeAmount.toString(),
+            test_mode: 'true'
+          }
+        });
+      } else {
+        // Production mode with Connect Express destination
+        paymentIntent = await stripe.paymentIntents.create({
+          amount: Math.round(parseFloat(amount) * 100), // convert to cents
+          currency: "usd",
+          payment_method_types: ["card"],
+          application_fee_amount: platformFeeAmount,
+          transfer_data: {
+            destination: contractor.stripeAccountId,
+          },
+          metadata: {
+            project_id: project_id.toString(),
+            conversation_id: conversation_id?.toString() || '',
+            payer_id: payerId,
+            payee_id: payee_id
+          }
+        });
+      }
 
       // Insert into database
       const payment = await storage.createPayment({
