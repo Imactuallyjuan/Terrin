@@ -1018,6 +1018,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CSV export for project costs
+  app.get('/api/projects/:id/costs/csv', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const costs = await storage.getProjectCosts(projectId);
+      
+      // Generate CSV content
+      const csvHeader = 'Date,Category,Description,Amount,Vendor,Notes\n';
+      const csvRows = costs.map(cost => {
+        const date = new Date(cost.dateIncurred).toLocaleDateString();
+        const category = cost.category || '';
+        const description = (cost.description || '').replace(/"/g, '""');
+        const amount = cost.amount || '0.00';
+        const vendor = (cost.vendor || '').replace(/"/g, '""');
+        const notes = (cost.notes || '').replace(/"/g, '""');
+        
+        return `"${date}","${category}","${description}","${amount}","${vendor}","${notes}"`;
+      }).join('\n');
+      
+      const csvContent = csvHeader + csvRows;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="project-${projectId}-costs.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error generating CSV:", error);
+      res.status(500).json({ message: "Failed to generate CSV export" });
+    }
+  });
+
   // Project milestone routes
   app.post('/api/projects/:id/milestones', verifyFirebaseToken, async (req: any, res) => {
     try {
@@ -1909,6 +1939,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching conversation payments:", error);
       res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
+  // Notification routes
+  app.post('/api/notifications', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const { type, message, data } = req.body;
+      const userId = req.user.uid;
+      
+      const notification = await storage.createNotification({
+        userId,
+        type,
+        message,
+        data: data || {},
+        read: false
+      });
+      
+      res.json(notification);
+    } catch (error) {
+      console.error("Error creating notification:", error);
+      res.status(500).json({ message: "Failed to create notification" });
+    }
+  });
+
+  app.get('/api/notifications', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const userId = req.user.uid;
+      const notifications = await storage.getUserNotifications(userId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.post('/api/notifications/:id/read', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      await storage.markNotificationAsRead(notificationId);
+      res.json({ message: "Notification marked as read" });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.delete('/api/notifications/:id', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      await storage.deleteNotification(notificationId);
+      res.json({ message: "Notification deleted" });
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      res.status(500).json({ message: "Failed to delete notification" });
     }
   });
 

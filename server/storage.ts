@@ -11,6 +11,7 @@ import {
   projectPhotos,
   projectDocuments,
   payments,
+  notifications,
   type User,
   type UpsertUser,
   type Project,
@@ -35,6 +36,8 @@ import {
   type InsertProjectDocument,
   type Payment,
   type InsertPayment,
+  type Notification,
+  type InsertNotification,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -123,6 +126,12 @@ export interface IStorage {
   
   // Stripe account operations
   updateContractorStripeAccount(userId: string, stripeAccountId: string): Promise<Contractor | undefined>;
+  
+  // Notification operations
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: string): Promise<Notification[]>;
+  markNotificationAsRead(id: number): Promise<void>;
+  deleteNotification(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -724,6 +733,36 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contractors.userId, userId))
       .returning();
     return contractor || undefined;
+  }
+
+  // Notification operations
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [newNotification] = await db
+      .insert(notifications)
+      .values(notification)
+      .returning();
+    return newNotification;
+  }
+
+  async getUserNotifications(userId: string): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async markNotificationAsRead(id: number): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.id, id));
+  }
+
+  async deleteNotification(id: number): Promise<void> {
+    await db
+      .delete(notifications)
+      .where(eq(notifications.id, id));
   }
 }
 

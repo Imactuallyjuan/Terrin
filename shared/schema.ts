@@ -4,6 +4,7 @@ import {
   varchar,
   timestamp,
   jsonb,
+  json,
   index,
   serial,
   integer,
@@ -11,7 +12,6 @@ import {
   boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
 import { z } from "zod";
 
 // Session storage table.
@@ -221,6 +221,7 @@ export const projectPhotos = pgTable("project_photos", {
   filePath: text("file_path").notNull(),
   caption: text("caption"),
   category: varchar("category").default("progress").notNull(), // before, progress, after, materials, issues
+  tags: text("tags").array().default([]),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
 });
 
@@ -235,6 +236,7 @@ export const projectDocuments = pgTable("project_documents", {
   fileSize: integer("file_size").notNull(), // in bytes
   category: varchar("category").default("general").notNull(), // contracts, permits, invoices, estimates, plans, receipts, warranties, general
   description: text("description"),
+  tags: text("tags").array().default([]),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
 });
 
@@ -264,9 +266,23 @@ export type InsertProjectPhoto = typeof projectPhotos.$inferInsert;
 export type ProjectDocument = typeof projectDocuments.$inferSelect;
 export type InsertProjectDocument = typeof projectDocuments.$inferInsert;
 
+// Notifications system
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  type: text("type").notNull(), // "info" | "warning" | "success" | "alert"
+  message: text("message").notNull(),
+  data: json("data").default({}),
+  read: boolean("read").default(false),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = typeof payments.$inferInsert;
 export const insertPaymentSchema = createInsertSchema(payments).omit({
   id: true,
   createdAt: true,
 });
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;

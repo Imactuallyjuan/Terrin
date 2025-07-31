@@ -46,6 +46,14 @@ export default function MessagesV2() {
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   // Fetch conversations
   const fetchConversations = async () => {
@@ -431,6 +439,7 @@ export default function MessagesV2() {
                               </div>
                             ))
                           )}
+                          <div ref={messagesEndRef} />
                         </div>
                       </ScrollArea>
                     </div>

@@ -1,0 +1,98 @@
+I need you to implement and finish the following items based on recent backend improvements committed to GitHub and instructions from ChatGPT. These changes include notification support, file tagging, demo seeding, and auto-scroll in messages.
+
+✅ WHAT'S ALREADY BEEN DONE:
+CSV export route was added at: GET /api/projects/:id/costs/csv
+
+useRef was imported in messages-v2.tsx to support auto-scroll
+
+🔧 TASKS TO IMPLEMENT (FINISH WHAT'S LEFT):
+1. Auto-scroll for Messages
+Add the following inside the MessagesV2 component:
+
+tsx
+Copy
+Edit
+const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+useEffect(() => {
+  if (messagesEndRef.current) {
+    messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  }
+}, [messages]);
+And in the JSX after the message list:
+
+tsx
+Copy
+Edit
+<div ref={messagesEndRef} />
+2. Notification System (Backend)
+In shared/schema.ts, add:
+
+ts
+Copy
+Edit
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  type: text("type").notNull(), // "info" | "warning" | "success" | "alert"
+  message: text("message").notNull(),
+  data: json("data").default({}),
+  read: boolean("read").default(false),
+  createdAt: timestamp("created_at").defaultNow()
+});
+In server/storage.ts, add functions:
+
+ts
+Copy
+Edit
+export async function createNotification(...) {}
+export async function getUserNotifications(...) {}
+export async function markNotificationAsRead(...) {}
+export async function deleteNotification(...) {}
+In server/routes.ts, add routes:
+
+POST /api/notifications – create
+
+GET /api/notifications – fetch for current user
+
+POST /api/notifications/:id/read – mark as read
+
+DELETE /api/notifications/:id – delete
+
+3. Tagging for Photos and Docs
+In shared/schema.ts, update:
+
+ts
+Copy
+Edit
+tags: text("tags").array().default([]),
+Add to both project_photos and project_documents.
+
+Update the getProjectPhotoMetadata and related document fetch logic in server/storage.ts to return the tags.
+
+4. Seed Script
+Create server/seed.ts:
+
+Insert demo users, one project, estimates, conversations, messages, costs, milestones, and notifications using storage functions.
+
+Usage:
+
+bash
+Copy
+Edit
+npx tsx server/seed.ts
+⚙️ ENV
+You can use the secrets already stored in .env and Replit Secrets.
+
+Once all changes are made, run npm run dev to test in browser and verify:
+
+CSV download works
+
+New messages auto-scroll to bottom
+
+Photos and documents support tags
+
+Notification routes are functional
+
+Seed script inserts usable demo data
+
