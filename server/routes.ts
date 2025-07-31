@@ -947,6 +947,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Project cost tracking routes
+   app.get('/api/projects/:id/costs/csv', verifyFirebaseToken, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id, 10);
+      const costs = await storage.getProjectCosts(projectId);
+      const header = 'Category,Description,Vendor,Amount,Date,Notes';
+      const rows = costs.map((cost: any) => {
+        const { category, description, vendor, amount, date, notes } = cost;
+        const escape = (value: any) => {
+          if (value == null) return '';
+          return String(value).replace(/"/g, '""');
+        };
+        return `"${escape(category)}","${escape(description)}","${escape(vendor)}","${amount}","${new Date(date).toISOString()}","${escape(notes)}"`;
+      });
+      const csv = [header, ...rows].join('\n');
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename=project-${projectId}-costs.csv`);
+      res.send(csv);
+    } catch (error) {
+      console.error('Error generating CSV:', error);
+      res.status(500).json({ success: false, error: 'Failed to generate CSV' });
+    }
+  });
+
   app.post('/api/projects/:id/costs', verifyFirebaseToken, async (req: any, res) => {
     try {
       const projectId = parseInt(req.params.id);
