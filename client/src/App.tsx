@@ -25,6 +25,7 @@ import ContractorProfile from "@/pages/contractor-profile";
 import Payment from "@/pages/payment";
 import ContractorDashboard from "@/pages/contractor-dashboard";
 import Tutorial from "@/pages/tutorial";
+import DemoLogin from "@/pages/demo-login";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import RoleChecker from "@/components/RoleChecker";
@@ -108,6 +109,7 @@ function Router() {
       <Route path="/tutorial" component={Tutorial} />
       <Route path="/payment" component={Payment} />
       <Route path="/professionals/:id" component={ContractorProfile} />
+      <Route path="/demo-login" component={DemoLogin} />
       
       {/* Protected Project Gallery - Requires Authentication */}
       <Route path="/projects/:id/gallery">
