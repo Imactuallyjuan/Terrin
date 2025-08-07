@@ -61,6 +61,8 @@ async function seedDatabase() {
       userId: homeowner.id,
       title: "Kitchen Renovation",
       description: "Complete kitchen remodel including new cabinets, countertops, and appliances",
+      projectType: "renovation",
+      budgetRange: "$25,001 - $50,000",
       budget: "50000",
       timeline: "3 months",
       location: "San Francisco, CA",
@@ -96,9 +98,11 @@ async function seedDatabase() {
       licenseNumber: "LIC-123456",
       yearsExperience: 15,
       serviceArea: "San Francisco Bay Area",
+      location: "San Francisco, CA",
       description: "Experienced contractor specializing in high-end kitchen and bathroom renovations",
       phone: "(555) 123-4567",
       website: "https://janespro.com",
+      hourlyRate: "125",
       insurance: true,
       bonded: true,
       rating: "4.8",
@@ -115,14 +119,19 @@ async function seedDatabase() {
     await db.insert(estimates).values({
       projectId: project.id,
       userId: homeowner.id,
-      totalCost: "50000",
-      breakdown: {
-        materials: 25000,
-        labor: 20000,
-        permits: 2000,
-        contingency: 3000,
-        details: "Detailed cost breakdown for kitchen renovation"
-      },
+      totalCostMin: "45000",
+      totalCostMax: "55000",
+      materialsCostMin: "22000",
+      materialsCostMax: "28000",
+      laborCostMin: "18000",
+      laborCostMax: "22000",
+      permitsCostMin: "1800",
+      permitsCostMax: "2200",
+      contingencyCostMin: "2700",
+      contingencyCostMax: "3300",
+      location: "San Francisco, CA",
+      projectType: "Kitchen Renovation",
+      squareFootage: "200",
       timeline: {
         weeks: 12,
         phases: [
@@ -131,6 +140,13 @@ async function seedDatabase() {
           { name: "Installation", duration: "6 weeks" },
           { name: "Finishing", duration: "3 weeks" }
         ]
+      },
+      detailedBreakdown: {
+        materials: 25000,
+        labor: 20000,
+        permits: 2000,
+        contingency: 3000,
+        details: "Detailed cost breakdown for kitchen renovation"
       },
       createdAt: new Date()
     });

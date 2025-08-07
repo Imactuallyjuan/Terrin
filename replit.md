@@ -33,17 +33,20 @@ Preferred communication style: Simple, everyday language.
 - **Storage**: Firebase Storage for contractor profile photos and project images.
 
 ### Key Features
-- **Authentication System**: Firebase Authentication with email/password and Google OAuth; Firestore-based user profiles with role-based access.
+- **Authentication System**: Firebase Authentication with email/password and Google OAuth; Firestore-based user profiles with role-based access control (RBAC) middleware.
 - **AI-Powered Cost Estimation**: Uses OpenAI GPT-4o-mini for detailed cost breakdowns including materials, labor, permits, and contingency, with location-aware estimates.
 - **AI Scope Generator**: Generates comprehensive project scopes from descriptions, with detailed task breakdowns and requirements.
 - **AI Change Order Generator**: Creates formal change orders comparing original scope to requested changes with cost impact analysis.
-- **Project Management**: Full CRUD operations for projects, including status tracking, cost tracking (with receipt attachments), milestone management, and photo uploads.
+- **Project Management**: Full CRUD operations for projects, including status tracking, cost tracking (with receipt attachments and CSV export), milestone management, and photo uploads with tagging support.
 - **Contractor Matching**: Allows search by specialty and location, detailed contractor profiles, and secure communication.
-- **Messaging System**: Real-time messaging with conversation management, including payment integration. Polling optimized to 10 seconds for production.
-- **Payment System**: Integrated Stripe Connect Express for direct contractor payouts, supporting deposits, milestones, and custom amounts with a platform fee.
+- **Messaging System**: Real-time messaging with conversation management, file attachments, payment integration, and auto-scroll. Polling optimized to 10 seconds for production.
+- **Payment System**: Integrated Stripe Connect Express for direct contractor payouts, supporting deposits, milestones, and custom amounts with a 5% platform fee.
 - **Professional Portal**: Comprehensive portal for professionals to manage profiles, discover projects, and track earnings.
-- **Photo Gallery**: Dedicated gallery for project photos with editing and deletion capabilities.
+- **Photo Gallery**: Dedicated gallery for project photos with editing, deletion, and tagging capabilities.
+- **Document Management**: Upload and manage project documents with tagging support.
+- **Notification System**: In-app notifications for important events and updates.
 - **Tutorial Page**: Step-by-step guides for both homeowners and professionals.
+- **Database Seeding**: Comprehensive demo data script for testing (demo@example.com / contractor@example.com).
 
 ### System Design Choices
 - **UI/UX**: Emphasis on accessible UI components, consistent styling with Tailwind CSS, and intuitive workflows.
