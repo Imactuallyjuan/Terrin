@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, MapPin, DollarSign, Clock, Plus, User, Building, Settings, Calculator, MessageCircle, Activity, TrendingUp, Sparkles } from "lucide-react";
+import { Calendar, MapPin, DollarSign, Clock, Plus, User, Building, Settings, Calculator, MessageCircle, Activity, TrendingUp, Sparkles, FileText } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import ProjectTimeline from "@/components/ProjectTimeline";
@@ -190,11 +190,20 @@ export default function Dashboard() {
               
               {/* AI Tools Card */}
               <Card className="mt-4">
-                <CardContent className="p-4">
+                <CardHeader>
+                  <CardTitle className="text-sm">AI Tools</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
                   <Link href="/ai-scope-generator">
-                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white text-sm">
                       <Sparkles className="h-4 w-4 mr-2" />
-                      AI Scope Generator
+                      Scope Generator
+                    </Button>
+                  </Link>
+                  <Link href="/ai-change-order">
+                    <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white text-sm">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Change Order
                     </Button>
                   </Link>
                 </CardContent>
