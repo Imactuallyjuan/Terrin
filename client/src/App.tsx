@@ -26,6 +26,7 @@ import Payment from "@/pages/payment";
 import ContractorDashboard from "@/pages/contractor-dashboard";
 import Tutorial from "@/pages/tutorial";
 import DemoLogin from "@/pages/demo-login";
+import AIScopeGenerator from "@/pages/ai-scope-generator";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import RoleChecker from "@/components/RoleChecker";
@@ -110,6 +111,13 @@ function Router() {
       <Route path="/payment" component={Payment} />
       <Route path="/professionals/:id" component={ContractorProfile} />
       <Route path="/demo-login" component={DemoLogin} />
+      
+      {/* AI Tools - Requires Authentication */}
+      <Route path="/ai-scope-generator">
+        <ProtectedRoute requireAuth={true}>
+          <AIScopeGenerator />
+        </ProtectedRoute>
+      </Route>
       
       {/* Protected Project Gallery - Requires Authentication */}
       <Route path="/projects/:id/gallery">
