@@ -75,7 +75,7 @@ export default function MessagesV2() {
         }
       }
     } catch (error) {
-      console.error('Error fetching conversations:', error);
+      // Silent error handling - conversations will remain empty
     }
   };
 
@@ -94,7 +94,7 @@ export default function MessagesV2() {
         setMessages(data);
       }
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      // Silent error handling - messages will remain empty
       setMessages([]);
     }
   };
@@ -122,7 +122,7 @@ export default function MessagesV2() {
         await fetchMessages(selectedConversation);
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      // Silent error handling
     } finally {
       setSendingMessage(false);
     }
@@ -138,14 +138,12 @@ export default function MessagesV2() {
       // Get conversation details to find the other participant (payee)
       const currentConversation = conversations.find(c => c.id === selectedConversation);
       if (!currentConversation) {
-        console.error('Conversation not found');
         return;
       }
       
       // Find the other participant (not the current user)
       const payeeId = currentConversation.participants.find(p => p !== user.uid);
       if (!payeeId) {
-        console.error('Payee not found in conversation');
         return;
       }
       
@@ -187,7 +185,6 @@ export default function MessagesV2() {
         window.location.href = `/payment?client_secret=${client_secret}&conversation_id=${selectedConversation}`;
       } else {
         const errorData = await response.json();
-        console.error('Payment creation failed:', errorData.message);
         
         // Show error message in conversation
         await fetch(`/api/conversations/${selectedConversation}/messages`, {
@@ -205,7 +202,7 @@ export default function MessagesV2() {
         await fetchMessages(selectedConversation);
       }
     } catch (error) {
-      console.error('Error creating payment:', error);
+      // Silent error handling
     }
   };
 
@@ -228,7 +225,7 @@ export default function MessagesV2() {
         }
       }
     } catch (error) {
-      console.error('Error deleting conversation:', error);
+      // Silent error handling
     }
   };
 
@@ -247,12 +244,12 @@ export default function MessagesV2() {
     }
   }, [selectedConversation]);
 
-  // Auto-refresh messages every 5 seconds
+  // Auto-refresh messages every 10 seconds (reduced frequency for production)
   useEffect(() => {
     if (selectedConversation) {
       const interval = setInterval(() => {
         fetchMessages(selectedConversation);
-      }, 5000);
+      }, 10000);
       return () => clearInterval(interval);
     }
   }, [selectedConversation]);

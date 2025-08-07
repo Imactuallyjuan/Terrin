@@ -35,9 +35,11 @@ Preferred communication style: Simple, everyday language.
 ### Key Features
 - **Authentication System**: Firebase Authentication with email/password and Google OAuth; Firestore-based user profiles with role-based access.
 - **AI-Powered Cost Estimation**: Uses OpenAI GPT-4o-mini for detailed cost breakdowns including materials, labor, permits, and contingency, with location-aware estimates.
+- **AI Scope Generator**: Generates comprehensive project scopes from descriptions, with detailed task breakdowns and requirements.
+- **AI Change Order Generator**: Creates formal change orders comparing original scope to requested changes with cost impact analysis.
 - **Project Management**: Full CRUD operations for projects, including status tracking, cost tracking (with receipt attachments), milestone management, and photo uploads.
 - **Contractor Matching**: Allows search by specialty and location, detailed contractor profiles, and secure communication.
-- **Messaging System**: Real-time messaging with conversation management, including payment integration.
+- **Messaging System**: Real-time messaging with conversation management, including payment integration. Polling optimized to 10 seconds for production.
 - **Payment System**: Integrated Stripe Connect Express for direct contractor payouts, supporting deposits, milestones, and custom amounts with a platform fee.
 - **Professional Portal**: Comprehensive portal for professionals to manage profiles, discover projects, and track earnings.
 - **Photo Gallery**: Dedicated gallery for project photos with editing and deletion capabilities.

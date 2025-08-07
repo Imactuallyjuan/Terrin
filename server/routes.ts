@@ -64,11 +64,8 @@ function generateSmartTitle(description: string): string {
 }
 
 // Initialize Stripe
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn('STRIPE_SECRET_KEY not found - payment functionality will be disabled');
-}
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-11-20.acacia",
+  apiVersion: "2025-05-28.basil",
 }) : null;
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -91,7 +88,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: user?.role || 'visitor'
       });
     } catch (error) {
-      console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
@@ -101,7 +97,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.uid;
       const userEmail = req.user.email;
-      console.log(`🔍 Fetching role for user: ${userId}`);
       
       const [user] = await db
         .select({ role: users.role })
@@ -110,11 +105,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .limit(1);
       
       if (user) {
-        console.log(`✅ Found role for user ${userId}: ${user.role}`);
         res.json({ role: user.role });
       } else {
         // Auto-initialize new users with visitor role
-        console.log(`🔄 Auto-initializing new user: ${userId}`);
         try {
           const [newUser] = await db
             .insert(users)
@@ -124,15 +117,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               role: 'visitor'
             })
             .returning();
-          console.log(`✅ Auto-initialized user with visitor role: ${userId}`);
           res.json({ role: newUser.role });
         } catch (createError) {
-          console.error(`❌ Failed to auto-initialize user ${userId}:`, createError);
           res.json({ role: 'visitor' }); // Fallback
         }
       }
     } catch (error) {
-      console.error("Error fetching user role:", error);
       res.status(500).json({ message: "Failed to fetch user role" });
     }
   });
@@ -142,8 +132,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.uid;
       const email = req.user.email;
       const { role } = req.body;
-
-      console.log(`🔄 Updating role for user ${userId} to ${role}`);
 
       if (!['visitor', 'homeowner', 'professional', 'both'].includes(role)) {
         return res.status(400).json({ message: "Invalid role" });
@@ -157,14 +145,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (existingUser.length > 0) {
         // User exists, update role
-        console.log(`✅ User exists, updating role from ${existingUser[0].role} to ${role}`);
         const [updatedUser] = await db
           .update(users)
           .set({ role: role, updatedAt: new Date() })
           .where(eq(users.email, email))
           .returning();
-        
-        console.log(`✅ Role updated successfully for user ${userId}`);
         res.json({
           id: updatedUser.id,
           email: updatedUser.email,
@@ -172,7 +157,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } else {
         // User doesn't exist, create new user
-        console.log(`➕ Creating new user ${userId} with role ${role}`);
         const [newUser] = await db
           .insert(users)
           .values({
@@ -182,18 +166,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           })
           .returning();
         
-        console.log(`✅ New user created successfully`);
         res.json({
           id: newUser.id,
           email: newUser.email,
           role: newUser.role
         });
       }
-    } catch (error) {
-      console.error("Failed to update user role:", error);
+    } catch (error: any) {
       res.status(500).json({ 
         error: "Role update failed", 
-        details: error.message 
+        details: error?.message || 'Unknown error'
       });
     }
   });
@@ -202,23 +184,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/projects', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
-      console.log('Creating project for user:', userId);
-      console.log('Project data received:', req.body);
       
       const projectData = insertProjectSchema.parse(req.body);
-      console.log('Project data validated:', projectData);
       
       const project = await storage.createProject({
         ...projectData,
         userId,
       });
 
-      console.log('Project created successfully:', project.id);
       res.json(project);
     } catch (error) {
-      console.error("Error creating project:", error);
       if (error instanceof z.ZodError) {
-        console.error("Validation errors:", error.errors);
         res.status(400).json({ message: "Invalid project data", errors: error.errors });
       } else {
         res.status(500).json({ message: "Failed to create project" });
@@ -229,17 +205,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/projects', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
-      console.log(`📊 Projects query - User ID: ${userId}`);
       
       const projects = await storage.getUserProjects(userId);
-      console.log(`📊 Projects result - Count: ${projects.length}, User: ${userId}`);
-      console.log(`📊 Project IDs returned: [${projects.map(p => p.id).join(', ')}]`);
       
-      // Disable caching for debugging
-      res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
       res.json(projects);
     } catch (error) {
-      console.error("Error fetching projects:", error);
       res.status(500).json({ message: "Failed to fetch projects" });
     }
   });
@@ -260,7 +230,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(project);
     } catch (error) {
-      console.error("Error fetching project:", error);
       res.status(500).json({ message: "Failed to fetch project" });
     }
   });
@@ -284,7 +253,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteProject(projectId);
       res.json({ message: "Project deleted successfully" });
     } catch (error) {
-      console.error("Error deleting project:", error);
       res.status(500).json({ message: "Failed to delete project" });
     }
   });
@@ -293,7 +261,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/estimate', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
-      console.log('Request body:', req.body);
       
       // Handle both direct data and projectData wrapper
       const projectData = req.body.projectData || req.body;
@@ -305,8 +272,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Missing required fields: description and location are required" 
         });
       }
-
-      console.log('Generating estimate for user:', userId);
       
       // Generate a descriptive title from the description
       let estimateTitle = title;
@@ -351,8 +316,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       });
 
-      console.log('Estimate saved successfully:', estimate.id);
-
       res.json({
         id: estimate.id,
         ...aiEstimate,
@@ -367,7 +330,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: estimate.createdAt
       });
     } catch (error) {
-      console.error("Error generating estimate:", error);
       res.status(500).json({ message: "Failed to generate cost estimate" });
     }
   });
@@ -375,17 +337,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/estimates', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
-      console.log(`📊 Estimates query - User ID: ${userId}`);
       
       const estimates = await storage.getUserEstimates(userId);
-      console.log(`📊 Estimates result - Count: ${estimates.length}, User: ${userId}`);
-      console.log(`📊 Estimate IDs returned: [${estimates.map(e => e.id).join(', ')}]`);
       
-      // Disable caching for debugging
-      res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
       res.json(estimates);
     } catch (error) {
-      console.error("Error fetching estimates:", error);
       res.status(500).json({ message: "Failed to fetch estimates" });
     }
   });
@@ -409,7 +365,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteEstimate(estimateId);
       res.json({ message: "Estimate deleted successfully" });
     } catch (error) {
-      console.error("Error deleting estimate:", error);
       res.status(500).json({ message: "Failed to delete estimate" });
     }
   });
@@ -430,7 +385,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(estimate);
     } catch (error) {
-      console.error("Error fetching estimate:", error);
       res.status(500).json({ message: "Failed to fetch estimate" });
     }
   });
@@ -451,7 +405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Access denied" });
       }
 
-      console.log('Generating timeline for project:', projectId);
+
       
       // Generate AI-powered timeline
       const timelineData = await generateProjectTimeline({
@@ -478,8 +432,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdMilestones.push(createdMilestone);
       }
 
-      console.log(`Created ${createdMilestones.length} milestones for project ${projectId}`);
-
       res.json({
         message: "Timeline generated successfully",
         milestonesCreated: createdMilestones.length,
@@ -488,7 +440,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         milestones: createdMilestones
       });
     } catch (error) {
-      console.error("Error generating timeline:", error);
       res.status(500).json({ message: "Failed to generate timeline" });
     }
   });
@@ -497,26 +448,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/professionals', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
-      console.log(`🔧 Creating professional profile for user: ${userId}`);
-      console.log(`🔧 Request body:`, JSON.stringify(req.body, null, 2));
       
       const professionalData = insertContractorSchema.parse(req.body);
-      console.log(`✅ Schema validation passed`);
       
       const professional = await storage.createContractor({
         ...professionalData,
         userId,
       });
-
-      console.log(`✅ Professional profile created with ID: ${professional.id}`);
       
-      // Disable caching for immediate refresh
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.json(professional);
     } catch (error) {
-      console.error("❌ Error creating professional profile:", error);
       if (error instanceof z.ZodError) {
-        console.error("❌ Schema validation errors:", error.errors);
         res.status(400).json({ message: "Invalid professional data", errors: error.errors });
       } else {
         res.status(500).json({ message: "Failed to create professional profile" });
@@ -528,25 +471,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/contractors', verifyFirebaseToken, async (req: any, res) => {
     try {
       const userId = req.user.uid;
-      console.log(`🔧 Creating contractor profile for user: ${userId}`);
-      console.log(`🔧 Request body:`, JSON.stringify(req.body, null, 2));
       
       const professionalData = insertContractorSchema.parse(req.body);
-      console.log(`✅ Schema validation passed for contractor creation`);
       
       const professional = await storage.createContractor({
         ...professionalData,
         userId,
       });
-
-      console.log(`✅ Contractor profile created with ID: ${professional.id}`);
       
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.json(professional);
     } catch (error) {
-      console.error("❌ Error creating contractor profile:", error);
       if (error instanceof z.ZodError) {
-        console.error("❌ Schema validation errors:", error.errors);
         res.status(400).json({ message: "Invalid contractor data", errors: error.errors });
       } else {
         res.status(500).json({ message: "Failed to create contractor profile" });
@@ -576,7 +512,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedContractor = await storage.updateContractor(contractorId, updates);
       res.json(updatedContractor);
     } catch (error) {
-      console.error("Error updating contractor:", error);
       res.status(500).json({ message: "Failed to update contractor profile" });
     }
   });
@@ -816,7 +751,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const project = await storage.updateProject(projectId, updates);
       res.json(project);
     } catch (error) {
-      console.error("Error updating project:", error);
       res.status(500).json({ message: "Failed to update project" });
     }
   });
@@ -828,7 +762,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const conversations = await storage.getUserConversations(userId);
       res.json(conversations);
     } catch (error) {
-      console.error("Error fetching conversations:", error);
       res.status(500).json({ message: "Failed to fetch conversations" });
     }
   });
@@ -854,7 +787,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(conversation);
     } catch (error) {
-      console.error("Error creating conversation:", error);
       res.status(500).json({ message: "Failed to create conversation" });
     }
   });
@@ -886,7 +818,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ success: true });
     } catch (error) {
-      console.error("Error deleting conversation:", error);
       res.status(500).json({ message: "Failed to delete conversation" });
     }
   });
@@ -1507,7 +1438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: description || `Project deposit for project #${projectId}`,
         metadata: {
           projectId: projectId?.toString() || '',
-          userId: req.user?.id || ''
+          userId: req.user?.uid || ''
         }
       });
 
@@ -1907,7 +1838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const projectId = intent.metadata.project_id;
           const amount = (intent.amount / 100).toFixed(2);
           const platformFee = ((intent.application_fee_amount || 0) / 100).toFixed(2);
-          const professionalAmount = (amount - parseFloat(platformFee)).toFixed(2);
+          const professionalAmount = (parseFloat(amount) - parseFloat(platformFee)).toFixed(2);
           
           await storage.createMessage({
             conversationId,
