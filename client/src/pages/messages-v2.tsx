@@ -17,7 +17,11 @@ import {
   Trash2,
   RefreshCw,
   DollarSign,
-  CreditCard
+  CreditCard,
+  Paperclip,
+  X,
+  File,
+  Image
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -26,7 +30,16 @@ interface Message {
   conversationId: number;
   senderId: string;
   content: string;
+  messageType?: string;
+  attachments?: string[];
   createdAt: string;
+}
+
+interface AttachmentInfo {
+  url: string;
+  filename: string;
+  size: number;
+  type: string;
 }
 
 interface Conversation {
@@ -46,6 +59,9 @@ export default function MessagesV2() {
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  const [attachments, setAttachments] = useState<AttachmentInfo[]>([]);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Auto-scroll to bottom when messages change
@@ -99,9 +115,50 @@ export default function MessagesV2() {
     }
   };
 
+  // Handle file selection
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || !user) return;
+
+    setUploadingFile(true);
+    try {
+      const token = await user.getIdToken();
+      
+      for (const file of Array.from(files)) {
+        const formData = new FormData();
+        formData.append("attachment", file);
+
+        const response = await fetch("/api/messages/upload-attachment", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+
+        if (response.ok) {
+          const fileInfo = await response.json();
+          setAttachments((prev) => [...prev, fileInfo]);
+        }
+      }
+    } catch (error) {
+      // Silent error handling
+    } finally {
+      setUploadingFile(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  // Remove attachment
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
   // Send new message
   const sendMessage = async () => {
-    if (!user || !selectedConversation || !newMessage.trim()) return;
+    if (!user || !selectedConversation || (!newMessage.trim() && attachments.length === 0)) return;
     
     setSendingMessage(true);
     try {
@@ -113,12 +170,15 @@ export default function MessagesV2() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          content: newMessage.trim()
+          content: newMessage.trim(),
+          messageType: attachments.length > 0 ? 'document' : 'text',
+          attachments: attachments.map(a => a.url)
         })
       });
       
       if (response.ok) {
         setNewMessage("");
+        setAttachments([]);
         await fetchMessages(selectedConversation);
       }
     } catch (error) {
@@ -427,6 +487,34 @@ export default function MessagesV2() {
                                     )}
                                   </div>
                                   <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                  {message.attachments && message.attachments.length > 0 && (
+                                    <div className="mt-2 space-y-1">
+                                      {message.attachments.map((attachment, idx) => {
+                                        const filename = attachment.split('/').pop() || 'attachment';
+                                        const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(filename);
+                                        return (
+                                          <a
+                                            key={idx}
+                                            href={attachment}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`flex items-center space-x-2 p-2 rounded ${
+                                              message.senderId === user.uid
+                                                ? 'bg-blue-500 hover:bg-blue-400'
+                                                : 'bg-gray-200 hover:bg-gray-300'
+                                            } transition-colors`}
+                                          >
+                                            {isImage ? (
+                                              <Image className="h-4 w-4" />
+                                            ) : (
+                                              <File className="h-4 w-4" />
+                                            )}
+                                            <span className="text-xs truncate">{filename}</span>
+                                          </a>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
                                   <div className="flex items-center justify-end mt-2">
                                     <span className="text-xs opacity-70">
                                       {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
@@ -494,9 +582,46 @@ export default function MessagesV2() {
                       </div>
                     )}
 
+                    {/* Attachments Preview */}
+                    {attachments.length > 0 && (
+                      <div className="flex-shrink-0 mb-2 p-2 bg-gray-50 rounded-lg border">
+                        <div className="flex flex-wrap gap-2">
+                          {attachments.map((attachment, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center space-x-2 bg-white p-2 rounded border"
+                            >
+                              {attachment.type.startsWith('image/') ? (
+                                <Image className="h-4 w-4 text-blue-600" />
+                              ) : (
+                                <File className="h-4 w-4 text-gray-600" />
+                              )}
+                              <span className="text-xs truncate max-w-[100px]">
+                                {attachment.filename}
+                              </span>
+                              <button
+                                onClick={() => removeAttachment(index)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Message Input - Fixed at bottom */}
                     <div className="flex-shrink-0 mt-4 pt-4 border-t bg-white">
                       <div className="flex space-x-2">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileSelect}
+                          multiple
+                          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+                          className="hidden"
+                        />
                         <Textarea
                           placeholder="Type your message..."
                           value={newMessage}
@@ -508,8 +633,22 @@ export default function MessagesV2() {
                             }
                           }}
                           className="flex-1 min-h-[60px] max-h-[120px] resize-none"
+                          disabled={uploadingFile}
                         />
                         <div className="flex flex-col space-y-2">
+                          <Button
+                            onClick={() => fileInputRef.current?.click()}
+                            variant="outline"
+                            size="icon"
+                            disabled={uploadingFile}
+                            title="Attach files"
+                          >
+                            {uploadingFile ? (
+                              <RefreshCw className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Paperclip className="h-4 w-4" />
+                            )}
+                          </Button>
                           <Button
                             onClick={() => setShowPaymentOptions(!showPaymentOptions)}
                             variant="outline"
