@@ -10,6 +10,7 @@ import { generateCostEstimate, generateProjectTimeline } from "./openai";
 import { z } from "zod";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
+import aiRoutes from "./routes/ai";
 
 // Smart title generation function
 function generateSmartTitle(description: string): string {
@@ -71,6 +72,9 @@ const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SEC
 }) : null;
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Mount AI routes
+  app.use('/api/ai', aiRoutes);
 
   // Auth routes
   app.get('/api/auth/user', verifyFirebaseToken, async (req: any, res) => {
